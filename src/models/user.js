@@ -1,24 +1,28 @@
-'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Định nghĩa quan hệ "nhiều-nhiều" giữa User và Address
       User.belongsToMany(models.Address, {
-        through: 'UserAddress', // Tên của bảng trung gian
-        foreignKey: 'userId', // Tên trường khóa ngoại trong bảng trung gian liên kết với User
-        otherKey: 'addressId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Address
+        through: 'UserAddress',
+        foreignKey: 'userId',
+        otherKey: 'addressId',
       });
     }
   };
 
   User.init({
-    idUser: DataTypes.INTEGER,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true, // Đánh dấu cột "id" là primaryKey
+      autoIncrement: true,
+    },
     email: DataTypes.STRING,
-    pass: DataTypes.STRING,
+    name: DataTypes.STRING,
+    password: DataTypes.STRING,
     image: DataTypes.STRING,
     role: DataTypes.STRING,
-    dateCreate: DataTypes.DATE
+    phone: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'User',

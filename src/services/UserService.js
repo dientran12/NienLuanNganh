@@ -1,5 +1,5 @@
-import bcrypt from 'bcryptjs';
-import db from '../models/index'
+import bcrypt from 'bcrypt';
+const db = require('../models/index');
 import JwtService from "./JwtService"
 
 const salt = bcrypt.genSaltSync(10);
@@ -7,6 +7,7 @@ const createNewUser = async (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             const { email } = data;
+            console.log('Email:', email);
             const checkUser = await db.User.findOne({
                 where: {
                     email: email
@@ -50,10 +51,8 @@ const createNewUser = async (data) => {
                     name: name,
                     password: hassUserPasswordFromBcrypt,
                     email: data.email,
-                    address: data.address,
                     phone: data.phone,
-                    isAdmin: data.isAdmin,
-                    gender: data.gender
+                    role: data.role,
                 });
                 if (newUser) {
                     resolve({
@@ -99,11 +98,11 @@ const loginUser = async (data) => {
                 }
                 const accessToken = await JwtService.genneralAccessToken({
                     id: checkUser.id,
-                    isAdmin: checkUser.isAdmin
+                    role: checkUser.role
                 })
                 const refreshToken = await JwtService.genneralRefreshToken({
                     id: checkUser.id,
-                    isAdmin: checkUser.isAdmin
+                    role: checkUser.role
                 })
                 console.log("email", email)
                 console.log("password", password)

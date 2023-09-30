@@ -12,15 +12,15 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users', // Tên bảng User
-          key: 'idUser' // Tên trường khóa chính trong bảng User
+          key: 'id' // Tên trường khóa chính trong bảng User
         },
         allowNull: false
       },
       idAddress: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Address', // Tên bảng Address
-          key: 'idAddress' // Tên trường khóa chính trong bảng Address
+          model: 'Addresses', // Tên bảng Address
+          key: 'id' // Tên trường khóa chính trong bảng Address
         },
         allowNull: false
       },

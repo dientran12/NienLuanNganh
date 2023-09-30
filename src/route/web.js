@@ -1,7 +1,6 @@
 import express from 'express';
 let router = express.Router();
-import UserRouter from './UserRouter';
-import ProductRouter from './ProductRouter';
+import UserRouter from './UserRouter.js';
 
 let initWebRouter = (app) => {
     router.use('/api/user', UserRouter);

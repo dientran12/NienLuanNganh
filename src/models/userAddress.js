@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'User', // Tên model liên kết
-        key: 'userId' // Tên trường khóa chính trong model liên kết
+        key: 'id' // Tên trường khóa chính trong model liên kết
       }
     },
     addressId: {
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'Address', // Tên model liên kết
-        key: 'addressId' // Tên trường khóa chính trong model liên kết
+        key: 'id' // Tên trường khóa chính trong model liên kết
       }
     },
   }, {
