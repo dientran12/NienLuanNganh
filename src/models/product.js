@@ -3,36 +3,36 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Product extends Model {
     static associate(models) {
-    //   // Quan hệ nhiều-nhiều giữa Product và Color thông qua ProductDetail
-    //   Product.belongsToMany(models.Color, {
-    //     through: 'ProductDetails',
-    //     foreignKey: 'productId',
-    //     otherKey: 'colorId',
-    //   });
+      // Quan hệ nhiều-nhiều giữa Product và Color thông qua ProductDetail
+      Product.belongsToMany(models.Color, {
+        through: 'ProductDetails',
+        foreignKey: 'productId',
+        otherKey: 'colorId',
+      });
 
-    //   // Quan hệ nhiều-nhiều giữa Product và Size thông qua ProductDetail
-    //   Product.belongsToMany(models.Size, {
-    //     through: 'ProductDetails',
-    //     foreignKey: 'productId',
-    //     otherKey: 'sizeId',
-    //   });
+      // Quan hệ nhiều-nhiều giữa Product và Size thông qua ProductDetail
+      Product.belongsToMany(models.Size, {
+        through: 'ProductDetails',
+        foreignKey: 'productId',
+        otherKey: 'sizeId',
+      });
 
-    //   // Quan hệ nhiều-nhiều giữa Product và InvoiceDetail thông qua ProductDetail
-    //   Product.belongsToMany(models.InvoiceDetail, {
-    //     through: 'ProductDetails',
-    //     foreignKey: 'productId',
-    //     otherKey: 'invoiceDetailId',
-    //   });
+      // Quan hệ nhiều-nhiều giữa Product và InvoiceDetail thông qua ProductDetail
+      Product.belongsToMany(models.InvoiceDetails, {
+        through: 'ProductDetails',
+        foreignKey: 'productId',
+        otherKey: 'invoiceDetailId',
+      });
 
-    //   // Quan hệ nhiều-nhiều giữa Product và Category thông qua CategoryProduct
-    //   Product.belongsToMany(models.Category, {
-    //     through: 'CategoryProducts',
-    //     foreignKey: 'productId',
-    //     otherKey: 'categoryId',
-    //   });
+      // Quan hệ nhiều-nhiều giữa Product và Category thông qua CategoryProduct
+      Product.belongsToMany(models.Categories, {
+        through: 'CategoryProducts',
+        foreignKey: 'productId',
+        otherKey: 'categoryId',
+      });
 
-    //   // Quan hệ một-nhiều giữa Product và Review
-    //   Product.hasMany(models.Review, { foreignKey: 'productId' });
+      // Quan hệ một-nhiều giữa Product và Review
+      Product.hasMany(models.Review, { foreignKey: 'productId' });
     }
   }
 
@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     gender: DataTypes.STRING,
   }, {
     sequelize,
-    modelName: 'Product',
+    modelName: 'Product',    
   });
 
   return Product;

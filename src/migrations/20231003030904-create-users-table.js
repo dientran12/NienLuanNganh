@@ -2,24 +2,34 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Promotions', {
+    await queryInterface.createTable('Users', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
-      },    
-      discountPercentage: {
-        type: Sequelize.FLOAT,
-        allowNull: false,
       },
-      startDate: {
-        type: Sequelize.DATE,
+      email: {
         allowNull: false,
+        type: Sequelize.STRING
       },
-      endDate: {
-        type: Sequelize.DATE,
+      name: {
         allowNull: false,
+        type: Sequelize.STRING
+      },
+      password: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      image: {
+        type: Sequelize.STRING
+      },
+      phone: {
+        type: Sequelize.STRING // Chuyển từ INTEGER thành STRING để phù hợp với kiểu dữ liệu của bạn
+      },
+      role: {
+        type: Sequelize.STRING,
+        defaultValue: 'customer'
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +42,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Promotions');
+    await queryInterface.dropTable('Users');
   }
 };

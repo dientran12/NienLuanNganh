@@ -20,15 +20,7 @@ module.exports = {
           model: 'colors', // Tên bảng mà colorId liên kết đến
           key: 'idColor', // Tên trường khóa chính trong bảng Colors
         },
-      },
-      productId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'Products', // Tên bảng mà productId liên kết đến
-          key: 'idProduct', // Tên trường khóa chính trong bảng Products
-        },
-      },
+      },    
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
