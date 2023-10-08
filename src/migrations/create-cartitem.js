@@ -9,20 +9,25 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      productname: {
-        type: Sequelize.STRING
+      cartID: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Carts', 
+          key: 'id' 
+        },
+      },
+      productID: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: '', // Tên bảng User
+          key: 'id' // Tên trường khóa chính trong bảng User
+        },
       },
       quantity: {
         type: Sequelize.INTEGER
       },
-      productID: {
+      price: {
         type: Sequelize.INTEGER
-      },
-      cartID: {
-        type: Sequelize.INTEGER
-      },
-      role_code: {
-        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

@@ -10,10 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       userID: {
-        type: Sequelize.STRING
-      },
-      role_code: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
