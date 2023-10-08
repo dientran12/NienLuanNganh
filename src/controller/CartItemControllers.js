@@ -1,23 +1,45 @@
 import * as services from '../services/CartItemServices.js'
 
-export const addtocart = async (req, res) => {
-    try{
-        const {productID, quantity} = req.body
-        console.log({productID, quantity})
-        if ( !productID ) return res.status(400).json({
-            err: 1,
-            mes: 'Missing payload'
-        })
-        const response = await services.addtocart(req.body)
-        return  res.status(200).json(response)
 
-    } catch (error) {
-        return res.status(500).json({
-            err: -1,
-            mes: 'Iternal server error'
-        })
+// controllers/cartController.js
+import { addToCartItem } from '../services/CartItemServices.js';
+
+export const addtocartitem = async (req, res) => {
+  try {
+    
+    const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
+    const productId = req.params.productId;
+
+    if (!productId) {
+      return res.status(400).json({
+        err: 1,
+        mes: 'Missing payload',
+      });
     }
-}
+
+    const response = await addToCartItem(userId, productId);
+
+    if (response.success) {
+      return res.status(200).json({
+        status: 'OK',
+        message: response.message,
+        cartItem: response.cartItem,
+      });
+    } else {
+      return res.status(404).json({
+        err: -1,
+        message: response.message,
+      });
+    }
+  } catch (error) {
+    console.error('Error in addtocartitem controller:', error);
+    return res.status(500).json({
+      err: -1,
+      message: 'Internal server error',
+    });
+  }
+};
+  
 
 export const updatecart = async (req, res) => {
     try {

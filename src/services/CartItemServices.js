@@ -1,27 +1,52 @@
 import { response } from 'express';
 import db from '../models'
 
-export const addtocart = ({productID}) => new Promise(async (resolve, reject) => {
-    try {
-        const response = await db.CartItem.findOrCreate({
-            where: {
-                productID
-            },
-            defaults: {
-                productID,
-                quantity: "1"
-            }
-        })
-        console.log(response);
-        resolve ({
-            err: response[1] ? 0 : 1,
-            mes: response[1] ? 'add product is successfully' : 'product already exists',
-            response
-        })
-    } catch (error) {
-        reject(error)
+// Trong service (CartItemServices.js)
+// import { Cart, CartItem } from '../models'; // Import các model cần thiết
+
+export const addToCartItem = async (userId, productId) => {
+  try {
+    // Tìm giỏ hàng của người dùng dựa trên userId
+    let cart = await db.Cart.findOne({ where: { userID: userId } });
+
+    if (!cart) {
+      // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
+      cart = await db.Cart.create({ userID: userId });
     }
-})
+
+    // Tìm sản phẩm trong giỏ hàng dựa trên productId
+    const cartItem = await db.CartItem.findOne({
+      where: { cartID: cart.id, productID: productId },
+    });
+
+    if (cartItem) {
+      // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng quantity lên 1
+      cartItem.quantity += 1;
+      await cartItem.save();
+    } else {
+      // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
+      await db.CartItem.create({
+        cartID: cart.id,
+        productID: productId,
+        quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
+        price: 100, // Thay thế bằng giá của sản phẩm
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Product added to cart successfully',
+      cartItem: cartItem,
+    };
+  } catch (error) {
+    console.error('Error in addToCartItem service:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+    };
+  }
+};
+
 
 export const updatecart = async (id, data) => {
     return new Promise(async (resolve, reject) => {
@@ -75,12 +100,12 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
     try {
         const cartID = await db.CartItem.findOne({
             where: { id },
-            include:[{ model: db.Cart, as: 'cartdata'}]
+            include:[{ model: db.Cart, as: 'cartdata'}, { model: db.Product, as: 'productdata'}]
         })
         resolve({
             err: response ? 0:1,
             mes: response ? '':'',
-            cartdata: cartID
+            data: cartID
         })
     } catch (e) {
         reject(e)

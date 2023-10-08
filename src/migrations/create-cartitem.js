@@ -19,9 +19,9 @@ module.exports = {
       productID: {
         type: Sequelize.INTEGER,
         references: {
-          model: '', // Tên bảng User
-          key: 'id' // Tên trường khóa chính trong bảng User
-        },
+          model: 'Products',
+          key: 'idProduct' 
+        }
       },
       quantity: {
         type: Sequelize.INTEGER
