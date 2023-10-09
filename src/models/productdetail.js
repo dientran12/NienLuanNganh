@@ -7,16 +7,18 @@ module.exports = (sequelize) => {
       ProductDetail.belongsTo(models.Product, { foreignKey: 'productId' });
       ProductDetail.belongsTo(models.Color, { foreignKey: 'colorId' });
       ProductDetail.belongsTo(models.Size, { foreignKey: 'sizeId' });
-      ProductDetail.belongsTo(models.InvoiceDetails, { foreignKey: 'invoiceDetailId' });
+      //ProductDetail.belongsTo(models.InvoiceDetails, { foreignKey: 'invoiceDetailId' });
     }
   }
 
   ProductDetail.init(
-    {
-      inventoryQuantity: {
+    {      
+      quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
-      },
+      },      
+      imageData: DataTypes.BLOB,
+
       sizeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -28,7 +30,7 @@ module.exports = (sequelize) => {
     
       colorId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Color', // Tên model của bảng Color
           key: 'idColor', // Tên trường khóa chính của bảng Color
@@ -45,14 +47,14 @@ module.exports = (sequelize) => {
       },
     
       
-      invoiceDetailId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'InvoiceDetails', // Tên model của bảng InvoiceDetail
-          key: 'id', // Tên trường khóa chính của bảng InvoiceDetail
-        },
-      },
+      // invoiceDetailId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      //   references: {
+      //     model: 'InvoiceDetails', // Tên model của bảng InvoiceDetail
+      //     key: 'id', // Tên trường khóa chính của bảng InvoiceDetail
+      //   },
+      // },
     },
     {
       sequelize,

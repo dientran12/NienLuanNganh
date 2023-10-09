@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 
-module.exports = (sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   class ProductImage extends Model {
     static associate(models) {
       // Mối quan hệ "một-nhiều" giữa ProductImage và Colors
@@ -12,10 +12,18 @@ module.exports = (sequelize) => {
 
   ProductImage.init(
     {
-      idProductImage: {
+      idImage: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+      },
+      colorId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Color', // Tên model của bảng Color
+          key: 'idColor', // Tên trường khóa chính của bảng Color
+        },
       },
       imageData: DataTypes.BLOB,
     },

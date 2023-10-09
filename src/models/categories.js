@@ -5,7 +5,7 @@ module.exports = (sequelize) => {
     static associate(models) {
       // Mối quan hệ "nhiều-nhiều" giữa Categories và Products thông qua CategoryProduct
       Categories.belongsToMany(models.Product, {
-        through: 'CategoryProduct', // Tên của bảng trung gian
+        through: 'CategoryProducts', // Tên của bảng trung gian
         foreignKey: 'categoryId', // Khóa ngoại trong bảng trung gian liên kết với Categories
       });
     }
@@ -13,7 +13,7 @@ module.exports = (sequelize) => {
 
   Categories.init(
     {
-      id: {
+      idCategory: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,

@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class PromotionProduct extends Model {}
+  class ProductPromotion extends Model {}
 
-  PromotionProduct.init(
+  ProductPromotion.init(
     {
       // Các trường của bảng trung gian (promotionId và productId là các khóa ngoại)
       promotionId: {
@@ -15,13 +15,13 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
-      },
+      },      
     },
     {
       sequelize,
-      modelName: 'PromotionProduct', // Tên của Model trung gian
+      modelName: 'ProductPromotion', // Tên của Model trung gian
     }
   );
 
-  return PromotionProduct;
+  return ProductPromotion;
 };

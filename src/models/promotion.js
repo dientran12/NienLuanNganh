@@ -7,6 +7,7 @@ module.exports = (sequelize) => {
       Promotion.belongsToMany(models.Product, {
         through: 'ProductPromotion',
         foreignKey: 'promotionId',
+        otherKey: 'productId'
       });
     }
   }
@@ -20,7 +21,7 @@ module.exports = (sequelize) => {
       },
       // Các trường của bảng Promotion
       name: DataTypes.STRING,
-      discountPercentage: DataTypes.FLOAT,
+      percentage: DataTypes.FLOAT,
       startDate: DataTypes.DATE,
       endDate: DataTypes.DATE,
     },

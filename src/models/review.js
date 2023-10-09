@@ -10,7 +10,28 @@ module.exports = (sequelize) => {
 
   Review.init(
     {
-      content: {
+      idReview: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      productId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Product', // Tên model của bảng Product
+          key: 'idProduct', // Tên trường khóa chính của bảng Product
+        }
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'User', // Tên model của bảng User
+          key: 'id', // Tên trường khóa chính của bảng User
+        }
+      },
+      comment: {
         type: DataTypes.TEXT, // Kiểu dữ liệu cho nội dung đánh giá (dài hơn kiểu STRING)
         allowNull: false, // Không được phép giá trị null
       },

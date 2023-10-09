@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         through: 'ProductDetails',
         foreignKey: 'productId',
         otherKey: 'colorId',
+        onDelete: ' CASCADE '
       });
 
       // Quan hệ nhiều-nhiều giữa Product và Size thông qua ProductDetail
@@ -15,8 +16,16 @@ module.exports = (sequelize, DataTypes) => {
         through: 'ProductDetails',
         foreignKey: 'productId',
         otherKey: 'sizeId',
+        onDelete: ' CASCADE '
       });
 
+      Product.belongsToMany(models.Promotion, {
+        through: 'ProductPromotion',
+        foreignKey: 'productId',
+        otherKey: 'promotionId',
+        onDelete: ' CASCADE '
+      });
+      
       // Quan hệ nhiều-nhiều giữa Product và InvoiceDetail thông qua ProductDetail
       Product.belongsToMany(models.InvoiceDetails, {
         through: 'ProductDetails',
@@ -29,10 +38,15 @@ module.exports = (sequelize, DataTypes) => {
         through: 'CategoryProducts',
         foreignKey: 'productId',
         otherKey: 'categoryId',
+        onDelete: ' CASCADE '
       });
 
       // Quan hệ một-nhiều giữa Product và Review
-      Product.hasMany(models.Review, { foreignKey: 'productId' });
+      Product.hasMany(models.Review, { 
+        foreignKey: 'productId',
+        onDelete: 'CASCADE',
+        hooks: true
+       });
     }
   }
 
