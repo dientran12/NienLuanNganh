@@ -22,7 +22,7 @@ export const addToCartItem = async (userId, productId) => {
     if (cartItem) {
       // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng quantity lên 1
       return {
-        err: 1,
+        success: false,
         message: 'Product already exists',
         cartItem: cartItem
       }
@@ -51,68 +51,74 @@ export const addToCartItem = async (userId, productId) => {
 };
 
 
-export const updatecart = async (id, data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const products = await db.CartItem.findByPk(id)
-            console.log('product ' + id + ' dataUpdate in backend ', data)
-            if (!products) {
-                resolve({
-                    status: 'OK',
-                    message: 'Product is not defined',
-                })
-            }
-            await products.update(data);
-            console.log(products)
-            resolve({
-                status: 'OK',
-                message: 'Update product SUCCESSFULLY',
-                data: products 
-            })
-        } catch (e) {
-            reject(e)
-        }
-    })
+export const updatecart = async (userId, productId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let cart = await db.Cart.findOne({ where: { userID: userId } });
+      const cartItem = await db.CartItem.findOne({
+        where: { cartID: cart.id, productID: productId },
+      });
+      console.log('product ' + productId + ' dataUpdate in backend ', data)
+      if (!cartItem) {
+        resolve({
+          status: 'OK',
+          message: 'Product is not defined',
+        })
+      }
+      await cartItem.update(data);
+      console.log(cartItem)
+      resolve({
+        status: 'OK',
+        message: 'Update product SUCCESSFULLY',
+        data: cartItem
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
 }
 
-export const deletecart = async (id) => {
-    return new Promise(async (resolve, reject) => {
-        try {
+export const deletecart = async (userId, productId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let cart = await db.Cart.findOne({ where: { userID: userId } });
 
-            const products = await db.CartItem.findByPk(id)
+      const cartItem = await db.CartItem.findOne({
+        where: { cartID: cart.id, productID: productId },
+      });
 
-            if (!products) {
-                resolve({
-                    status: 'OK',
-                    message: 'The product is not defined',
-                })
-            }
-            await products.destroy();
+      if (!cartItem) {
+        resolve({
+          status: 'OK',
+          message: 'The product is not defined',
+        })
+      }
+      await cartItem.destroy();
 
-            resolve({
-                status: 'OK',
-                message: `Delete product SUCCESSFULLY`
-            })
-        } catch (e) {
-            reject(e)
-        }
-    })
+      resolve({
+        status: 'OK',
+        message: `Delete product SUCCESSFULLY`
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
 }
 
 export const getCartItem = async (id) => new Promise(async (resolve, reject) => {
-    try {
-        const cartID = await db.CartItem.findOne({
-            where: { id },
-            include:[{ model: db.Cart, as: 'cartdata'}, { model: db.Product, as: 'productdata'}]
-        })
-        resolve({
-            err: response ? 0:1,
-            mes: response ? '':'',
-            data: cartID
-        })
-    } catch (e) {
-        reject(e)
-    }
+  try {
+    const cartID = await db.CartItem.findOne({
+      where: { id },
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Product, as: 'productdata' }]
+    })
+    resolve({
+      err: response ? 0 : 1,
+      mes: response ? '' : '',
+      data: cartID
+    })
+  } catch (e) {
+    reject(e)
+  }
 })
 
 export const getAllCartItem = async (userId) => {
@@ -131,7 +137,7 @@ export const getAllCartItem = async (userId) => {
     // Tìm tất cả các mục trong giỏ hàng của người dùng
     const cartItems = await db.CartItem.findAll({
       where: { cartID: cart.id },
-      include:[{ model: db.Cart, as: 'cartdata'}, { model: db.Product, as: 'productdata'}]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Product, as: 'productdata' }]
     });
 
     return {

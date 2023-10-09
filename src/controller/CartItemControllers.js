@@ -43,7 +43,8 @@ export const addtocartitem = async (req, res) => {
 
 export const updatecart = async (req, res) => {
     try {
-        const productId = req.params.id
+        const productId = req.params.productId
+        const userId = req.params.userId
         const data = req.body
         if (!productId) {
             return res.status(200).json({
@@ -51,7 +52,7 @@ export const updatecart = async (req, res) => {
                 message: "The Id is required"
             })
         }
-        const response = await services.updatecart(productId, data)
+        const response = await services.updatecart(userId, productId, data)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
@@ -62,14 +63,15 @@ export const updatecart = async (req, res) => {
 
 export const deletecart = async (req, res) => {
     try {
-        const productId = req.params.id
+        const productId = req.params.productId
+        const userId = req.params.userId
         if (!productId) {
             return res.status(200).json({
                 status: "error",
                 message: "The Id is required"
             })
         }
-        const response = await services.deletecart(productId)
+        const response = await services.deletecart(userId,productId)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
