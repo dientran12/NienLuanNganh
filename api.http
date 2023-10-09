@@ -1,4 +1,4 @@
-POST http://localhost:3100/api/cart/addtocart/1/1
+POST http://localhost:3100/api/cart/addtocart/1/2
 Content-Type: application/json
 
 
@@ -17,7 +17,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3100/api/promotion/getPromotion/2
+GET http://localhost:3100/api/cart/getcart/1
 
 ###
 GET http://localhost:3100/api/cart/getcartitem/3
+
+###
+GET http://localhost:3100/api/cart/getalldata/1

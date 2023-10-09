@@ -89,3 +89,29 @@ export const getCartItem = async (req, res) => {
         })
     }
 }
+
+export const getAllCartItemController = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const result = await services.getAllCartItem(userId);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        cartItems: result.cartItems,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error('Error in getAllCartItemController:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};

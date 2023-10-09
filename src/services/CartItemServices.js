@@ -36,7 +36,7 @@ export const addToCartItem = async (userId, productId) => {
     return {
       success: true,
       message: 'Product added to cart successfully',
-      cartItem: cartItem,
+      cartItem: cartItem
     };
   } catch (error) {
     console.error('Error in addToCartItem service:', error);
@@ -111,3 +111,37 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
         reject(e)
     }
 })
+
+export const getAllCartItem = async (userId) => {
+  try {
+    // Tìm giỏ hàng của người dùng dựa trên userId
+    const cart = await db.Cart.findOne({ where: { userID: userId } });
+
+    if (!cart) {
+      return {
+        success: true,
+        message: 'Cart is empty',
+        cartItems: [],
+      };
+    }
+
+    // Tìm tất cả các mục trong giỏ hàng của người dùng
+    const cartItems = await db.CartItem.findAll({
+      where: { cartID: cart.id },
+      include:[{ model: db.Cart, as: 'cartdata'}, { model: db.Product, as: 'productdata'}]
+    });
+
+    return {
+      success: true,
+      message: 'Cart items retrieved successfully',
+      cartItems: cartItems,
+    };
+  } catch (error) {
+    console.error('Error in getAllCartItem service:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      cartItems: [],
+    };
+  }
+};

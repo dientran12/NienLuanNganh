@@ -16,8 +16,20 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   CartItem.init({
-    cartID: DataTypes.INTEGER,
-    productID: DataTypes.INTEGER,
+    cartID:{
+      type: DataTypes.INTEGER,
+      references: {
+        model:'Cart', // Tên model của bảng Size
+        key: 'id', // Tên trường khóa chính của bảng Size
+      },
+    },
+    productID: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Product', // Tên model của bảng Size
+        key: 'idProduct', // Tên trường khóa chính của bảng Size
+      },
+    },
     quantity: DataTypes.INTEGER,
     price: DataTypes.INTEGER
   }, {
