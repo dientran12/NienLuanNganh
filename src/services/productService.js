@@ -6,6 +6,7 @@ const Promotion = db.Promotion;
 const Size = db.Size;
 const Color = db.Color;
 const ProductDetail = db.ProductDetail;
+const ProductPromotions = db.ProductPromotion;
 
 const productService = {
   findProductsByPriceRange: async (minPrice, maxPrice) => {
@@ -375,6 +376,39 @@ const productService = {
       throw new Error('Internal Server Error');
     }
   },
+  applyPromotionToProduct: async (productId, promotionId) => {
+    try {
+        const product = await Product.findByPk(productId);
+        const promotion = await Promotion.findByPk(promotionId);
+
+        if (!product || !promotion) {
+            return { success: false, message: 'Sản phẩm hoặc khuyến mãi không tồn tại' };
+        }
+
+        const existingLink = await ProductPromotions.findOne({
+            where: {
+                productId: productId,
+                promotionId: promotionId
+            }
+        });
+
+        if (existingLink) {
+            return { success: false, message: 'Sản phẩm đã được áp dụng khuyến mãi này' };
+        }
+
+        await ProductPromotions.create({
+            productId: productId,
+            promotionId: promotionId
+        });
+
+        // Áp dụng logic khuyến mãi (ví dụ: giảm giá sản phẩm)
+
+        return { success: true, message: 'Sản phẩm đã được áp dụng khuyến mãi' };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Internal Server Error' };
+    }
+  }
   
 //   addQuantityToProduct: async (productName, sizeName, colorName, quantity) => {
 //     try {

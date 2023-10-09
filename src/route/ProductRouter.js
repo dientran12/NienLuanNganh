@@ -44,6 +44,9 @@ router.post('/products/:productId/size-color', productController.addSizeAndColor
 router.put('/products/:productId', productController.updateProduct);
 // Thêm số lượng cho sản phẩm theo tên, màu sắc và kích thước
 router.post('/products/quantity', productController.addQuantityToProduct);
+// Áp dụng khuyến mãi cho sản phẩm
+router.post('/products/applyPromotion', productController.applyPromotion);
+
 
 
 router.post('/categories', categoriesController.createCategory);// Tạo danh mục mới

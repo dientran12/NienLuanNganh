@@ -170,6 +170,11 @@ const productController = {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
+  applyPromotion: async (req, res) => {
+    const { productId, promotionId } = req.body;
+    const result = await productService.applyPromotionToProduct(productId, promotionId);
+    return res.json(result);
+  },
 
 };
 
