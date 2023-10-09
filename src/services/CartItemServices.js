@@ -21,8 +21,11 @@ export const addToCartItem = async (userId, productId) => {
 
     if (cartItem) {
       // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng quantity lên 1
-      cartItem.quantity += 1;
-      await cartItem.save();
+      return {
+        err: 1,
+        message: 'Product already exists',
+        cartItem: cartItem
+      }
     } else {
       // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
       await db.CartItem.create({
