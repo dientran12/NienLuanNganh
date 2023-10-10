@@ -4,11 +4,11 @@ module.exports = (sequelize) => {
   class Size extends Model {
     static associate(models) {
       // Định nghĩa quan hệ "nhiều-nhiều" với bảng Product thông qua bảng trung gian ProductDetails
-      Size.belongsToMany(models.Product, {
-        through: 'ProductDetails',
-        foreignKey: 'sizeId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Size
-        otherKey: 'productId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Product
-      });
+      // Size.belongsToMany(models.Product, {
+      //   through: 'ProductDetails',
+      //   foreignKey: 'sizeId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Size
+      //   otherKey: 'productId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Product
+      // });
     }
   }
 

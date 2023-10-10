@@ -73,7 +73,18 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-  
+  getAllProductsWithPage: async (req, res) => {
+    try {
+      const { page, pageSize } = req.query;
+
+        const products = await productService.getAllProductsOnPage(page, pageSize);
+        return res.status(200).json(products);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
   getByType: async (req, res) => {
     try {
       const { type } = req.params;

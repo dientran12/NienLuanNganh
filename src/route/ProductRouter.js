@@ -25,25 +25,27 @@ router.post('/promotions', promotionController.createPromotion);//Thêm khuyến
 router.delete('/promotions/:id', promotionController.deletePromotion);// Xóa khuyến mãi theo id
 
 // Tạo sản phẩm mới
-router.post('/products', productController.createProduct);
+router.post('/products/createProduct', productController.createProduct);
 // Xóa sản phẩm theo ID
-router.delete('/products/:productId', productController.deleteProductById);
+router.delete('/products/deleteProduct/:productId', productController.deleteProductById);
 // Lấy tất cả sản phẩm
-router.get('/products', productController.getAllProducts);
+router.get('/products/getAllProduct', productController.getAllProducts);
+// Lấy tất cả sản phẩm và phân trang theo yêu cầu
+router.get('/products/getAllProductOnPage', productController.getAllProductsWithPage);
 // Lấy chi tiết sản phẩm theo ID
-router.get('/products/:id', productController.getProductDetail);
+router.get('/products/getDetailProduct/:id', productController.getProductDetail);//chưa xong
 // Lấy sản phẩm theo tên
-router.get('/products/name/:name', productController.getProductByName);
+router.get('/products/getProductByName/:name', productController.getProductByName);
 // Lấy sản phẩm theo loại
-router.get('/products/type/:type', productController.getByType);
+router.get('/products/getProductByType/:type', productController.getByType);
 // Tìm sản phẩm theo mức giá
-router.get('/products/price', productController.findProductsByPriceRange);
+router.get('/products/findProductByPrice', productController.findProductsByPriceRange);
 // Thêm kích thước và màu cho sản phẩm
-router.post('/products/:productId/size-color', productController.addSizeAndColorToProduct);
+router.post('/products/:productId/addSizeColor', productController.addSizeAndColorToProduct);
 // Cập nhật thông tin sản phẩm
-router.put('/products/:productId', productController.updateProduct);
+router.put('/updateProducts/:productId', productController.updateProduct);
 // Thêm số lượng cho sản phẩm theo tên, màu sắc và kích thước
-router.post('/products/quantity', productController.addQuantityToProduct);
+router.post('/products/addQuantityToProduct', productController.addQuantityToProduct);
 // Áp dụng khuyến mãi cho sản phẩm
 router.post('/products/applyPromotion', productController.applyPromotion);
 

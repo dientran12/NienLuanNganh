@@ -205,55 +205,110 @@ const productService = {
     }
   },
 
+  getAllProductsOnPage: async ( page, pageSize ) => {
+    try {
+        const offset = (page - 1) * parseInt(pageSize);
+
+        const productsWithDiscount = await Product.findAndCountAll({
+            include: [
+                {
+                    model: Promotion,
+                    through: 'PromotionProduct',
+                    where: {
+                        startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+                        endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+                    }
+                }
+            ],
+            attributes: [
+                'idProduct',
+                'name',
+                'description',
+                'origin',
+                'brand',
+                'type',
+                'gender',
+                'price',
+                // [Sequelize.literal('CASE WHEN promotions.percentage IS NOT NULL THEN price - (price * promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+            ],
+            offset: offset,
+            limit: parseInt(pageSize),
+            include: [
+                {
+                    model: Promotion,
+                    through: 'PromotionProduct',
+                    attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+                }
+            ] 
+        });
+
+        return productsWithDiscount;
+    } catch (error) {
+        throw error;
+    }
+  },
+
   getDetailById: async (id) => {
     try {
       const product = await Product.findOne({
-        where: { idProduct: id },
-        attributes: ['idProduct', 'name', 'description', 'price', 'origin', 'brand', 'type', 'gender', 'createdAt', 'updatedAt'],
-        include: [
-          {
-            model: ProductDetail,
-            include: [
+          where: { idProduct: id },
+          attributes: [
+              'idProduct',
+              'name',
+              'description',
+              'price',
+              'origin',
+              'brand',
+              'type',
+              'gender',
+              'createdAt',
+              'updatedAt',
+              [
+                  Sequelize.literal(`CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END`),
+                  'discountedPrice'
+              ]
+          ],
+          include: [
               {
-                model: Color,
-                attributes: ['idColor', 'colorName']
+                  model: ProductDetail,
+                  required: false,
+                  include: [
+                      {
+                          model: Color,
+                          attributes: ['idColor', 'colorName']
+                      },
+                      {
+                          model: Size,
+                          attributes: ['idSize', 'sizeName']
+                      }
+                  ]
               },
               {
-                model: Size,
-                attributes: ['idSize', 'sizeName']
+                  model: Promotion,
+                  through: 'PromotionProducts',
+                  attributes: [], // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+                  required: false,
+                  where: {
+                      startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+                      endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+                  }
               }
-            ]
-          },
-          {
-            model: Promotion,
-            through: 'PromotionProduct',
-            where: {
-              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
-            }
-          }
-        ]
+          ]
       });
 
       if (!product) {
-        return null;
-      }
-
-      let discountedPrice = product.price;
-      if (product.Promotions.length > 0) {
-        const discountPercentage = product.Promotions[0].discountPercentage;
-        discountedPrice = product.price - (product.price * discountPercentage / 100);
-      }
+          return null;
+      }     
 
       const productWithDiscount = {
-        ...product.toJSON(),
-        discountedPrice
+          ...product.toJSON(),
+          discountedPrice: product.get('discountedPrice')
       };
 
       return productWithDiscount;
-    } catch (error) {
+  } catch (error) {
       throw error;
-    }
+  }
   },
 
 
@@ -408,7 +463,69 @@ const productService = {
         console.error(error);
         return { success: false, message: 'Internal Server Error' };
     }
-  }
+  },
+  getAllProductsPaginated: async (pageNumber = 1, itemsPerPage = 10) => {
+    try {
+        const offset = (pageNumber - 1) * itemsPerPage;
+
+        const productsWithDiscount = await Product.findAll({
+            limit: itemsPerPage,
+            offset: offset,
+            include: [
+                {
+                    model: Promotion,
+                    through: 'PromotionProduct',
+                    where: {
+                        startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+                        endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+                    }
+                }
+            ],
+            attributes: [
+                'idProduct',
+                'name',
+                'description',
+                'origin',
+                'brand',
+                'type',
+                'gender',
+                'price',
+                [Sequelize.literal('CASE WHEN `Promotions->ProductPromotion`.`percentage` IS NOT NULL THEN `Product`.`price` - (`Product`.`price` * `Promotions->ProductPromotion`.`percentage` / 100) ELSE NULL END'), 'discountedPrice']
+            ],
+            include: [
+                {
+                    model: Promotion,
+                    through: 'PromotionProduct',
+                    attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+                }
+            ]
+        });
+
+        const totalItems = await Product.count({
+            include: [
+                {
+                    model: Promotion,
+                    through: 'PromotionProduct',
+                    where: {
+                        startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+                        endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+                    }
+                }
+            ]
+        });
+
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        return {
+            products: productsWithDiscount,
+            currentPage: pageNumber,
+            totalPages: totalPages,
+            totalItems: totalItems
+        };
+    } catch (error) {
+        throw error;
+    }
+}
   
 //   addQuantityToProduct: async (productName, sizeName, colorName, quantity) => {
 //     try {

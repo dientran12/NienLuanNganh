@@ -1,7 +1,11 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class ProductPromotion extends Model {}
+  class ProductPromotion extends Model {
+    static associate(models) {
+      ProductPromotion.belongsTo(models.Promotion, { foreignKey: 'promotionId' } )
+    }
+  }
 
   ProductPromotion.init(
     {
@@ -9,12 +13,18 @@ module.exports = (sequelize) => {
       promotionId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
+        references: {
+          model: 'Promotion', // Tên model của bảng Promotion
+          key: 'id', // Tên trường khóa chính của bảng Promotion
+        },
       },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
+        references: {
+          model: 'Product', // Tên model của bảng Product
+          key: 'idProduct', // Tên trường khóa chính của bảng Product
+        },
       },      
     },
     {
