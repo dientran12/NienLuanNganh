@@ -1,1 +1,2 @@
-GET http://localhost:3100/api/user/get-all
+POST http://localhost:3100/api/order/add
+Content-Type: application/json
