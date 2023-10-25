@@ -8,7 +8,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         otherKey: 'addressId',
       });
+      User.hasMany(models.Review, {
+        foreignKey: 'userId', // Tên trường khóa ngoại trong bảng Reviews
+        as: 'reviews', // Tên mối quan hệ, bạn có thể đặt tên khác nếu muốn
+      });
     }
+    //User.hasMany(models.Order, { foreignKey: 'user_id' });
   };
 
   User.init({

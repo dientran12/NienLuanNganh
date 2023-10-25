@@ -1,7 +1,7 @@
 import JwtService from '../services/JwtService.js';
 import UserService from '../services/UserService.js';
 
-const createUser = async (req, res) => {
+const createUsers = async (req, res) => {
     try {
         const { password, confirmPassword, email } = req.body;
         const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -165,5 +165,6 @@ const logoutnUser = async (req, res) => {
 }
 
 export default {
-    createUser, loginUser, updateUser, deleteUser, getAllUsers, getDetailsUser, refreshToken, logoutnUser
+    createUsers, loginUser, updateUser, deleteUser, getAllUsers, getDetailsUser, refreshToken, logoutnUser
 }
+// test push

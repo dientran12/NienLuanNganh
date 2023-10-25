@@ -25,7 +25,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       phone: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING // Chuyển từ INTEGER thành STRING để phù hợp với kiểu dữ liệu của bạn
       },
       role: {
         type: Sequelize.STRING,
@@ -33,13 +33,11 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: 'TIMESTAMP',
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: 'TIMESTAMP',
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        type: Sequelize.DATE
       }
     });
   },
