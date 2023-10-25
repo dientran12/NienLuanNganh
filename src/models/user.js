@@ -8,10 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         otherKey: 'addressId',
       });
-      User.hasMany(models.Review, {
-        foreignKey: 'userId', // Tên trường khóa ngoại trong bảng Reviews
-        as: 'reviews', // Tên mối quan hệ, bạn có thể đặt tên khác nếu muốn
-      });
     }
   };
 
@@ -27,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     image: DataTypes.STRING,
     role: DataTypes.STRING,
     phone: DataTypes.INTEGER,
+    address: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'User',
