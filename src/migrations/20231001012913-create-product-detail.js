@@ -2,11 +2,16 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('ProductDetails', {      
+    await queryInterface.createTable('ProductDetails', {    
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },  
       sizeId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        primaryKey: true,
         references: {
           model: 'Sizes',
           key: 'idSize',
@@ -17,7 +22,6 @@ module.exports = {
       colorId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        primaryKey: true,
         references: {
           model: 'Colors',
           key: 'idColor',
@@ -28,7 +32,6 @@ module.exports = {
       productId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        primaryKey: true,
         references: {
           model: 'Products',
           key: 'idProduct',
@@ -39,6 +42,10 @@ module.exports = {
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false,
+      },
+      image: {
+        type: Sequelize.TEXT, 
+        allowNull: true, // Cho phép giá trị null
       },
       createdAt: {
         type: Sequelize.DATE,

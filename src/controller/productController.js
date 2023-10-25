@@ -2,45 +2,45 @@ const productService = require('../services/productService');
 
 const productController = {
   
-  createSize: async (req, res) => {
-    try {
-      const { name } = req.body;
-      const newSize = await productService.createSize(name);
-      res.status(201).json({ success: true, size: newSize });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-  },
+  // createSize: async (req, res) => {
+  //   try {
+  //     const { name } = req.body;
+  //     const newSize = await productService.createSize(name);
+  //     res.status(201).json({ success: true, size: newSize });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  //   }
+  // },
 
-  createColor: async (req, res) => {
-    try {
-      const { name } = req.body;
-      const newColor = await productService.createColor(name);
-      res.status(201).json({ success: true, color: newColor });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-  },
+  // createColor: async (req, res) => {
+  //   try {
+  //     const { name } = req.body;
+  //     const newColor = await productService.createColor(name);
+  //     res.status(201).json({ success: true, color: newColor });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  //   }
+  // },
   
   getProductDetail: async (req, res) => {
+    const productId = req.params.productId; // Lấy ID sản phẩm từ request parameters
     try {
-      const { id } = req.params;
-      const productWithDiscount = await productService.getDetailById(id);
-      if (!productWithDiscount) {
-        return res.status(404).json({ success: false, message: 'Product not found' });
+      const product = await productService.getProductById(productId);
+      if (product) {
+        res.status(200).json(product);
+      } else {
+        res.status(404).json({ error: 'Product not found.' });
       }
-      res.status(200).json({ success: true, product: productWithDiscount });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+      res.status(500).json({ error: error.message });
     }
   },
 
   getProductByName: async (req, res) => {
     try {
-      const name = req.params.name;
+      const name = req.params.name.trim();
       const productsWithDiscount = await productService.getByName(name);
       res.status(200).json({ success: true, products: productsWithDiscount });
     } catch (error) {
@@ -73,21 +73,32 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-  getAllProductsWithPage: async (req, res) => {
+  getAllProductsOnPage: async (req, res) => {
     try {
-      const { page, pageSize } = req.query;
-
-        const products = await productService.getAllProductsOnPage(page, pageSize);
-        return res.status(200).json(products);
+      const page = parseInt(req.query.page, 10) || 1; // Chuyển đổi giá trị của page thành số nguyên, mặc định là 1 nếu không có giá trị
+      const pageSize = parseInt(req.query.pageSize, 10) || 10; // Chuyển đổi giá trị của pageSize thành số nguyên, mặc định là 10 nếu không có giá trị     
+      const productsWithDiscount = await productService.getProductsOnpage(page, pageSize);
+      res.status(200).json(productsWithDiscount);
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-  },
+  },  
+  // getAllProductsWithPage: async (req, res) => {
+  //   try {
+  //     const { page, pageSize } = req.query;
+
+  //       const products = await productService.getProductsOnPage(page, pageSize);
+  //       return res.status(200).json(products);
+  //   } catch (error) {
+  //       console.error(error);
+  //       return res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // },
 
   getByType: async (req, res) => {
     try {
-      const { type } = req.params;
+      const type = req.params.type;
       const products = await productService.getByType(type);
       res.status(200).json({ success: true, products: products });
     } catch (error) {
@@ -114,7 +125,7 @@ const productController = {
   updateProduct: async (req, res) => {
     try {
       const { productId } = req.params;
-      const { name, description, type, price, origin, brand, gender, colors, sizes, quantities } = req.body;
+      const { name, description, type, price, origin, brand, gender } = req.body;
 
       const productData = {
         name: name,
@@ -124,9 +135,9 @@ const productController = {
         origin: origin,
         brand: brand,
         gender: gender,
-      };
+      };    
 
-      const updatedProduct = await productService.updateProductAndRelatedInfo(productId, productData, colors, sizes, quantities);
+      const updatedProduct = await productService.updateProductAndRelatedInfo(productId, productData);
 
       res.status(200).json({ success: true, product: updatedProduct });
     } catch (error) {
@@ -153,8 +164,9 @@ const productController = {
   },
   deleteProductById: async (req, res) => {
     try {
-      const { productId } = req.params;
-      const result = await productService.deleteProductById(productId);
+      // const pageSize = parseInt(req.params.idProduct)
+      const idProduct = req.params.idProduct;
+      const result = await productService.deleteProductById(idProduct);
       
       if (result.success) {
         res.status(200).json(result);

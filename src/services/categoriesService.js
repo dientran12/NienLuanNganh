@@ -25,10 +25,10 @@ const categoriesService = {
 
       if (!category) {
         return { success: false, message: 'Danh mục không tồn tại' };
-      }
-
-      await category.destroy();
-      return { success: true, message: 'Danh mục đã được xóa' };
+      } else {
+        await category.destroy();
+        return { success: true, message: 'Danh mục đã được xóa' };
+      }     
     } catch (error) {
       console.error(error);
       return { success: false, message: 'Internal Server Error' };
@@ -68,15 +68,15 @@ const categoriesService = {
         });
 
         if (existingLink) {
-            return { success: false, message: 'Sản phẩm đã tồn tại trong danh mục' };
+            return { success: false, message: 'Sản phẩm đã tồn tại trong danh mục', info: existingLink };
         }
 
-        await CategoryProducts.create({
+        const cate = await CategoryProducts.create({
             categoryId: categoryId,
             productId: productId
         });
 
-        return { success: true, message: 'Sản phẩm đã được thêm vào danh mục' };
+        return { success: true, message: 'Sản phẩm đã được thêm vào danh mục', info: cate };
     } catch (error) {
         console.error(error);
         return { success: false, message: 'Internal Server Error' };
@@ -110,12 +110,12 @@ const categoriesService = {
         });
 
         if (!categoryProductLink) {
-            return { success: false, message: 'Sản phẩm không tồn tại trong danh mục' };
+            return { success: false, message: 'Sản phẩm không tồn tại trong danh mục', infoCategory: category };
         }
 
         await category.removeProduct(product);
 
-        return { success: true, message: 'Sản phẩm đã được xóa khỏi danh mục' };
+        return { success: true, message: 'Sản phẩm đã được xóa khỏi danh mục', infoCategory: category, infoProduct: product};
     } catch (error) {
         console.error(error);
         return { success: false, message: 'Internal Server Error' };

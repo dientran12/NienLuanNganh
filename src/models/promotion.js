@@ -1,18 +1,17 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class Promotion extends Model {
+  class Promotions extends Model {
     static associate(models) {
       // Mối quan hệ "nhiều-nhiều" giữa Promotion và Product thông qua bảng ProductPromotion
-      Promotion.belongsToMany(models.Product, {
-        through: 'ProductPromotion',
-        foreignKey: 'promotionId',
-        otherKey: 'productId'
-      });
+      Promotions.belongsToMany(models.Product, {
+        through: 'ProductPromotions', // Tên bảng trung gian
+        foreignKey: 'promotionId', // Tên cột khóa ngoại của Promotion trong bảng trung gian        
+      });  
     }
   }
 
-  Promotion.init(
+  Promotions.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -27,9 +26,9 @@ module.exports = (sequelize) => {
     },
     {
       sequelize,
-      modelName: 'Promotion', // Tên của Model, phải trùng với tên đã đặt trong Sequelize
-    }
+      modelName: 'Promotions', // Tên của Model, phải trùng với tên đã đặt trong Sequelize
+    },
   );
 
-  return Promotion;
+  return Promotions;
 };

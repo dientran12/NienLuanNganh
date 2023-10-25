@@ -21,9 +21,10 @@ const categoriesController = {
     try {
       const categoryId = req.params.id;
       const result = await categoriesService.deleteCategory(categoryId);
+      console.log(result);
 
       if (result.success) {
-        res.status(204).json(result);
+        res.status(200).json(result);
       } else {
         res.status(404).json(result);
       }
@@ -84,7 +85,6 @@ const categoriesController = {
     try {
       const { productId, categoryId } = req.params;
       const result = await categoriesService.removeProductFromCategory(productId, categoryId);
-
       if (result.success) {
         res.status(200).json(result);
       } else {
