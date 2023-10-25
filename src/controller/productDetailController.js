@@ -1,10 +1,19 @@
 const productDetailService = require('../services/productDetailService');
 
+
 const productDetailController = {
     createProductDetail: async (req, res) => {
         try {
-            const productDetailData = req.body;                
-            console.error('Data:', productDetailData);
+            const { sizeId, colorId, productId, quantity } = req.body;
+            const imageFileName = req.file ? req.file.filename : null;
+            const productDetailData = {
+                sizeId: sizeId,
+                colorId: colorId,
+                productId: productId,
+                quantity: quantity,
+                image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
+            };              
+            console.log('Data:', productDetailData);
 
             const productDetail = await productDetailService.createProductDetail(productDetailData);
             res.status(201).json(productDetail);
@@ -34,7 +43,16 @@ const productDetailController = {
 
     updateProductDetail: async (req, res) => {
         const productDetailId = req.params.id;
-        const updatedProductDetailData = req.body;
+        const { sizeId, colorId, productId, quantity } = req.body;
+        const imageFileName = req.file ? req.file.filename : null;
+        
+        const updatedProductDetailData = {
+            sizeId: sizeId,
+            colorId: colorId,
+            productId: productId,
+            quantity: quantity,
+            image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
+        };
         try {
             const updatedProductDetail = await productDetailService.updateProductDetail(productDetailId, updatedProductDetailData);
             res.status(200).json(updatedProductDetail);
