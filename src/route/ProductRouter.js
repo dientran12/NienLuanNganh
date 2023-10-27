@@ -18,7 +18,7 @@ router.get('/getProductOnPage', productController.getAllProductsOnPage);
 // Lấy chi tiết sản phẩm theo ID
 router.get('/getProductBy/:productId', productController.getProductDetail);
 // Lấy sản phẩm theo tên
-router.get('/getProductByName/:name', productController.getProductByName);
+router.get('/getProductByName', productController.getProductByName);
 // Lấy sản phẩm theo loại
 router.get('/getProductByType/:type', productController.getByType);
 // Tìm sản phẩm theo mức giá

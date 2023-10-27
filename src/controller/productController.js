@@ -40,7 +40,7 @@ const productController = {
 
   getProductByName: async (req, res) => {
     try {
-      const name = req.params.name.trim();
+      const name = req.query.name;
       const productsWithDiscount = await productService.getByName(name);
       res.status(200).json({ success: true, products: productsWithDiscount });
     } catch (error) {

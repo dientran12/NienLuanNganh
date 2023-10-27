@@ -101,45 +101,45 @@ const productService = {
   getByName: async (name) => {
     try {
       const productsWithDiscount = await Product.findAll({
-        where: {
-          name: {
-            [Op.like]: `%${name.replace(/\s/g, '')}%`,
-          }
-        },
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            where: {
-              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+          where: {
+              name: {
+                  [Op.like]: `%${name}%`
+              }
+          },
+          include: [
+            {
+              model: Promotion,
+              through: 'productpromotions',
+              where: {
+                startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+                endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+              }
             }
-          }
-        ],
-        attributes: [
-          'idProduct',
-          'name',
-          'description',
-          'origin',
-          'brand',
-          'type',
-          'gender',
-          'price',
-          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
-        ],
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
-          }
-        ]
-      });
-      
+          ],
+          attributes: [
+            'idProduct',
+            'name',
+            'description',
+            'origin',
+            'brand',
+            'type',
+            'gender',
+            'price',
+            [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+          ],
+          include: [
+            {
+              model: Promotion,
+              through: 'productpromotions',
+              attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+            }
+          ]
+        });
+
       return productsWithDiscount;
-    } catch (error) {
+  } catch (error) {
       throw error;
-    }
+  }
   },
   getAllProducts: async () => {
     try {
