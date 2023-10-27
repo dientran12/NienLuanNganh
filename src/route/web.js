@@ -11,7 +11,7 @@ import ReviewRouter from './ReviewRouter.js';
 
 let initWebRouter = (app) => {
     router.use('/api/user', UserRouter);
-    router.use('/apiproduct', ProductRouter);
+    router.use('/products', ProductRouter);
     router.use('/colors', colorRouter);
     router.use('/sizes', sizeRouter);
     router.use('/details', detailRouter);
