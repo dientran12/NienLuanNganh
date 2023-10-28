@@ -13,7 +13,7 @@ module.exports = (sequelize) => {
 
   Categories.init(
     {
-      idCategory: {
+      id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,

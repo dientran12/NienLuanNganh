@@ -24,10 +24,10 @@ const promotionController = {
   },
 
   updatePromotion: async (req, res) => {
-    const { promotionId } = req.params;
+    const { id } = req.params;
     const { name, percentage, startDate, endDate } = req.body;
     try {
-      const updatedPromotion = await promotionService.updatePromotion(promotionId, name, percentage, startDate, endDate);
+      const updatedPromotion = await promotionService.updatePromotion(id, name, percentage, startDate, endDate);
       if (updatedPromotion.success) {
         res.status(200).json(updatedPromotion);
       } else {
@@ -40,7 +40,7 @@ const promotionController = {
   },
 
   deletePromotion: async (req, res) => {
-    const { promotionId } = req.params;
+    const { promotionId } = req.params.id;
     try {
       const deletedPromotion = await promotionService.deletePromotion(promotionId);
       if (deletedPromotion.success) {

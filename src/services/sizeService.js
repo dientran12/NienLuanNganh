@@ -32,10 +32,10 @@ const sizeService = {
           return null;
         }
       },      
-      deleteSizeById: async (sizeId) => {
+      deleteSizeById: async (id) => {
         try {
           const deletedSize = await Size.destroy({
-            where: { idSize: sizeId }
+            where: { id: id }
           });
           if (deletedSize > 0) {
             return { message: 'Size deleted successfully.' };

@@ -14,6 +14,11 @@ module.exports = (sequelize) => {
 
   ProductPromotions.init(
     {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true, // Đánh dấu cột "id" là primaryKey
+        autoIncrement: true,
+      },
       // Các trường của bảng trung gian (promotionId và productId là các khóa ngoại)
       promotionId: {
         type: DataTypes.INTEGER,
@@ -28,7 +33,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         references: {
           model: 'Product', // Tên model của bảng Product
-          key: 'idProduct', // Tên trường khóa chính của bảng Product
+          key: 'id', // Tên trường khóa chính của bảng Product
         },
       },      
     },

@@ -6,12 +6,12 @@ router.post('/create', categoriesController.createCategory);// Tạo danh mục 
 // Xóa danh mục theo ID
 router.delete('/delete/:id', categoriesController.deleteCategory);
 // Lấy tất cả sản phẩm thuộc danh mục
-router.get('/getProductById/:categoryId', categoriesController.getProductsByCategory);
+router.get('/get-by-category/:id', categoriesController.getProductsByCategory);
 // Thêm sản phẩm vào danh mục
-router.post('/addProduct', categoriesController.addProductToCategory);
+router.post('/add-product', categoriesController.addProductToCategory);
 // Lấy tất cả danh mục
-router.get('/getAll', categoriesController.getAllCategories);
+router.get('/get-all', categoriesController.getAllCategories);
 // Xóa sản phẩm khỏi danh mục
-router.delete('/deleteProduct/:categoryId/IdProducts/:productId', categoriesController.removeProductFromCategory);
+router.delete('/delete-product/:categoryId/IdProducts/:productId', categoriesController.removeProductFromCategory);
 
 module.exports = router;

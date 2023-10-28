@@ -30,10 +30,10 @@ const colorService = {
           return null;
         }
       },
-      deleteColorById: async (colorId) => {
+      deleteColorById: async (id) => {
         try {
           const deletedColor = await Color.destroy({
-            where: { idColor: colorId }
+            where: { id: id }
           });
           if (deletedColor > 0) {
             return { message: 'Color deleted successfully.' };

@@ -10,7 +10,7 @@ module.exports = (sequelize) => {
 
   Review.init(
     {
-      idReview: {
+      id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         references: {
           model: 'Product', // Tên model của bảng Product
-          key: 'idProduct', // Tên trường khóa chính của bảng Product
+          key: 'id', // Tên trường khóa chính của bảng Product
         }
       },
       userId: {

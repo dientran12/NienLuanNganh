@@ -29,9 +29,9 @@ const promotionService = {
         }
       },
       //createPromotion('Special Sale', 15, new Date(), new Date('2023-12-31'));
-      updatePromotion: async (promotionId, name, percentage, startDate, endDate) => {
+      updatePromotion: async (id, name, percentage, startDate, endDate) => {
         try {
-          const promotion = await Promotion.findByPk(promotionId);
+          const promotion = await Promotion.findByPk(id);
           if (promotion) {
             promotion.name = name;
             promotion.percentage = percentage;
@@ -79,7 +79,7 @@ const promotionService = {
             });
     
             if (existingLink) {
-                return { success: false, message: 'Sản phẩm đã được áp dụng khuyến mãi này' };
+                return { success: false, message: 'Sản phẩm đã được áp dụng khuyến mãi này.' };
             }
     
             const apply = await ProductPromotions.create({
@@ -89,7 +89,7 @@ const promotionService = {
     
             // Áp dụng logic khuyến mãi (ví dụ: giảm giá sản phẩm)
     
-            return { infomation: apply, success: true, message: 'Sản phẩm đã được áp dụng khuyến mãi' };
+            return { infomation: apply, success: true, message: 'Áp dụng khuyến mãi cho sản phẩm thành công.' };
         } catch (error) {
             console.error(error);
             return { success: false, message: 'Internal Server Error' };

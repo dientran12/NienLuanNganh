@@ -8,7 +8,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Categories',
-          key: 'idCategory',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
@@ -18,7 +18,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Products',
-          key: 'idProduct',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',

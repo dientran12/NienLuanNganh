@@ -4,11 +4,11 @@ const colorController = require('../controller/colorController');
 
 // Định nghĩa các routes cho colorController
 router.post('/create', colorController.createColor);
-router.get('/getAll', colorController.getAllColors);
+router.get('/get-all', colorController.getAllColors);
 router.delete('/delete/:id', colorController.deleteColorById);
-router.get('/getProductsWithColor/:id', colorController.getProductsByColor);
-router.get('/getById/:id', colorController.getColorById);
-router.get('/getByName/:name', colorController.getColorByName);
+router.get('/get-products-by-color/:id', colorController.getProductsByColor);
+router.get('/get-by-id/:id', colorController.getColorById);
+router.get('/get-by-name/:name', colorController.getColorByName);
 router.put('/update/:id', colorController.updateColor);
 
 module.exports = router;

@@ -46,8 +46,7 @@ const getReviewsByUser = async (req, res) => {
 const updateReview = async (req, res) => {
     try {
         const reviewId = req.params.id;
-        const { comment, rating } = req.bo
-        dy;
+        const { comment, rating } = req.body;
         const result = await reviewService.updateReview(reviewId, comment, rating);
         if (result.success) {
             res.status(200).json(result);

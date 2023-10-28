@@ -30,7 +30,7 @@ const productService = {
           }
         ],
         attributes: [
-          'idProduct',
+          'id',
           'name',
           'description',
           'origin',
@@ -73,7 +73,7 @@ const productService = {
           }
         ],
         attributes: [
-          'idProduct',
+          'id',
           'name',
           'description',
           'origin',
@@ -117,7 +117,7 @@ const productService = {
             }
           ],
           attributes: [
-            'idProduct',
+            'id',
             'name',
             'description',
             'origin',
@@ -155,7 +155,7 @@ const productService = {
           }
         ],
         attributes: [
-          'idProduct',
+          'id',
           'name',
           'description',
           'origin',
@@ -218,7 +218,7 @@ const productService = {
           : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
   
         return {
-          id: product.idProduct,
+          id: product.id,
           name: product.name,
           description: product.description,
           origin: product.origin,
@@ -238,9 +238,9 @@ const productService = {
     }
   },
   
-  getProductById: async (idProduct) => {
+  getProductById: async (id) => {
     try {
-      const product = await Product.findByPk(idProduct, {
+      const product = await Product.findByPk(id, {
         include: [
           {
             model: ProductDetail,
@@ -248,17 +248,17 @@ const productService = {
             include: [
               {
                 model: Size,
-                attributes: ['idSize', 'sizeName'],
+                attributes: ['id', 'sizeName'],
               },
               {
                 model: Color,
-                attributes: ['idColor', 'colorName'],
+                attributes: ['id', 'colorName'],
               },
             ],
           },
           {
             model: Review,
-            attributes: ['idReview', 'comment', 'rating'],
+            attributes: ['id', 'comment', 'rating'],
           },          
           {
             model: Promotion, // Liên kết với bảng Promotion nếu sản phẩm tham gia chương trình khuyến mãi
@@ -300,9 +300,9 @@ const productService = {
       return { success: false, message: 'Internal Server Error' };
     }
   },
-  deleteProductById: async (idProduct) => {
+  deleteProductById: async (id) => {
     try {
-      const product = await Product.findByPk(idProduct);
+      const product = await Product.findByPk(id);
 
       if (product) {
         await product.destroy();
@@ -329,64 +329,86 @@ const productService = {
     }
   },
 
-  // async updateColorsAndSizes(product, colors, sizes, quantities) {
-  //   // Xử lý logic để cập nhật thông tin màu sắc, size và số lượng trong kho    
-  //   // Ví dụ: Tạo hoặc cập nhật thông tin trong bảng ProductDetail
-  //   for (let i = 0; i < colors.length; i++) {
-  //     const colorId = colors[i].id;
-  //     const sizeId = sizes[i].id;
-  //     const quantity = quantities[i];
+  getPricesLowToHigh: async () => {
+    try {
+      const productsWithDiscount = await Product.findAll({
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            where: {
+              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+            }
+          }
+        ],
+        attributes: [
+          'id',
+          'name',
+          'description',
+          'origin',
+          'brand',
+          'type',
+          'gender',
+          'price',
+          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+        ],
+        order: [['price', 'asc']], // Sắp xếp theo giá tăng dần hoặc giảm dần
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+          }
+        ]
+      });
+      
+      return productsWithDiscount;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-  //     let productDetail = await ProductDetail.findOne({
-  //       where: {
-  //         productId: product.id,
-  //         colorId: colorId,
-  //         sizeId: sizeId,
-  //       },
-  //     });
+  getPricesHighToLow: async () => {
+    try {
+      const productsWithDiscount = await Product.findAll({
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            where: {
+              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+            }
+          }
+        ],
+        attributes: [
+          'id',
+          'name',
+          'description',
+          'origin',
+          'brand',
+          'type',
+          'gender',
+          'price',
+          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+        ],
+        order: [['price', 'desc']], // Sắp xếp theo giá tăng dần hoặc giảm dần
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+          }
+        ]
+      });
+      
+      return productsWithDiscount;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-  //     if (productDetail) {
-  //       // Nếu productDetail đã tồn tại, cập nhật số lượng
-  //       productDetail.quantity = quantity;
-  //       await productDetail.save();
-  //     } else {
-  //       // Nếu productDetail chưa tồn tại, tạo mới và thêm số lượng
-  //       await ProductDetail.create({
-  //         productId: product.id,
-  //         colorId: colorId,
-  //         sizeId: sizeId,
-  //         quantity: quantity,
-  //       });
-  //     }
-  //   }
-  // },
-  // addSizeAndColorToProduct: async (productId, sizeName, colorName, quantity) => {
-  //   try {
-  //     // Tìm hoặc tạo mới size và color
-  //     const [size, createdSize] = await Size.findOrCreate({
-  //       where: { sizeName: sizeName },
-  //       defaults: { sizeName: sizeName }
-  //     });
-
-  //     const [color, createdColor] = await Color.findOrCreate({
-  //       where: { colorName: colorName },
-  //       defaults: { colorName: colorName }
-  //     });
-
-  //     // Liên kết sản phẩm với size và color thông qua bảng ProductDetail
-  //     const productDetail = await ProductDetail.create({
-  //       productId: productId,
-  //       sizeId: size.idSize,
-  //       colorId: color.idColor,
-  //       quantity: quantity
-  //     });
-
-  //     return { success: true, productDetail };
-  //   } catch (error) {
-  //     console.error(error);
-  //     throw new Error('Internal Server Error');
-  //   }
-  // },
   
   getAllProductsPaginated: async (pageNumber = 1, itemsPerPage = 10) => {
     try {
@@ -406,7 +428,7 @@ const productService = {
                 }
             ],
             attributes: [
-                'idProduct',
+                'id',
                 'name',
                 'description',
                 'origin',

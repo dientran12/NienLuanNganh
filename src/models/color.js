@@ -13,7 +13,7 @@ module.exports = (sequelize) => {
 
   Color.init(
     {
-      idColor: {
+      id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,

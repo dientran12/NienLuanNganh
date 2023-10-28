@@ -14,7 +14,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Sizes',
-          key: 'idSize',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
@@ -24,7 +24,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Colors',
-          key: 'idColor',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
@@ -34,7 +34,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'Products',
-          key: 'idProduct',
+          key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',

@@ -5,10 +5,10 @@ const productController = require('../controller/productController');
 // const authMiddleware = require('../middleware/authUserMiddleware');
 
 // Routes for promotions
-router.get('/getAll', promotionController.getAllPromotions);
+router.get('/get-all', promotionController.getAllPromotions);
 router.post('/create', promotionController.createPromotion);
-router.put('/update/:promotionId', promotionController.updatePromotion);
-router.delete('/delete/:promotionId', promotionController.deletePromotion);
+router.put('/update/:id', promotionController.updatePromotion);
+router.delete('/delete/:id', promotionController.deletePromotion);
 
 // Route for applying promotion to a product
 router.post('/products/:productId/promotions/:promotionId', promotionController.applyPromotionToProduct);

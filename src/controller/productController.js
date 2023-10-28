@@ -25,7 +25,7 @@ const productController = {
   // },
   
   getProductDetail: async (req, res) => {
-    const productId = req.params.productId; // Lấy ID sản phẩm từ request parameters
+    const productId = req.params.id; // Lấy ID sản phẩm từ request parameters
     try {
       const product = await productService.getProductById(productId);
       if (product) {
@@ -87,7 +87,7 @@ const productController = {
 
   getByType: async (req, res) => {
     try {
-      const type = req.params.type;
+      const type = req.query.type;
       const products = await productService.getByType(type);
       res.status(200).json({ success: true, products: products });
     } catch (error) {
@@ -152,10 +152,9 @@ const productController = {
     }
   },
   deleteProductById: async (req, res) => {
-    try {
-      // const pageSize = parseInt(req.params.idProduct)
-      const idProduct = req.params.idProduct;
-      const result = await productService.deleteProductById(idProduct);
+    try {      
+      const id = req.params.id;
+      const result = await productService.deleteProductById(id);
       
       if (result.success) {
         res.status(200).json(result);
@@ -187,6 +186,25 @@ const productController = {
     const result = await productService.applyPromotionToProduct(productId, promotionId);
     return res.json(result);
   },
+  getPricesLowToHigh: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getPricesLowToHigh();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getPricesHighToLow: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getPricesHighToLow();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  }
 
 };
 

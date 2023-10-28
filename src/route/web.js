@@ -11,13 +11,13 @@ import ReviewRouter from './ReviewRouter.js';
 
 let initWebRouter = (app) => {
     router.use('/api/user', UserRouter);
-    router.use('/products', ProductRouter);
-    router.use('/colors', colorRouter);
-    router.use('/sizes', sizeRouter);
-    router.use('/details', detailRouter);
-    router.use('/categories', categoryRouter);
-    router.use('/promotions', PromotionRouter);
-    router.use('/reviews', ReviewRouter);
+    router.use('/api/product', ProductRouter);
+    router.use('/api/color', colorRouter);
+    router.use('/api/size', sizeRouter);
+    router.use('/api/detail', detailRouter);
+    router.use('/api/category', categoryRouter);
+    router.use('/api/promotion', PromotionRouter);
+    router.use('/api/review', ReviewRouter);
 
     return app.use('/', router);
 }

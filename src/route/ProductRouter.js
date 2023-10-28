@@ -1,8 +1,7 @@
 import express from 'express';
 //import authMiddleware from '../middleware/authUserMiddleware.js';
 import productController from '../controller/productController.js';
-import promotionController from '../controller/promotionController.js';
-import categoriesController from '../controller/categotriesController.js';
+import progoriesController from '../controller/categotriesController.js';
 
 
 const router = express.Router();
@@ -10,22 +9,25 @@ const router = express.Router();
 // Tạo sản phẩm mới
 router.post('/create', productController.createProduct);
 // Xóa sản phẩm theo ID
-router.delete('/deleteProduct/:idProduct', productController.deleteProductById);
+router.delete('/delete/:id', productController.deleteProductById);
 // Lấy tất cả sản phẩm
-router.get('/getAll', productController.getAllProducts);
+router.get('/get-all', productController.getAllProducts);
 // Lấy tất cả sản phẩm và phân trang theo yêu cầu
-router.get('/getProductOnPage', productController.getAllProductsOnPage);
+router.get('/get-product-on-page', productController.getAllProductsOnPage);
 // Lấy chi tiết sản phẩm theo ID
-router.get('/getProductBy/:productId', productController.getProductDetail);
+router.get('/get-product-by-id/:id', productController.getProductDetail);
 // Lấy sản phẩm theo tên
-router.get('/getProductByName', productController.getProductByName);
+router.get('/search', productController.getProductByName);
 // Lấy sản phẩm theo loại
-router.get('/getProductByType/:type', productController.getByType);
+router.get('/get-By-Type', productController.getByType);
 // Tìm sản phẩm theo mức giá
-router.get('/findProductByPrice', productController.findProductsByPriceRange);
+// router.get('/get-By-Price-Range', productController.findProductsByPriceRange);
 // Cập nhật thông tin sản phẩm
-router.put('/updateProducts/:productId', productController.updateProduct);
-
+router.put('/update/:productId', productController.updateProduct);
+// Lấy sản phẩm theo giá từ thấp tới cao
+router.get('/get-price-low-to-high', productController.getPricesLowToHigh);
+// Lấy sản phẩm theo giá từ cao tới thấp
+router.get('/get-price-high-to-low', productController.getPricesHighToLow);
 
 
 module.exports = router;

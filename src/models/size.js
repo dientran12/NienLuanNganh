@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
   }
 
   Size.init({
-    idSize: {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,

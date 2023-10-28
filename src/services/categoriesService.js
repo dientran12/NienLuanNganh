@@ -35,9 +35,9 @@ const categoriesService = {
     }
   },
 
-  getProductsByCategory: async (categoryId) => {
+  getProductsByCategory: async (id) => {
     try {
-      const category = await Categories.findByPk(categoryId);
+      const category = await Categories.findByPk(id);
 
       if (!category) {
         return { success: false, message: 'Danh mục không tồn tại' };

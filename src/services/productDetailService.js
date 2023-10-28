@@ -10,7 +10,7 @@ const productDetailService = {
             const productDetail = await ProductDetail.create(productDetailData);
             return productDetail;
         } catch (error) {           
-            throw new Error('Error creating product detail: ' + error.message);
+            throw new Error('Sản phẩm, size hoặc color không tồn tại: ' + error.message);
         }
     },
     getAllProductDetails: async () => {

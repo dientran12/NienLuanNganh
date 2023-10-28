@@ -36,8 +36,8 @@ const categoriesController = {
 
   getProductsByCategory: async (req, res) => {
     try {
-      const { categoryId } = req.params;
-      const result = await categoriesService.getProductsByCategory(categoryId);
+      const { id } = req.params;
+      const result = await categoriesService.getProductsByCategory(id);
 
       if (result.success) {
         res.status(200).json(result);

@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         references: {
           model: 'Size', // Tên model của bảng Size
-          key: 'idSize', // Tên trường khóa chính của bảng Size
+          key: 'id', // Tên trường khóa chính của bảng Size
         },
       },    
       colorId: {
@@ -30,7 +30,7 @@ module.exports = (sequelize) => {
         allowNull: true,
         references: {
           model: 'Color', // Tên model của bảng Color
-          key: 'idColor', // Tên trường khóa chính của bảng Color
+          key: 'id', // Tên trường khóa chính của bảng Color
         },
       },      
       productId: {
@@ -38,7 +38,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         references: {
           model: 'Product', // Tên model của bảng Product
-          key: 'idProduct', // Tên trường khóa chính của bảng Product
+          key: 'id', // Tên trường khóa chính của bảng Product
         },
       }, 
       quantity: {

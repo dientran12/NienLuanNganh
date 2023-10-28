@@ -44,7 +44,7 @@ const getReviewsByUser = async (userId) => {
     try {
         const reviews = await Review.findAll({
             where: {
-                userId: userId,
+                id: userId,
             },
         });
         return { success: true, message: 'Reviews retrieved successfully', data: reviews };
