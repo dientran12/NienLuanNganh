@@ -82,7 +82,22 @@ const sizeService = {
         } catch (error) {
           throw new Error('Error updating size: ' + error.message);
         }
-      }
+      },
+      async getSizeByName(sizeName) {
+        try {
+          const size = await Size.findOne({
+            where: { sizeName: sizeName }
+          });
+      
+          if (size) {
+            return size;
+          } else {
+            throw new Error('Size not found.');
+          }
+        } catch (error) {
+          throw new Error('Error getting size: ' + error.message);
+        }
+      },
 };
 
 module.exports = sizeService;

@@ -14,5 +14,7 @@ router.put('/update/:id', sizeController.updateSize);
 router.delete('/delete/:id', sizeController.deleteSizeById);
 // Route để lấy các sản phẩm dựa trên size
 router.get('/get-product-by-size/:id', sizeController.getProductsBySize);
+// Router để lấy size theo tên
+router.get('/get-by-name/:name', sizeController.getSizeByName);
 
 module.exports = router;

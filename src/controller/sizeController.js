@@ -54,7 +54,16 @@ const sizeController = {
         } catch (error) {
           res.status(500).json({ error: error.message });
         }
-      }
+      },
+      getSizeByName: async (req, res) => {
+        const sizeName = req.params.name;
+        try {
+          const size = await sizeService.getSizeByName(sizeName);
+          res.status(200).json(size);
+        } catch (error) {
+          res.status(404).json({ error: error.message });
+        }
+      },
 };
 
 module.exports = sizeController;
