@@ -28,6 +28,9 @@ router.put('/update/:productId', productController.updateProduct);
 router.get('/get-price-low-to-high', productController.getPricesLowToHigh);
 // Lấy sản phẩm theo giá từ cao tới thấp
 router.get('/get-price-high-to-low', productController.getPricesHighToLow);
-
+// Lấy số lượng sản phẩm theo id
+router.get('/get-total-quantity/:productId', productController.getTotalQuantityForProductController);
+// Lấy số lượng với version cụ thể
+router.get('/get-quantity-version/:productId/:colorId/:sizeId', productController.getQuantityVersion);
 
 module.exports = router;

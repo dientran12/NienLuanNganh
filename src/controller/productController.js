@@ -167,25 +167,7 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-  addSizeAndColorToProduct: async (req, res) => {
-    try {
-      const { productId, sizeName, colorName, quantity } = req.body;
-      const result = await productService.addSizeAndColorToProduct(productId, sizeName, colorName, quantity);
-      if (result.success) {
-        res.status(201).json(result.productDetail);
-      } else {
-        res.status(500).json({ message: result.message });
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  },
-  applyPromotion: async (req, res) => {
-    const { productId, promotionId } = req.body;
-    const result = await productService.applyPromotionToProduct(productId, promotionId);
-    return res.json(result);
-  },
+
   getPricesLowToHigh: async (req, res) => {
     try {
       const productsWithDiscount = await productService.getPricesLowToHigh();
@@ -201,6 +183,43 @@ const productController = {
       const productsWithDiscount = await productService.getPricesHighToLow();
       res.status(200).json({ success: true, products: productsWithDiscount });
     } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getTotalQuantityForProductController: async (req, res) => {
+    try {
+      const productId = req.params.productId; // Lấy productId từ tham số của URL
+  
+      // Gọi service để tính tổng số lượng sản phẩm
+      const totalQuantity = await productService.getTotalQuantityForProduct(productId);
+  
+      // Trả về kết quả thành công
+      res.status(200).json({ success: true, Total: totalQuantity });
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getQuantityVersion: async (req, res) => {
+    try {
+      const { productId, sizeId, colorId } = req.params;
+  
+      // Kiểm tra xem productId, sizeId, colorId có được truyền vào không
+      if (!productId || !sizeId || !colorId) {
+        return res.status(400).json({ success: false, message: 'Sản phẩm, size hoặc màu không xác định' });
+      }
+  
+      // Gọi hàm service để lấy tổng số lượng
+      const totalQuantity = await productService.getQuantityVersion(productId, sizeId, colorId);
+  
+      // Trả về kết quả dưới dạng JSON
+      res.status(200).json({ success: true, totalversion: totalQuantity });
+    } catch (error) {
+      // Xử lý lỗi nếu cần thiết
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
