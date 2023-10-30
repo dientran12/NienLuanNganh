@@ -240,6 +240,7 @@ const productService = {
   
   getProductById: async (id) => {
     try {
+      const currentDate = new Date();
       const product = await Product.findByPk(id, {
         include: [
           {
@@ -266,12 +267,24 @@ const productService = {
               model: ProductPromotions,
               as: 'productPromotions',
             },
+            required: false, // Sử dụng left join thay vì inner join
+            where: {
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                },
+                {
+                  '$Promotions.startDate$': { [Op.is]: null },
+                  '$Promotions.endDate$': { [Op.is]: null },
+                },
+              ],
+            },
           },
         ],
       });
   
       if (product) {
-        // Kiểm tra xem sản phẩm có tham gia vào chương trình khuyến mãi không
         if (product.productPromotions && product.productPromotions.length > 0) {
           const promotion = product.productPromotions[0];
           const discountPercentage = promotion.ProductPromotion.percentage;
@@ -283,7 +296,7 @@ const productService = {
         } else {
           product.dataValues.promotionName = null;
           product.dataValues.promotionPercentage = 0;
-          product.dataValues.discountedPrice = null;
+          product.dataValues.discountedPrice = product.price; // Giá gốc nếu không có khuyến mãi
         }
   
         return product;

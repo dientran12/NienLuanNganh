@@ -14,6 +14,20 @@ const promotionService = {
         }
     },
 
+    getPromotionById: async (id) => {
+      try {
+        const promotion = await Promotion.findByPk(id);
+        if (promotion) {
+          return promotion;
+        } else {
+          throw new Error('Promotion not found.');
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+
     createPromotion: async (name, percentage, startDate, endDate) => {
         try {
           const newPromotion = await Promotion.create({
@@ -73,13 +87,14 @@ const promotionService = {
     
             const existingLink = await ProductPromotions.findOne({
                 where: {
-                    productId: productId,
-                    promotionId: promotionId
+                    productId: productId                    
                 }
             });
     
             if (existingLink) {
-                return { success: false, message: 'Sản phẩm đã được áp dụng khuyến mãi này.' };
+                const id = existingLink.promotionId;
+                const applyPromotion = await Promotion.findByPk(id);
+                return { success: false, message: 'Sản phẩm này đã được áp dụng khuyến mãi.', Detail: applyPromotion };
             }
     
             const apply = await ProductPromotions.create({

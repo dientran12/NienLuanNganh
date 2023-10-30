@@ -6,6 +6,7 @@ const productController = require('../controller/productController');
 
 // Routes for promotions
 router.get('/get-all', promotionController.getAllPromotions);
+router.get('/get-by-id/:id', promotionController.getPromotionById);
 router.post('/create', promotionController.createPromotion);
 router.put('/update/:id', promotionController.updatePromotion);
 router.delete('/delete/:id', promotionController.deletePromotion);

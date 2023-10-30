@@ -39,6 +39,21 @@ const promotionController = {
     }
   },
 
+  getPromotionById: async (req, res) => {
+    const id = req.params.id;    
+    try {
+      const Promotion = await promotionService.getPromotionById(id);
+      if (Promotion.success) {
+        res.status(200).json(Promotion);
+      } else {
+        res.status(404).json(Promotion);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   deletePromotion: async (req, res) => {
     const { promotionId } = req.params.id;
     try {
