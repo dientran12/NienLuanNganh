@@ -261,7 +261,7 @@ const productService = {
             attributes: ['id', 'comment', 'rating'],
           },          
           {
-            model: Promotion, // Liên kết với bảng Promotion nếu sản phẩm tham gia chương trình khuyến mãi
+            model: Promotion,
             through: {
               model: ProductPromotions,
               as: 'productPromotions',
@@ -273,15 +273,19 @@ const productService = {
       if (product) {
         // Kiểm tra xem sản phẩm có tham gia vào chương trình khuyến mãi không
         if (product.productPromotions && product.productPromotions.length > 0) {
-          // Nếu sản phẩm có khuyến mãi, lấy thông tin về chương trình khuyến mãi từ Promotion
           const promotion = product.productPromotions[0];
-          product.dataValues.promotionName = promotion.Promotion.promotionName; // Thêm trường promotionName vào kết quả trả về
-          product.dataValues.promotionPercentage = promotion.ProductPromotion.percentage; // Thêm trường promotionPercentage vào kết quả trả về
+          const discountPercentage = promotion.ProductPromotion.percentage;
+          const discountedPrice = product.price - (product.price * (discountPercentage / 100));
+  
+          product.dataValues.promotionName = promotion.Promotion.promotionName;
+          product.dataValues.promotionPercentage = discountPercentage;
+          product.dataValues.discountedPrice = discountedPrice;
         } else {
-          // Nếu sản phẩm không có khuyến mãi, đặt giá trị của promotionName và promotionPercentage là null
           product.dataValues.promotionName = null;
           product.dataValues.promotionPercentage = 0;
+          product.dataValues.discountedPrice = null;
         }
+  
         return product;
       } else {
         throw new Error('Product not found.');

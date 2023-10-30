@@ -136,6 +136,21 @@ const categoriesService = {
       throw error;
     }
   },
+
+  getCategoryById: async (id) => {
+    try {
+      const category = await Categories.findByPk(id);
+      if (category) {
+        return { success: true, category };
+      } else {
+        return { success: false, message: 'Category not found.' };
+      }
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  },
+  
 };
 
 module.exports = categoriesService;

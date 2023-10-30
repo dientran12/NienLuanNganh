@@ -106,6 +106,17 @@ const categoriesController = {
     } catch (error) {
       res.status(500).json({ error: error.message }); // Trả về lỗi nếu có lỗi xảy ra trong quá trình xử lý
     }
+  },
+
+  getCategoryById: async (req, res) => {
+    const categoryId = req.params.id; // Lấy ID danh mục từ request parameters 
+
+    try {
+      const Category = await categoriesService.getCategoryById(categoryId);
+      res.status(200).json(Category); 
+    } catch (error) {
+      res.status(500).json({ error: error.message }); // Trả về lỗi nếu có lỗi xảy ra trong quá trình xử lý
+    }
   }
 };
 

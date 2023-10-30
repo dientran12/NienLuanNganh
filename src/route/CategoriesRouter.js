@@ -13,6 +13,8 @@ router.get('/get-by-category/:id', categoriesController.getProductsByCategory);
 router.post('/add-product', categoriesController.addProductToCategory);
 // Lấy tất cả danh mục
 router.get('/get-all', categoriesController.getAllCategories);
+// Lấy chi tiết danh mục
+router.get('/get-by-id/:id', categoriesController.getCategoryById);
 // Xóa sản phẩm khỏi danh mục
 router.delete('/delete-product/:categoryId/IdProducts/:productId', categoriesController.removeProductFromCategory);
 
