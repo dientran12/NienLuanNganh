@@ -94,6 +94,18 @@ const categoriesController = {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
+  },
+
+  updateCategory: async (req, res) => {
+    const categoryId = req.params.id; // Lấy ID danh mục từ request parameters
+    const { categoryName } = req.body; // Lấy thông tin danh mục cần cập nhật từ request body
+
+    try {
+      const updatedCategory = await categoriesService.update(categoryId, categoryName);
+      res.status(200).json(updatedCategory); // Trả về danh mục đã được cập nhật
+    } catch (error) {
+      res.status(500).json({ error: error.message }); // Trả về lỗi nếu có lỗi xảy ra trong quá trình xử lý
+    }
   }
 };
 

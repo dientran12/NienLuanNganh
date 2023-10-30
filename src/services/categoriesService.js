@@ -120,7 +120,22 @@ const categoriesService = {
         console.error(error);
         return { success: false, message: 'Internal Server Error' };
     }
-  }
+  },
+
+  update: async (id, categoryName) => {
+    try {
+      const category = await Categories.findByPk(id);
+      if (category) {
+        category.categoryName = categoryName;
+        await category.save();
+        return { success: true, message: 'Category updated successfully.', category };
+      } else {
+        throw new Error('Category not found.');
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 module.exports = categoriesService;

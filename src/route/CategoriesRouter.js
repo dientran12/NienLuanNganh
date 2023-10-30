@@ -5,6 +5,8 @@ import categoriesController from '../controller/categotriesController.js';
 router.post('/create', categoriesController.createCategory);// Tạo danh mục mới
 // Xóa danh mục theo ID
 router.delete('/delete/:id', categoriesController.deleteCategory);
+// Cập nhật danh mục
+router.put('/update/:id', categoriesController.updateCategory);
 // Lấy tất cả sản phẩm thuộc danh mục
 router.get('/get-by-category/:id', categoriesController.getProductsByCategory);
 // Thêm sản phẩm vào danh mục
