@@ -1,28 +1,22 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class CategoryProduct extends Model {
+  class CategoryProducts extends Model {
     static associate(models) {
       // Mối quan hệ "một-nhiều" giữa CategoryProduct và Products
-      CategoryProduct.belongsTo(models.Product, {
+      CategoryProducts.belongsTo(models.Product, {
         foreignKey: 'productId', // Khóa ngoại trong CategoryProduct liên kết với Products
       });
       
       // Mối quan hệ "một-nhiều" giữa CategoryProduct và Categories
-      CategoryProduct.belongsTo(models.Categories, {
+      CategoryProducts.belongsTo(models.Categories, {
         foreignKey: 'categoryId', // Khóa ngoại trong CategoryProduct liên kết với Categories
       });
     }
   }
 
-  CategoryProduct.init(
-    {
-      // Các trường của bảng trung gian
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
+  CategoryProducts.init(
+    {           
       // Khóa ngoại liên kết với Products
       productId: {
         type: DataTypes.INTEGER,
@@ -44,9 +38,9 @@ module.exports = (sequelize) => {
     },
     {
       sequelize,
-      modelName: 'CategoryProduct', // Tên của Model, phải trùng với tên đã đặt trong Sequelize
+      modelName: 'CategoryProducts', // Tên của Model, phải trùng với tên đã đặt trong Sequelize
     }
   );
 
-  return CategoryProduct;
+  return CategoryProducts;
 };

@@ -9,11 +9,7 @@ const adminAuth = (req, res, next) => {
             status: 'error'
         })
     } else {
-        try {
-            const token = req.headers.token.split(' ')[1]
-        } catch (error) {
-            console.log("Not token")
-        }
+        const token = req.headers.token.split(' ')[1]
         jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
             if (err) {
                 return res.status(404).json({
@@ -21,7 +17,8 @@ const adminAuth = (req, res, next) => {
                     status: 'error'
                 })
             }
-            if (user?.role == "admin") {
+            console.log('user', user)
+            if (user?.role === "admin") {
                 next()
             } else {
                 return res.status(404).json({
@@ -34,11 +31,7 @@ const adminAuth = (req, res, next) => {
 }
 
 const memberAuth = (req, res, next) => {
-    try {
-        const token = req.headers.token.split(' ')[1]
-    } catch (error) {
-        console.log("Not token")
-    }
+    const token = req.headers.token.split(' ')[1]
     const userId = req.params.id
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
         if (err) {

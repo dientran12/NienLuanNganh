@@ -1,17 +1,36 @@
 import express from 'express';
-import authMiddleware from '../middleware/authUserMiddleware.js';
-import ProductController from '../controller/productController.js';
-//import { Model } from 'sequelize';
+//import authMiddleware from '../middleware/authUserMiddleware.js';
+import productController from '../controller/productController.js';
+import progoriesController from '../controller/categotriesController.js';
+
 
 const router = express.Router();
 
-// Định tuyến yêu cầu tới các phương thức trong controllerProduct
-router.post('/products', authMiddleware.adminAuth, ProductController.create);
-router.delete('/products/:id', authMiddleware.adminAuth, ProductController.delete);
-router.put('/products/:id', authMiddleware.adminAuth, ProductController.update);
-router.get('/products', ProductController.getAll);
-router.get('/products/:id', ProductController.getDetail);
-router.get('/products/name/:name', ProductController.getByName);
-router.get('/products/type/:type', ProductController.getByType);
+// Tạo sản phẩm mới
+router.post('/create', productController.createProduct);
+// Xóa sản phẩm theo ID
+router.delete('/delete/:id', productController.deleteProductById);
+// Lấy tất cả sản phẩm
+router.get('/get-all', productController.getAllProducts);
+// Lấy tất cả sản phẩm và phân trang theo yêu cầu
+router.get('/get-product-on-page', productController.getAllProductsOnPage);
+// Lấy chi tiết sản phẩm theo ID
+router.get('/get-product-by-id/:id', productController.getProductDetail);
+// Lấy sản phẩm theo tên
+router.get('/search', productController.getProductByName);
+// Lấy sản phẩm theo loại
+router.get('/get-By-Type', productController.getByType);
+// Tìm sản phẩm theo mức giá
+// router.get('/get-By-Price-Range', productController.findProductsByPriceRange);
+// Cập nhật thông tin sản phẩm
+router.put('/update/:productId', productController.updateProduct);
+// Lấy sản phẩm theo giá từ thấp tới cao
+router.get('/get-price-low-to-high', productController.getPricesLowToHigh);
+// Lấy sản phẩm theo giá từ cao tới thấp
+router.get('/get-price-high-to-low', productController.getPricesHighToLow);
+// Lấy số lượng sản phẩm theo id
+router.get('/get-total-quantity/:productId', productController.getTotalQuantityForProductController);
+// Lấy số lượng với version cụ thể
+router.get('/get-quantity-version/:productId/:colorId/:sizeId', productController.getQuantityVersion);
 
 module.exports = router;

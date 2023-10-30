@@ -7,22 +7,23 @@ const createUsers = async (req, res) => {
         const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isCheckEmail = reg.test(email)
         if (!password || !confirmPassword || !email) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: 'error',
                 message: 'The input is required'
             })
         } else if (!isCheckEmail) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: 'error',
                 message: 'Invalid email'
             })
         } else if (password !== confirmPassword) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: 'error',
                 message: 'confirm Password must match Password'
             })
         } else {
             const response = await UserService.createNewUser(req.body)
+            console.log("response " + response)
             return res.status(200).json(response)
         }
     } catch (e) {
@@ -69,7 +70,7 @@ const updateUser = async (req, res) => {
         const userId = req.params.id
         const data = req.body
         if (!userId) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: "error",
                 message: "The userId is required"
             })
@@ -89,7 +90,7 @@ const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id
         if (!userId) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: "error",
                 message: "The userId is required"
             })
@@ -118,7 +119,7 @@ const getDetailsUser = async (req, res) => {
     try {
         const userId = req.params.id
         if (!userId) {
-            return res.status(200).json({
+            return res.status(404).json({
                 status: "error",
                 message: "The userId is required"
             })
