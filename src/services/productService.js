@@ -277,6 +277,15 @@ const productService = {
             },
           },
         ],
+        include: [
+          {
+            model: ProductDetail,
+            as: 'Details',
+            where: {
+                productId:  Sequelize.col('Product.id') 
+            }
+          }
+        ],    
         offset: offset,
         limit: pageSize,
       });

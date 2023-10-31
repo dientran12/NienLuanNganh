@@ -10,6 +10,8 @@ router.delete('/delete/:id', categoriesController.deleteCategory);
 router.put('/update/:id', categoriesController.updateCategory);
 // Lấy tất cả sản phẩm thuộc danh mục
 router.get('/get-by-category/:id', categoriesController.getProductsByCategory);
+// Lấy tất car danh mục với id sản phẩm
+router.get('/get-by-product/:id', categoriesController.getCategoryByProduct);
 // Thêm sản phẩm vào danh mục
 router.post('/add-product-to-category/:productId/:categoryId', categoriesController.addProductToCategory);
 // Lấy tất cả danh mục

@@ -51,6 +51,23 @@ const categoriesService = {
     }
   },
 
+  getCategoryByProductId: async (productId) => {
+    try {
+      const product = await Product.findByPk(productId, {
+        include: Categories // Include the Category model to get associated categories
+      });
+  
+      if (!product) {
+        return { success: false, message: 'Sản phẩm không tồn tại.' };
+      }
+  
+      return { success: true, categories: product.Categories };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  },
+
   addProductToCategory: async (categoryId, productId) => {
     try {
         const category = await Categories.findByPk(categoryId);
