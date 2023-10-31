@@ -52,7 +52,7 @@ const categoriesController = {
 
   addProductToCategory: async (req, res) => {
     try {
-      const { categoryId, productId } = req.body;
+      const { categoryId, productId } = req.params;
       const result = await categoriesService.addProductToCategory(categoryId, productId);
 
       if (result.success) {

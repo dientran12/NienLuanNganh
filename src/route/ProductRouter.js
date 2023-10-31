@@ -21,7 +21,7 @@ router.get('/search', productController.getProductByName);
 // Lấy sản phẩm theo loại
 router.get('/get-By-Type', productController.getByType);
 // Tìm sản phẩm theo mức giá
-// router.get('/get-By-Price-Range', productController.findProductsByPriceRange);
+router.get('/get-By-Price-Range', productController.findProductsByPriceRange);
 // Cập nhật thông tin sản phẩm
 router.put('/update/:productId', productController.updateProduct);
 // Lấy sản phẩm theo giá từ thấp tới cao

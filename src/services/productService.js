@@ -3,6 +3,8 @@ const Sequelize = require('sequelize');
 const db = require('../models/index');
 const productPromotionService = require('../services/productPromotionService');
 const promotionService = require('../services/promotionService');
+const productCategoryService = require('../services/categoriesService');
+const Category = db.Categories;
 const Product = db.Product;
 const Size = db.Size;
 const Color = db.Color;
@@ -257,7 +259,7 @@ const productService = {
                 attributes: ['id', 'colorName'],
               },
             ],
-          },
+          },          
           {
             model: Review,
             attributes: ['id', 'comment', 'rating'],
@@ -269,11 +271,16 @@ const productService = {
               model: ProductPromotions,
               attributes: []
             },
-          }
+          },
+          {
+            model: Category, // Thêm mối quan hệ với danh mục sản phẩm
+            attributes: ['id', 'categoryName'], // Chọn các thuộc tính bạn muốn hiển thị từ danh mục sản phẩm
+          },
+          
         ],
       });
   
-      if (product) {      
+      if (product) {              
         const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);        
         if (productpromotion){                
           const percent = await promotionService.getPromotionById(productpromotion.id);          
@@ -283,13 +290,13 @@ const productService = {
               const discount = percent.percentage;
               const discountedPrice = product.price - (product.price * (discount / 100));
               product.dataValues.discountedPrice = discountedPrice;
-            } else {
-              product.dataValues.promotionName = null;
-              product.dataValues.discountedPrice = 0;
-            }           
+            }        
           } 
-        }      
-  
+        } else {
+          product.dataValues.promotionName = null;
+          product.dataValues.discountedPrice = 0;
+        }    
+        
         return product;
       } else {
         throw new Error('Product not found.');

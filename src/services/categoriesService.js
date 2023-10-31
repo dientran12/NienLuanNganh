@@ -141,13 +141,27 @@ const categoriesService = {
     try {
       const category = await Categories.findByPk(id);
       if (category) {
-        return { success: true, category };
+        return { success: true, 'category': category };
       } else {
         return { success: false, message: 'Category not found.' };
       }
     } catch (error) {
       console.error(error);
       return { success: false, message: 'Internal Server Error' };
+    }
+  },
+
+  getCategoryProductByProductId: async (productId) => {
+    try {
+      const productCategory = await CategoryProducts.findOne({
+        where: {
+          productId: productId,
+        },
+      });
+      return productCategory;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   },
   
