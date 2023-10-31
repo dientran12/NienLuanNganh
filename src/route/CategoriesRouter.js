@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 import categoriesController from '../controller/categotriesController.js';
 
-router.post('/create', categoriesController.createCategory);// Tạo danh mục mới
+// Tạo danh mục mới
+router.post('/create', categoriesController.createCategory);
 // Xóa danh mục theo ID
 router.delete('/delete/:id', categoriesController.deleteCategory);
 // Cập nhật danh mục

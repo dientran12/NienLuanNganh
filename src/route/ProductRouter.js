@@ -32,5 +32,11 @@ router.get('/get-price-high-to-low', productController.getPricesHighToLow);
 router.get('/get-total-quantity/:productId', productController.getTotalQuantityForProductController);
 // Lấy số lượng với version cụ thể
 router.get('/get-quantity-version/:productId/:colorId/:sizeId', productController.getQuantityVersion);
+// Lấy tất cả type
+router.get('/get-all-type', productController.getAllUniqueTypes);
+// Lấy tất cả brand
+router.get('/get-all-brand', productController.getAllUniqueBrand);
+// Lấy tất cả origin
+router.get('/get-all-origin', productController.getAllUniqueOrigin);
 
 module.exports = router;

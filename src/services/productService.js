@@ -461,9 +461,55 @@ const productService = {
       // Xử lý lỗi nếu cần thiết
       throw error;
     }
-  }
+  },
 
+  getAllUniqueTypes: async () => {
+    try {
+      const uniqueTypes = await Product.findAll({
+        attributes: [
+          [Sequelize.fn('DISTINCT', Sequelize.col('type')), 'type'] // Lấy giá trị duy nhất từ cột 'type'
+        ],
+      });
   
+      const typeValues = uniqueTypes.map(type => type.type);
+      return typeValues;
+    } catch (error) {
+      console.error('Error fetching unique types:', error);
+      throw error;
+    }
+  },
+  
+  getAllUniqueBrand: async () => {
+    try {
+      const uniqueBrand = await Product.findAll({
+        attributes: [
+          [Sequelize.fn('DISTINCT', Sequelize.col('brand')), 'brand'] // Lấy giá trị duy nhất từ cột 'brand'
+        ],
+      });
+  
+      const BrandValues = uniqueBrand.map(brand => brand.brand);
+      return BrandValues;
+    } catch (error) {
+      console.error('Error fetching unique brands:', error);
+      throw error;
+    }
+  },
+
+  getAllUniqueOrigin: async () => {
+    try {
+      const uniqueOrigin = await Product.findAll({
+        attributes: [
+          [Sequelize.fn('DISTINCT', Sequelize.col('origin')), 'origin'] // Lấy giá trị duy nhất từ cột 'origin'
+        ],
+      });
+  
+      const OriginValues = uniqueOrigin.map(origin => origin.origin);
+      return OriginValues;
+    } catch (error) {
+      console.error('Error fetching unique origins:', error);
+      throw error;
+    }
+  }  
   
 };
   
