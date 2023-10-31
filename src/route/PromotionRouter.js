@@ -13,5 +13,6 @@ router.delete('/delete/:id', promotionController.deletePromotion);
 
 // Route for applying promotion to a product
 router.post('/products/:productId/promotions/:promotionId', promotionController.applyPromotionToProduct);
+// router.get('/get-productpromotion-by-productid/:id', promotionController.getProductPromotionById);
 
 module.exports = router;

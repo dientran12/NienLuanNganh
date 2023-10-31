@@ -1,4 +1,5 @@
 const promotionService = require('../services/promotionService');
+const productPromotionService = require('../services/productPromotionService'); 
 // const productService = require('../services/productService');
 
 const promotionController = {
@@ -79,6 +80,21 @@ const promotionController = {
         res.status(200).json(result);
       } else {
         res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getProductPromotionById: async (req, res) => {
+    const id = req.params.id;    
+    try {
+      const productPromotion = await productPromotionService.getProductPromotionsByProductId(id);
+      if (productPromotion.success) {
+        res.status(200).json(productPromotion);
+      } else {
+        res.status(404).json(productPromotion);
       }
     } catch (error) {
       console.error(error);

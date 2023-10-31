@@ -1,7 +1,8 @@
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
 const db = require('../models/index');
-const productDetailService = require('../services/productDetailService');
+const productPromotionService = require('../services/productPromotionService');
+const promotionService = require('../services/promotionService');
 const Product = db.Product;
 const Size = db.Size;
 const Color = db.Color;
@@ -260,44 +261,34 @@ const productService = {
           {
             model: Review,
             attributes: ['id', 'comment', 'rating'],
-          },          
+          },       
           {
             model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
             through: {
               model: ProductPromotions,
-              as: 'productPromotions',
+              attributes: []
             },
-            required: false, // Sử dụng left join thay vì inner join
-            where: {
-              [Op.or]: [
-                {
-                  '$Promotions.startDate$': { [Op.lte]: currentDate },
-                  '$Promotions.endDate$': { [Op.gte]: currentDate },
-                },
-                {
-                  '$Promotions.startDate$': { [Op.is]: null },
-                  '$Promotions.endDate$': { [Op.is]: null },
-                },
-              ],
-            },
-          },
+          }
         ],
       });
   
-      if (product) {
-        if (product.productPromotions && product.productPromotions.length > 0) {
-          const promotion = product.productPromotions[0];
-          const discountPercentage = promotion.ProductPromotion.percentage;
-          const discountedPrice = product.price - (product.price * (discountPercentage / 100));
-  
-          product.dataValues.promotionName = promotion.Promotion.promotionName;
-          product.dataValues.promotionPercentage = discountPercentage;
-          product.dataValues.discountedPrice = discountedPrice;
-        } else {
-          product.dataValues.promotionName = null;
-          product.dataValues.promotionPercentage = 0;
-          product.dataValues.discountedPrice = product.price; // Giá gốc nếu không có khuyến mãi
-        }
+      if (product) {      
+        const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);        
+        if (productpromotion){                
+          const percent = await promotionService.getPromotionById(productpromotion.id);          
+          if (percent){
+            if (percent.startDate <= currentDate && percent.endDate >= currentDate ){
+              product.dataValues.promotionName = percent.name;
+              const discount = percent.percentage;
+              const discountedPrice = product.price - (product.price * (discount / 100));
+              product.dataValues.discountedPrice = discountedPrice;
+            } else {
+              product.dataValues.promotionName = null;
+              product.dataValues.discountedPrice = 0;
+            }           
+          } 
+        }      
   
         return product;
       } else {
