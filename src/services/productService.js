@@ -12,6 +12,7 @@ const ProductDetail = db.ProductDetail;
 const Promotion = db.Promotions;
 const Review = db.Review;
 const ProductPromotions = db.ProductPromotions;
+const currentDate = new Date();
 
 const productService = {
   findProductsByPriceRange: async (minPrice, maxPrice) => {
@@ -59,7 +60,7 @@ const productService = {
   },
   getByType: async (type) => {
     try {
-      const productsWithDiscount = await Product.findAll({
+      const products = await Product.findAll({
         where: {
           type: {
             [Op.like]: `%${type.replace(/\s/g, '')}%`,
@@ -68,34 +69,56 @@ const productService = {
         include: [
           {
             model: Promotion,
-            through: 'productpromotions',
+            through: {
+              model: ProductPromotions,
+            },
+            required: false, // Sử dụng left join thay vì inner join
             where: {
-              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
-            }
-          }
-        ],
-        attributes: [
-          'id',
-          'name',
-          'description',
-          'origin',
-          'brand',
-          'type',
-          'gender',
-          'price',
-          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                },
+                {
+                  '$Promotions.startDate$': { [Op.is]: null },
+                  '$Promotions.endDate$': { [Op.is]: null },
+                },
+              ],
+            },
+          },
         ],
         include: [
           {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+            model: ProductDetail,
+            as: 'Details',
+            where: {
+                productId:  Sequelize.col('Product.id') 
+            }
           }
-        ]
+        ]        
       });
-      
-      return productsWithDiscount;
+  
+      const productsWithDiscountedPrice = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender, 
+          price: product.price,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice: discountedPrice,
+        };
+      });
+      return productsWithDiscountedPrice;
     } catch (error) {
       throw error;
     }
@@ -103,7 +126,7 @@ const productService = {
  
   getByName: async (name) => {
     try {
-      const productsWithDiscount = await Product.findAll({
+      const products = await Product.findAll({
           where: {
               name: {
                   [Op.like]: `%${name}%`
@@ -112,34 +135,56 @@ const productService = {
           include: [
             {
               model: Promotion,
-              through: 'productpromotions',
+              through: {
+                model: ProductPromotions,
+              },
+              required: false, // Sử dụng left join thay vì inner join
               where: {
-                startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-                endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
-              }
-            }
-          ],
-          attributes: [
-            'id',
-            'name',
-            'description',
-            'origin',
-            'brand',
-            'type',
-            'gender',
-            'price',
-            [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+            },
           ],
           include: [
             {
-              model: Promotion,
-              through: 'productpromotions',
-              attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+              model: ProductDetail,
+              as: 'Details',
+              where: {
+                  productId:  Sequelize.col('Product.id') 
+              }
             }
-          ]
+          ]        
         });
-
-      return productsWithDiscount;
+    
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+    
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
   } catch (error) {
       throw error;
   }
