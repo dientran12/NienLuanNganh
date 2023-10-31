@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 const db = require('../models/index');
 const productPromotionService = require('../services/productPromotionService');
 const promotionService = require('../services/promotionService');
-const productCategoryService = require('../services/categoriesService');
+const productDetailService = require('../services/productDetailService');
 const Category = db.Categories;
 const Product = db.Product;
 const Size = db.Size;
@@ -146,38 +146,61 @@ const productService = {
   },
   getAllProducts: async () => {
     try {
-      const productsWithDiscount = await Product.findAll({
+      const currentDate = new Date();
+      const products = await Product.findAll({
         include: [
           {
             model: Promotion,
-            through: 'productpromotions',
+            through: {
+              model: ProductPromotions,
+            },
+            required: false, // Sử dụng left join thay vì inner join
             where: {
-              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                },
+                {
+                  '$Promotions.startDate$': { [Op.is]: null },
+                  '$Promotions.endDate$': { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ],
+        include: [
+          {
+            model: ProductDetail,
+            as: 'Details',
+            where: {
+                productId:  Sequelize.col('Product.id') 
             }
           }
-        ],
-        attributes: [
-          'id',
-          'name',
-          'description',
-          'origin',
-          'brand',
-          'type',
-          'gender',
-          'price',
-          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
-        ],
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
-          }
-        ]
+        ]        
       });
-      
-      return productsWithDiscount;
+  
+      const productsWithDiscountedPrice = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender, 
+          price: product.price,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice: discountedPrice,
+        };
+      });
+      return productsWithDiscountedPrice;
     } catch (error) {
       throw error;
     }
@@ -280,7 +303,9 @@ const productService = {
         ],
       });
   
-      if (product) {              
+      if (product) {
+        const detail = await productDetailService.getProductDetailByProducId(product.id);
+        console.log(detail);                
         const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);        
         if (productpromotion){                
           const percent = await promotionService.getPromotionById(productpromotion.id);          

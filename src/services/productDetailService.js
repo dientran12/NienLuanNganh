@@ -39,6 +39,23 @@ const productDetailService = {
         }
     },
 
+    getProductDetailByProducId: async (productId) => {
+        try {
+            const detail = await ProductDetail.findAll({
+                where: {
+                    productId: productId
+                }
+            });
+            if (detail) {
+                return detail;
+            } else {
+                throw new Error('Product not found in detail.');
+            }
+        } catch (error) {
+            throw new Error('Error getting product detail: ' + error.message);
+        }
+    },
+
     updateProductDetail: async (productDetailId, updatedProductDetailData) => {
       try {
           const productDetail = await ProductDetail.findByPk(productDetailId);
