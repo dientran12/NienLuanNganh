@@ -10,7 +10,7 @@ router.get('/get-all', promotionController.getAllPromotions);
 router.get('/get-by-id/:id', promotionController.getPromotionById);
 // Tạo khuyến mãi
 router.post('/create', promotionController.createPromotion);
-// Chỉnh sửa khuyến mãi
+// Cập nhật khuyến mãi
 router.put('/update/:id', promotionController.updatePromotion);
 // Xóa khuyến mãi
 router.delete('/delete/:id', promotionController.deletePromotion);
