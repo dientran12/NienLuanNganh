@@ -121,28 +121,30 @@ const productController = {
   },
   updateProduct: async (req, res) => {
     try {
-      const { productId } = req.params;
-      const { name, description, type, price, origin, brand, gender } = req.body;
+        const { productId } = req.params;
+        const { name, description, type, price, origin, brand, gender } = req.body;
 
-      const productData = {
-        name: name,
-        description: description,
-        type: type,
-        price: price,
-        origin: origin,
-        brand: brand,
-        gender: gender,
-      };    
+        const productData = {
+            name: name,
+            description: description,
+            type: type,
+            price: price,
+            origin: origin,
+            brand: brand,
+            gender: gender,
+        };
 
-      const updatedProduct = await productService.updateProductAndRelatedInfo(productId, productData);
+        // Lấy danh sách id danh mục từ req.body (giả sử được gửi dưới dạng mảng categoryIds)
+        const { categoryIds } = req.body;
 
-      res.status(200).json({ success: true, product: updatedProduct });
+        const updatedProduct = await productService.updateProductAndCategories(productId, productData, categoryIds);
+
+        res.status(200).json({ success: true, product: updatedProduct });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-
   createProduct: async (req, res) => {
     try {
       const { name, description, type, price, origin, brand, gender } = req.body;
@@ -204,7 +206,7 @@ const productController = {
       const totalQuantity = await productService.getTotalQuantityForProduct(productId);
   
       // Trả về kết quả thành công
-      res.status(200).json({ success: true, Total: totalQuantity });
+      res.status(200).json({ success: true, Data: totalQuantity });
     } catch (error) {
       // Xử lý lỗi nếu có
       console.error(error);

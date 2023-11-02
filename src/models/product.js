@@ -5,15 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // Quan hệ nhiều-nhiều giữa Product và Color thông qua ProductDetail
       Product.belongsToMany(models.Color, {
-        through: 'ProductDetails',
+        through: 'Version',
         foreignKey: 'productId',        
-        onDelete: ' CASCADE '
-      });
-
-      // Quan hệ nhiều-nhiều giữa Product và Size thông qua ProductDetail
-      Product.belongsToMany(models.Size, {
-        through: 'ProductDetails',
-        foreignKey: 'productId',       
         onDelete: ' CASCADE '
       });
 
@@ -40,10 +33,9 @@ module.exports = (sequelize, DataTypes) => {
         hooks: true
        });
        
-       // Quan hệ một-nhiều giữa Product và Review
-      Product.hasMany(models.ProductDetail, { 
-        foreignKey: 'productId',
-        as: 'Details',
+       // Quan hệ một-nhiều giữa Product và ProductVersion
+      Product.hasMany(models.Versions, { 
+        foreignKey: 'productId',      
         onDelete: 'CASCADE',
         hooks: true
        });

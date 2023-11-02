@@ -1,20 +1,17 @@
-const productDetailService = require('../services/productDetailService');
+const productDetailService = require('../services/versionService');
 
 
 const productDetailController = {
     createProductDetail: async (req, res) => {
         try {
-            const { sizeId, colorId, productId, quantity } = req.body;
+            const { colorId, productId} = req.body;
             const imageFileName = req.file ? req.file.filename : null;
             const productDetailData = {
-                sizeId: sizeId,
                 colorId: colorId,
                 productId: productId,
-                quantity: quantity,
                 image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
-            };              
-            console.log('Data:', productDetailData);
-
+            };            
+            
             const productDetail = await productDetailService.createProductDetail(productDetailData);
             res.status(201).json(productDetail);
         } catch (error) {
@@ -43,14 +40,12 @@ const productDetailController = {
 
     updateProductDetail: async (req, res) => {
         const productDetailId = req.params.id;
-        const { sizeId, colorId, productId, quantity } = req.body;
+        const { colorId, productId } = req.body;
         const imageFileName = req.file ? req.file.filename : null;
         
         const updatedProductDetailData = {
-            sizeId: sizeId,
             colorId: colorId,
             productId: productId,
-            quantity: quantity,
             image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
         };
         try {
@@ -70,6 +65,26 @@ const productDetailController = {
             res.status(500).json({ error: error.message });
         }
     },
+
+    getAllVersionsByProductId: async (req, res) => {
+        const { productId } = req.params; // Lấy productId từ request parameters
+        
+        try {
+          const versions = await productDetailService.getAllVersionsByProductId(productId); // Gọi service để lấy tất cả phiên bản
+          
+          // Trả về kết quả cho client
+          return res.status(200).json({
+            success: true,
+            versions: versions
+          });
+        } catch (error) {
+          // Xử lý lỗi nếu có
+          return res.status(500).json({
+            success: false,
+            error: error.message
+          });
+        }
+      }
 };
 
 module.exports = productDetailController;

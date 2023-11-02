@@ -1,22 +1,24 @@
 const db = require('../models/index');
-const ProductDetail = db.ProductDetail;
+const Version = db.Versions;
 const Product = db.Product;
 const Color = db.Color;
+const SizeItem = db.SizeItem;
 const Size = db.Size;
 
-const productDetailService = {
+const VersionService = {
     createProductDetail: async (productDetailData) => {
         try {
-            const productDetail = await ProductDetail.create(productDetailData);
+            console.log('Data:', productDetailData);
+            const productDetail = await Version.create(productDetailData);
             return productDetail;
         } catch (error) {           
-            throw new Error('Sản phẩm, size hoặc color không tồn tại: ' + error.message);
+            throw new Error('Sản phẩm hoặc color không tồn tại: ' + error.message);
         }
     },
     getAllProductDetails: async () => {
         try {
-            const productDetails = await ProductDetail.findAll({
-                include: [Product, Color, Size],
+            const productDetails = await Version.findAll({
+                include: [Product, Color],
             });
             return productDetails;
         } catch (error) {
@@ -26,8 +28,10 @@ const productDetailService = {
     
     getProductDetailById: async (productDetailId) => {
         try {
-            const productDetail = await ProductDetail.findByPk(productDetailId, {
-                include: [Product, Color, Size],
+            const productDetail = await Version.findByPk(productDetailId, {
+                include: [
+                    SizeItem
+                ]
             });
             if (productDetail) {
                 return productDetail;
@@ -41,7 +45,7 @@ const productDetailService = {
 
     getProductDetailByProducId: async (productId) => {
         try {
-            const detail = await ProductDetail.findAll({
+            const detail = await Version.findAll({
                 where: {
                     productId: productId
                 }
@@ -58,7 +62,7 @@ const productDetailService = {
 
     updateProductDetail: async (productDetailId, updatedProductDetailData) => {
       try {
-          const productDetail = await ProductDetail.findByPk(productDetailId);
+          const productDetail = await Version.findByPk(productDetailId);
           if (productDetail) {
               await productDetail.update(updatedProductDetailData);
               return productDetail;
@@ -72,7 +76,7 @@ const productDetailService = {
 
     deleteProductDetailById: async (productDetailId) => {
         try {
-            const deletedProductDetail = await ProductDetail.destroy({
+            const deletedProductDetail = await Version.destroy({
                 where: { id: productDetailId },
             });
             if (deletedProductDetail) {
@@ -83,7 +87,21 @@ const productDetailService = {
         } catch (error) {
             throw new Error('Error deleting product detail: ' + error.message);
         }
-    }  
+    },
+    
+    getAllVersionsByProductId: async (productId) => {
+        try {
+          const versions = await Version.findAll({
+            where: {
+              productId: productId
+            }
+          });
+      
+          return versions;
+        } catch (error) {
+          throw error;
+        }
+    }
 };
 
-module.exports = productDetailService;
+module.exports = VersionService;

@@ -15,7 +15,7 @@ router.put('/update/:id', promotionController.updatePromotion);
 // Xóa khuyến mãi
 router.delete('/delete/:id', promotionController.deletePromotion);
 
-// Áp dụng khuyến mãi cho sản phẩm thông qua các id
+// Áp dụng khuyến mãi cho sản phẩm thông qua id
 router.post('/products/:productId/promotions/:promotionId', promotionController.applyPromotionToProduct);
 
 // test

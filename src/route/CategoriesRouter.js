@@ -8,12 +8,12 @@ router.post('/create', categoriesController.createCategory);
 router.delete('/delete/:id', categoriesController.deleteCategory);
 // Cập nhật danh mục
 router.put('/update/:id', categoriesController.updateCategory);
-// Lấy tất cả sản phẩm thuộc danh mục
+// Lấy tất cả sản phẩm với id danh mục
 router.get('/get-by-category/:id', categoriesController.getProductsByCategory);
-// Lấy tất car danh mục với id sản phẩm
+// Lấy tất cả danh mục với id sản phẩm
 router.get('/get-by-product/:id', categoriesController.getCategoryByProduct);
-// Thêm sản phẩm vào danh mục
-router.post('/add-product-to-category/:productId/:categoryId', categoriesController.addProductToCategory);
+// Thêm các danh mục cho sản phẩm
+router.post('/add-category-to-product', categoriesController.addProductToCategory);
 // Lấy tất cả danh mục
 router.get('/get-all', categoriesController.getAllCategories);
 // Lấy chi tiết danh mục

@@ -68,37 +68,42 @@ const categoriesService = {
     }
   },
 
-  addProductToCategory: async (categoryId, productId) => {
+  addProductToMultipleCategories: async (productId, categoryId) => {
     try {
-        const category = await Categories.findByPk(categoryId);
-        const product = await Product.findByPk(productId);
-
-        if (!category || !product) {
-            return { success: false, message: 'Danh mục hoặc sản phẩm không tồn tại' };
+      const product = await Product.findByPk(productId);  
+      if (!product) {
+        return { success: false, message: 'Sản phẩm không tồn tại' };
+      }
+  
+      const existingLinks = await CategoryProducts.findAll({
+        where: {
+          productId: productId,
+          categoryId: categoryId
         }
-
-        const existingLink = await CategoryProducts.findOne({
-            where: {
-                categoryId: categoryId,
-                productId: productId
-            }
-        });
-
-        if (existingLink) {
-            return { success: false, message: 'Sản phẩm đã tồn tại trong danh mục', info: existingLink };
-        }
-
-        const cate = await CategoryProducts.create({
-            categoryId: categoryId,
-            productId: productId
-        });
-
-        return { success: true, message: 'Sản phẩm đã được thêm vào danh mục', info: cate };
+      });
+  
+      const existingCategoryIds = existingLinks.map(link => link.categoryId);
+      const newCategoryIds = categoryId.filter(categoryId => !existingCategoryIds.includes(categoryId));
+  
+      if (newCategoryIds.length === 0) {
+        return { success: false, message: 'Sản phẩm đã tồn tại trong tất cả các danh mục' };
+      }
+  
+      const newLinks = newCategoryIds.map(categoryId => {
+        return {
+          productId: productId,
+          categoryId: categoryId
+        };
+      });
+  
+      const createdLinks = await CategoryProducts.bulkCreate(newLinks);
+  
+      return { success: true, message: 'Sản phẩm đã được thêm vào các danh mục', info: createdLinks };
     } catch (error) {
-        console.error(error);
-        return { success: false, message: 'Internal Server Error' };
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
     }
-},
+  },
 
   getAllCategories: async () => {
     try {

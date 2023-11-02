@@ -66,19 +66,15 @@ const categoriesController = {
     }
   },
 
-  addProductToCategory: async (req, res) => {
-    try {
-      const { categoryId, productId } = req.params;
-      const result = await categoriesService.addProductToCategory(categoryId, productId);
+  addProductToCategory: async (req, res) => {   
+    const { productId, categoryId } = req.body;
 
-      if (result.success) {
-        res.status(201).json(result);
-      } else {
-        res.status(404).json(result);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    const result = await categoriesService.addProductToMultipleCategories(productId, categoryId);
+
+    if (result.success) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
     }
   },
 
