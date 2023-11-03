@@ -15,6 +15,6 @@ router.put('/update/:id', productDetailController.updateProductDetail);
 // Xóa version theo id
 router.delete('/delete/:id', productDetailController.deleteProductDetailById);
 // Lấy tất cả version theo id của sản phẩm
-router.get('/get-all-version/:productId', express.static(path.join(__dirname, 'public')), productDetailController.getAllVersionsByProductId);
+router.get('/get-all-version/:productId', productDetailController.getAllVersionsByProductId);
 
 module.exports = router;
