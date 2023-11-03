@@ -5,7 +5,7 @@ const path = require('path');
 const productDetailController = require('../controller/versionController');
 
 // Tạo version
-router.post('/create/:productId', productDetailController.createProductDetail);
+router.post('/create', productDetailController.createProductDetail);
 // lấy tất cả version
 router.get('/get-all', productDetailController.getAllProductDetails);
 // Lấy version theo id của version

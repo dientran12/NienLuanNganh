@@ -3,9 +3,8 @@ const productDetailService = require('../services/versionService');
 
 const productDetailController = {
     createProductDetail: async (req, res) => {
-        try {
-            const  productId = req.params.productId;
-            const { colorName, image } = req.body;         
+        try {            
+            const { colorName, image, productId } = req.body;         
                                  
             const productDetail = await productDetailService.createProductDetail(productId, colorName, image);
             res.status(201).json(productDetail);
