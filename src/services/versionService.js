@@ -3,7 +3,8 @@ const Version = db.Versions;
 const Product = db.Product;
 const Color = db.Color;
 const SizeItem = db.SizeItem;
-const Size = db.Size;
+const path = require('path');
+
 
 const VersionService = {
     createProductDetail: async (productDetailData) => {
@@ -28,15 +29,20 @@ const VersionService = {
     
     getProductDetailById: async (productDetailId) => {
         try {
-            const productDetail = await Version.findByPk(productDetailId, {
-                include: [
-                    SizeItem
-                ]
-            });
+            const productDetail = await Version.findByPk(productDetailId);            
             if (productDetail) {
-                return productDetail;
+                const formattedResult = {
+                    id: productDetail.id,
+                    colorId: productDetail.colorId,
+                    productId: productDetail.productId,                    
+                    image: path.join(__dirname, '..', 'public', 'images', productDetail.image)                               
+                    
+                  };
+            
+                  console.log(formattedResult);
+                  return formattedResult;
             } else {
-                throw new Error('Product detail not found.');
+                throw new Error('Version not found.');
             }
         } catch (error) {
             throw new Error('Error getting product detail: ' + error.message);
