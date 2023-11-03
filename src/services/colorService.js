@@ -13,10 +13,12 @@ const colorService = {
           });
     
           if (existingColor) {
-            throw new Error('Color đã tồn tại.');
+            return { status: "error", message: "Color đã tồn tại" };
+          } else {
+            const color = await Color.create(colorData);
+            return { status: "succes", message: "Color đã tạo thành công", data: color };
           }
-          const color = await Color.create(colorData);
-          return color;
+          
         } catch (error) {
           throw new Error('Error creating color: ' + error.message);
         }

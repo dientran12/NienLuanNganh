@@ -9,7 +9,7 @@ router.post('/create', upload.single('image'), productDetailController.createPro
 // lấy tất cả version
 router.get('/get-all', productDetailController.getAllProductDetails);
 // Lấy version theo id của version
-router.get('/get-version-by-id/:id', express.static(path.join(__dirname, 'public')), productDetailController.getProductDetailById);
+router.get('/get-version-by-id/:id', productDetailController.getProductDetailById);
 // Cập nhật version
 router.put('/update/:id', upload.single('image'), productDetailController.updateProductDetail);
 // Xóa version theo id

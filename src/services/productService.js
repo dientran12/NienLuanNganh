@@ -203,10 +203,7 @@ const productService = {
       const products = await Product.findAll({        
         include: [
           {
-            model: Version,            
-            where: {
-                productId:  Sequelize.col('Product.id') 
-            }
+            model: Version,     
           },
           {
             model: Promotion,
