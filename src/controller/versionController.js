@@ -4,15 +4,10 @@ const productDetailService = require('../services/versionService');
 const productDetailController = {
     createProductDetail: async (req, res) => {
         try {
-            const { colorId, productId} = req.body;
-            const imageFileName = req.file ? req.file.filename : null;
-            const productDetailData = {
-                colorId: colorId,
-                productId: productId,
-                image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
-            };            
-            
-            const productDetail = await productDetailService.createProductDetail(productDetailData);
+            const  productId = req.params.productId;
+            const { colorName, image } = req.body;         
+                                 
+            const productDetail = await productDetailService.createProductDetail(productId, colorName, image);
             res.status(201).json(productDetail);
         } catch (error) {
             res.status(500).json({ error: error.message });
@@ -39,22 +34,19 @@ const productDetailController = {
     },
 
     updateProductDetail: async (req, res) => {
-        const productDetailId = req.params.id;
-        const { colorId, productId } = req.body;
-        const imageFileName = req.file ? req.file.filename : null;
-        
-        const updatedProductDetailData = {
-            colorId: colorId,
-            productId: productId,
-            image: imageFileName // Lưu tên tệp tin ảnh vào cơ sở dữ liệu
-        };
         try {
-            const updatedProductDetail = await productDetailService.updateProductDetail(productDetailId, updatedProductDetailData);
-            res.status(200).json(updatedProductDetail);
+          const { colorName, image } = req.body;
+          const versionId = req.params.id;
+      
+          const updatedVersion = await productDetailService.updateProductDetail(versionId, colorName, image);
+      
+          // Trả về phiên bản đã được cập nhật
+          res.status(201).json(updatedVersion);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+          // Xử lý lỗi nếu có
+          res.status(500).json({ error: error.message });
         }
-    },
+      },
 
     deleteProductDetailById: async (req, res) => {
         const productDetailId = req.params.id;

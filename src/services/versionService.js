@@ -7,23 +7,32 @@ const path = require('path');
 
 
 const VersionService = {
-    createProductDetail: async (productDetailData) => {
+    createProductDetail: async (productId, colorName, image) => {
         try {
-            console.log('Data:', productDetailData);
-            const productDetail = await Version.create(productDetailData);
-            return productDetail;
-        } catch (error) {           
-            throw new Error('Sản phẩm hoặc color không tồn tại: ' + error.message);
-        }
-    },
-    getAllProductDetails: async () => {
-        try {
-            const productDetails = await Version.findAll({
-                include: [Product, Color],
+          // Kiểm tra xem màu sắc đã tồn tại chưa
+          let color = await Color.findOne({
+            where: {
+              colorName: colorName,
+            },
+          });
+      
+          // Nếu màu sắc chưa tồn tại, tạo màu sắc mới
+          if (!color) {
+            color = await Color.create({
+              colorName: colorName,              
             });
-            return productDetails;
+          }
+      
+          // Tạo version với productId, colorId và image
+          const newVersion = await Version.create({
+            productId: productId,
+            colorId: color.id, 
+            image: image,            
+          });
+      
+          return newVersion;
         } catch (error) {
-            throw new Error('Error getting product details: ' + error.message);
+          throw new Error('Error creating version: ' + error.message);
         }
     },
     
@@ -66,19 +75,32 @@ const VersionService = {
         }
     },
 
-    updateProductDetail: async (productDetailId, updatedProductDetailData) => {
-      try {
-          const productDetail = await Version.findByPk(productDetailId);
-          if (productDetail) {
-              await productDetail.update(updatedProductDetailData);
-              return productDetail;
-          } else {
-              throw new Error('Product detail not found.');
+    updateProductDetail: async (versionId, colorName, imageName) => {
+        try {
+          // Kiểm tra xem màu sắc có tồn tại trong bảng Colors không
+          let color = await Color.findOne({ where: { colorName } });
+          if (!color) {
+            // Nếu màu sắc không tồn tại, tạo một màu mới
+            color = await Color.create({ colorName });
           }
-      } catch (error) {
-          throw new Error('Error updating product detail: ' + error.message);
-      }
-    },
+      
+          // Cập nhật thông tin phiên bản
+          const updatedVersion = await Version.update(
+            { colorId: color.id, image: imageName }, // Dữ liệu cần cập nhật
+            { where: { id: versionId } } // Điều kiện cập nhật
+          );
+      
+          if (updatedVersion[0] === 1) {
+            // Nếu có một phiên bản được cập nhật thành công
+            return {status: "success", message: "Cập nhật version thành công."};
+          } else {
+            // Nếu không có phiên bản nào được cập nhật, throw lỗi
+            return {status: "false", message: "Version không tồn tại hoặc cập nhật lỗi."}
+          }
+        } catch (error) {
+          throw new Error('Error updating version: ' + error.message);
+        }
+      },
 
     deleteProductDetailById: async (productDetailId) => {
         try {
