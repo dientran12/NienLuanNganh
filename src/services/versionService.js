@@ -122,7 +122,14 @@ const VersionService = {
           const versions = await Version.findAll({
             where: {
               productId: productId
-            }
+            },
+            include: [
+              {
+                model: Color, // Liên kết với bảng Colors
+                attributes: ['colorName'], // Chỉ lấy trường colorName
+                required: true // Nếu phiên bản không có màu sắc thì không hiển thị phiên bản đó
+              }
+            ]
           });
       
           return versions;
