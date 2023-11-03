@@ -129,7 +129,16 @@ const VersionService = {
         } catch (error) {
           throw error;
         }
-    }
+    },
+
+    getAllProductDetails: async () => {
+      try {
+        const versions = await Version.findAll();    
+        return {status: "success", data: versions};
+      } catch (error) {
+        throw error;
+      }
+  }
 };
 
 module.exports = VersionService;
