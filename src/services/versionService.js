@@ -77,7 +77,7 @@ const VersionService = {
           attributes: ['sizeName']
         });
         const version = { ...productDetail?.dataValues, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
-        console.log('-----------------version', version)
+        // console.log('-----------------version', version)
         return {
           version: version
         };
