@@ -76,7 +76,9 @@ const VersionService = {
           },
           attributes: ['sizeName']
         });
-        const version = { ...productDetail?.dataValues, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
+        const color = await Color.findByPk(productDetail.colorId);
+        console.log(color?.dataValues?.colorName);
+        const version = { ...productDetail?.dataValues, color: color?.dataValues?.colorName, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
         // console.log('-----------------version', version)
         return {
           version: version
