@@ -81,6 +81,17 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getAllProductsCustomer: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsCustomer();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   getAllProductsOnPage: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) || 1; // Chuyển đổi giá trị của page thành số nguyên, mặc định là 1 nếu không có giá trị

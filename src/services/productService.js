@@ -256,6 +256,68 @@ const productService = {
     }
   },
 
+  getAllProductsCustomer: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({        
+        include: [
+          {
+            model: Version,
+            where: {
+              productId:  Sequelize.col('Product.id') 
+            }     
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ]        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+    
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
+      
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getProductsOnpage: async (page = 1, pageSize = 10) => {
     try {
       const offset = (page - 1) * pageSize;

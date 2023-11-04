@@ -10,8 +10,10 @@ const router = express.Router();
 router.post('/create', productController.createProduct);
 // Xóa sản phẩm theo ID
 router.delete('/delete/:id', productController.deleteProductById);
-// Lấy tất cả sản phẩm 
-router.get('/get-all', productController.getAllProducts);
+// Lấy tất cả sản phẩm cho admin
+router.get('/get-all-for-admin', productController.getAllProducts);
+// Lấy tất cả sản phẩm cho custom
+router.get('/get-all-for-customer', productController.getAllProductsCustomer);
 // Lấy tất cả sản phẩm và phân trang theo yêu cầu
 router.get('/get-product-on-page', productController.getAllProductsOnPage);
 // Lấy chi tiết sản phẩm theo ID 
