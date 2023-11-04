@@ -1,8 +1,7 @@
-POST http://localhost:3000/api/cart/addtocart/3/3
+POST http://localhost:3001/api/cart/addtocart/1/2
 
 
 ###
-
 DELETE http://localhost:3100/api/cart/deletecart/2/1
 Content-Type: application/json
 
@@ -24,11 +23,11 @@ GET http://localhost:3000/api/cart/getcartitem/1
 GET http://localhost:3000/api/cart/getalldata/1
 
 ###
-POST http://localhost:3000/api/order/addProduct/1
+POST http://localhost:3001/api/order/addProduct/1
 Content-Type: application/json
 
 {
-  "productId": "1",
+  "productId": "2",
   "quantity": "2"
 }
 
@@ -36,16 +35,16 @@ Content-Type: application/json
 DELETE http://localhost:3000/api/order/cancel/1
 
 ###
-POST http://localhost:3000/api/order/moveMultipleFromCartToOrder
+POST http://localhost:3001/api/order/moveMultipleFromCartToOrder
 Content-Type: application/json
 
 {
   "userId": "1",
-  "cartItemIds": [8,9]
+  "cartItemIds": [1,2]
 }
 
 ###
-POST http://localhost:3000/api/order/confirmOrder/16
+POST http://localhost:3001/api/order/confirmOrder/13
 Content-Type: application/json
 
 {

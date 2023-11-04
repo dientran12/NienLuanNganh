@@ -9,25 +9,19 @@ import detailRouter from './VersionRouter.js';
 import categoryRouter from './CategoriesRouter.js';
 import PromotionRouter from './PromotionRouter.js';
 import ReviewRouter from './ReviewRouter.js';
-<<<<<<< HEAD
 import OrderRouter from './OrderRouter.js';
-=======
 import SizeItemRouter from './SizeItemRouter.js';
->>>>>>> e1eb7e91463d75a554a1686dcaee41ac68f49a23
 
 let initWebRouter = (app) => {
     // API của User
     router.use('/api/user', UserRouter);
-<<<<<<< HEAD
 
     // router.use('/api/product', ProductRouter);
     router.use('/api/cart',CartRouter)
     router.use('/api/user', UserRouter);
     router.use('/apiproduct', ProductRouter);
 
-=======
     // API của Product
->>>>>>> e1eb7e91463d75a554a1686dcaee41ac68f49a23
     router.use('/api/product', ProductRouter);
     // API của Color
     router.use('/api/color', colorRouter);

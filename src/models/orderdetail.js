@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      OrderDetail.belongsTo(models.ProductDetail, {foreignKey:'productId', targetKey:'id', as:'productdata'})
+      OrderDetail.belongsTo(models.Versions , {foreignKey:'productId', targetKey:'id', as:'productdata'})
       OrderDetail.belongsTo(models.Order, {foreignKey:'orderId', targetKey:'id', as:'orderdata'})
     }
   }
@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'ProductDetail', // Tên model của bảng Size
+        model: 'Versions', // Tên model của bảng Size
         key: 'id', // Tên trường khóa chính của bảng Size
       },
     },

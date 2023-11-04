@@ -17,8 +17,8 @@ export const addToOrder = async (userId, productId, quantity) => {
 
     
 
-    const productDetail = await db.ProductDetail.findByPk(productId);
-    const productID = productDetail.productId;
+    const version = await db.Versions.findByPk(productId);
+    const productID = version.productId;
     const product = await db.Product.findByPk(productID);
     const price = product.price;
 
@@ -183,16 +183,23 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
     // Cập nhật số lượng sản phẩm còn lại sau khi xác nhận đơn hàng
     for (const orderDetail of orderDetails) {
-      const product = await db.ProductDetail.findByPk(orderDetail.productId);
-
+      const versionId = orderDetail.productId;
+      console.log(versionId);
+      const product = await db.SizeItem.findOne({ where: { versionId } });
+      const cartitem= await db.CartItem.findOne({where: {productID: orderDetail.productId}})
+    
+      console.log(product);
+    
       if (!product) {
         throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.productId}`);
       }
-
+    
       // Giảm số lượng sản phẩm còn lại
       product.quantity -= orderDetail.quantity;
       await product.save();
+      cartitem.destroy();
     }
+    
 
     // Xác nhận đơn hàng
     order.confirmed = true;
