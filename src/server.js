@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors'
 require('dotenv').config()
 import bodyParser from 'body-parser'
-// import cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 import initWebRouter from './route/web.js'
 import connectDB from './config/connectDB.js'
 
@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // app.use(bodyParser.json())
-// app.use(cookieParser())
+app.use(cookieParser())
 
 initWebRouter(app)
 

@@ -3,7 +3,7 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('colors', {
-      idColor: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,

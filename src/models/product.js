@@ -6,38 +6,52 @@ module.exports = (sequelize, DataTypes) => {
       // Quan hệ nhiều-nhiều giữa Product và Color thông qua ProductDetail
       Product.belongsToMany(models.Color, {
         through: 'ProductDetails',
-        foreignKey: 'productId',
-        otherKey: 'colorId',
+        foreignKey: 'productId',        
+        onDelete: ' CASCADE '
       });
 
       // Quan hệ nhiều-nhiều giữa Product và Size thông qua ProductDetail
       Product.belongsToMany(models.Size, {
         through: 'ProductDetails',
-        foreignKey: 'productId',
-        otherKey: 'sizeId',
+        foreignKey: 'productId',       
+        onDelete: ' CASCADE '
       });
 
-      // Quan hệ nhiều-nhiều giữa Product và InvoiceDetail thông qua ProductDetail
-      Product.belongsToMany(models.InvoiceDetails, {
-        through: 'ProductDetails',
-        foreignKey: 'productId',
-        otherKey: 'invoiceDetailId',
+      
+      Product.belongsToMany(models.Promotions, {
+        through: 'ProductPromotions', // Tên bảng trung gian
+        foreignKey: 'productId', // Tên cột khóa ngoại của Product trong bảng trung gian
+        onDelete: 'CASCADE'        
       });
-
+      
+            
       // Quan hệ nhiều-nhiều giữa Product và Category thông qua CategoryProduct
       Product.belongsToMany(models.Categories, {
         through: 'CategoryProducts',
         foreignKey: 'productId',
         otherKey: 'categoryId',
+        onDelete: ' CASCADE '
       });
 
       // Quan hệ một-nhiều giữa Product và Review
-      Product.hasMany(models.Review, { foreignKey: 'productId' });
+      Product.hasMany(models.Review, { 
+        foreignKey: 'productId',
+        onDelete: 'CASCADE',
+        hooks: true
+       });
+       
+       // Quan hệ một-nhiều giữa Product và Review
+      Product.hasMany(models.ProductDetail, { 
+        foreignKey: 'productId',
+        as: 'Details',
+        onDelete: 'CASCADE',
+        hooks: true
+       });
     }
   }
 
   Product.init({
-    idProduct: {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,

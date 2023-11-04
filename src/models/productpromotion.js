@@ -1,27 +1,47 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class PromotionProduct extends Model {}
+  class ProductPromotions extends Model {
+    static associate(models) {
+      ProductPromotions.belongsTo(models.Product, {
+        foreignKey: "productId",
+      });
+      ProductPromotions.belongsTo(models.Promotions, {
+        foreignKey: "promotionId",
+      });
+    }
+  }
 
-  PromotionProduct.init(
+  ProductPromotions.init(
     {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true, // Đánh dấu cột "id" là primaryKey
+        autoIncrement: true,
+      },
       // Các trường của bảng trung gian (promotionId và productId là các khóa ngoại)
       promotionId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
+        references: {
+          model: 'Promotions', // Tên model của bảng Promotion
+          key: 'id', // Tên trường khóa chính của bảng Promotion
+        },
       },
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        primaryKey: true,
-      },
+        references: {
+          model: 'Product', // Tên model của bảng Product
+          key: 'id', // Tên trường khóa chính của bảng Product
+        },
+      },      
     },
     {
       sequelize,
-      modelName: 'PromotionProduct', // Tên của Model trung gian
+      modelName: 'ProductPromotions', // Tên của Model trung gian
     }
   );
 
-  return PromotionProduct;
+  return ProductPromotions;
 };

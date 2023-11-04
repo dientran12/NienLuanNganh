@@ -6,14 +6,13 @@ module.exports = (sequelize) => {
       // Định nghĩa quan hệ "nhiều-nhiều" với bảng Product thông qua bảng trung gian ProductDetails
       Size.belongsToMany(models.Product, {
         through: 'ProductDetails',
-        foreignKey: 'sizeId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Size
-        otherKey: 'productId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Product
+        foreignKey: 'sizeId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Size       
       });
     }
   }
 
   Size.init({
-    idSize: {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
