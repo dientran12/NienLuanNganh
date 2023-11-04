@@ -102,6 +102,7 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       const cartItem = await db.CartItem.findByPk(cartItemId);
 
       if (!cartItem) {
+        order.destroy();
         return {
           success: false,
           message: 'Cart item not found',
@@ -218,6 +219,38 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
     return order;
   } catch (error) {
     console.error('Lỗi khi xác nhận đơn hàng:', error);
+    return null;
+  }
+};
+
+export const calculateTotalForMonth = async (month, year) => {
+  try {
+    const startDate = new Date(year, month - 1, 1); // Ngày bắt đầu của tháng
+    const endDate = new Date(year, month, 0); // Ngày cuối của tháng
+
+    // Truy vấn cơ sở dữ liệu để lấy tổng giá trị các đơn hàng trong tháng và năm cụ thể
+    const totalAmount = await db.Order.sum('totalAmount', {
+      where: {
+        createdAt: {
+          [db.Sequelize.Op.between]: [startDate, endDate],
+        },
+      },
+    });
+
+    const totalOrders = await db.Order.count({
+      where: {
+        createdAt: {
+          [db.Sequelize.Op.between]: [startDate, endDate],
+        },
+      },
+    });
+
+    return {
+      totalAmount: totalAmount || 0,
+      totalOrders: totalOrders || 0,
+    };
+  } catch (error) {
+    console.error('Lỗi khi tính tổng giá trị đơn hàng trong tháng:', error);
     return null;
   }
 };
