@@ -102,3 +102,14 @@ export const confirmOrder = async (req, res) => {
     });
   }
 };
+
+export const getTotalForMonth = async (req, res) => {
+  const { month, year } = req.body;
+  const total = await services.calculateTotalForMonth(month, year);
+
+  if (total !== null) {
+    res.json({ total });
+  } else {
+    res.status(500).json({ error: 'Lỗi khi tính tổng giá trị đơn hàng trong tháng.' });
+  }
+};
