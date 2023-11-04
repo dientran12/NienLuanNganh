@@ -9,6 +9,15 @@ export const addToCartItem = async (userId, productId) => {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userID: userId } });
 
+    const productDetail = await db.ProductDetail.findByPk(productId);
+
+    const productID = productDetail.productId;
+
+    const product = await db.Product.findByPk(productID);
+
+
+    const price = product.price;
+
     if (!cart) {
       // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
       cart = await db.Cart.create({ userID: userId });
@@ -22,9 +31,9 @@ export const addToCartItem = async (userId, productId) => {
     if (cartItem) {
       // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng quantity lên 1
       return {
-        success: false,
+        success: true,
         message: 'Product already exists',
-        cartItem: cartItem
+        cartItem,
       }
     } else {
       // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
@@ -32,14 +41,13 @@ export const addToCartItem = async (userId, productId) => {
         cartID: cart.id,
         productID: productId,
         quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
-        price: 100, // Thay thế bằng giá của sản phẩm
+        price, // Thay thế bằng giá của sản phẩm
       });
     }
 
     return {
       success: true,
       message: 'Product added to cart successfully',
-      cartItem: cartItem
     };
   } catch (error) {
     console.error('Error in addToCartItem service:', error);
@@ -109,7 +117,7 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
   try {
     const cartID = await db.CartItem.findOne({
       where: { id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Product, as: 'productdata' }]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.ProductDetail, as: 'productdata' }]
     })
     resolve({
       err: response ? 0 : 1,
@@ -137,7 +145,7 @@ export const getAllCartItem = async (userId) => {
     // Tìm tất cả các mục trong giỏ hàng của người dùng
     const cartItems = await db.CartItem.findAll({
       where: { cartID: cart.id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Product, as: 'productdata' }]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.ProductDetail, as: 'productdata' }]
     });
 
     return {

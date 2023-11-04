@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class CartItem extends Model {
+  class OrderDetail extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,30 +11,32 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      CartItem.belongsTo(models.ProductDetail, {foreignKey:'productID', targetKey:'id', as:'productdata'})
-      CartItem.belongsTo(models.Cart, {foreignKey:'cartID', targetKey:'id', as:'cartdata'})
+      OrderDetail.belongsTo(models.ProductDetail, {foreignKey:'productId', targetKey:'id', as:'productdata'})
+      OrderDetail.belongsTo(models.Order, {foreignKey:'orderId', targetKey:'id', as:'orderdata'})
     }
   }
-  CartItem.init({
-    cartID:{
+  OrderDetail.init({
+    orderId:{
       type: DataTypes.INTEGER,
       references: {
-        model:'Cart', // Tên model của bảng Size
+        model:'Order', // Tên model của bảng Size
         key: 'id', // Tên trường khóa chính của bảng Size
       },
     },
-    productID: {
+    productId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: 'ProductDetail', // Tên model của bảng Size
         key: 'id', // Tên trường khóa chính của bảng Size
       },
     },
     quantity: DataTypes.INTEGER,
-    price: DataTypes.INTEGER
+    price: DataTypes.FLOAT,
+    totalPrice: DataTypes.FLOAT
   }, {
     sequelize,
-    modelName: 'CartItem',
+    modelName: 'OrderDetail',
   });
-  return CartItem;
+  return OrderDetail;
 };
