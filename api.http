@@ -27,8 +27,8 @@ POST http://localhost:3001/api/order/addProduct/1
 Content-Type: application/json
 
 {
-  "productId": "2",
-  "quantity": "2"
+  "productId": "4",
+  "quantity": "6"
 }
 
 ###
@@ -44,7 +44,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/15
+POST http://localhost:3001/api/order/confirmOrder/32~~
 Content-Type: application/json
 
 {
