@@ -43,7 +43,7 @@ const VersionService = {
           image: image,
         });
     
-        return newVersion;
+          return newVersion;
         }   
         
       } catch (error) {
@@ -53,39 +53,38 @@ const VersionService = {
     
     getProductDetailById: async (productDetailId) => {
       try {
-          const productDetail = await Version.findByPk(productDetailId);
-          if (!productDetail) {
-              throw new Error('Version not found.');
+        const productDetail = await Version.findByPk(productDetailId);
+        if (!productDetail) {
+          throw new Error('Version not found.');
+        }
+  
+        // Tìm tổng số lượng của version trong bảng sizeitem
+        const totalQuantity = await SizeItem.sum('quantity', {
+          where: {
+            versionId: productDetailId
           }
+        });
   
-          // Tìm tổng số lượng của version trong bảng sizeitem
-          const totalQuantity = await SizeItem.sum('quantity', {
-              where: {
-                  versionId: productDetailId
-              }
-          });
-  
-          // Tìm tất cả các tên size liên kết với version trong bảng sizeitem
-          const sizes = await Size.findAll({
-              include: {
-                  model: SizeItem,
-                  where: {
-                      versionId: productDetailId
-                  },
-                  attributes: [],
-              },
-              attributes: ['sizeName']
-          });
-  
-          return {
-              version: productDetail,
-              totalQuantity: totalQuantity,
-              sizes: sizes.map(size => size.sizeName)
-          };
+        // Tìm tất cả các tên size liên kết với version trong bảng sizeitem
+        const sizes = await Size.findAll({
+          include: {
+            model: SizeItem,
+            where: {
+              versionId: productDetailId
+            },
+            attributes: [],
+          },
+          attributes: ['sizeName']
+        });
+        const version = { ...productDetail?.dataValues, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
+        console.log('-----------------version', version)
+        return {
+          version: version
+        };
       } catch (error) {
-          throw new Error('Error getting product detail: ' + error.message);
+        throw new Error('Error getting product detail: ' + error.message);
       }
-  },
+    },
 
     getProductDetailByProducId: async (productId) => {
         try {
