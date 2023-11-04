@@ -4,7 +4,7 @@ const Product = db.Product;
 const Color = db.Color;
 const Size = db.Size;
 const SizeItem = db.SizeItem;
-const path = require('path');
+// const path = require('path');
 
 
 const VersionService = {
