@@ -18,10 +18,6 @@ router.get('/get-all-for-customer', productController.getAllProductsCustomer);
 router.get('/get-product-on-page', productController.getAllProductsOnPage);
 // Lấy chi tiết sản phẩm theo ID 
 router.get('/get-product-by-id/:id', productController.getProductDetail);
-// Lấy sản phẩm theo tên
-router.get('/search', productController.getProductByName);
-// Lấy sản phẩm theo loại
-router.get('/get-By-Type', productController.getByType);
 // Cập nhật thông tin sản phẩm 
 router.put('/update/:productId', productController.updateProduct);
 // Lấy sản phẩm theo giá từ thấp tới cao
@@ -34,6 +30,23 @@ router.get('/get-all-type', productController.getAllUniqueTypes);
 router.get('/get-all-brand', productController.getAllUniqueBrand);
 // Lấy tất cả origin
 router.get('/get-all-origin', productController.getAllUniqueOrigin);
+// Lấy sản phẩm theo tên
+router.get('/search', productController.getProductByName);
+// Lấy sản phẩm theo loại
+router.get('/get-by-type', productController.getByType);
+// Lấy sản phẩm theo brand
+router.get('/get-by-brand', productController.getByBrand);
+// Lấy sản phẩm theo origin
+router.get('/get-by-origin', productController.getByOrigin);
+// Lấy sản phẩm theo tên (có ảnh)
+router.get('/search-have-image', productController.getProductByNameWithImage);
+// Lấy sản phẩm theo loại (có ảnh)
+router.get('/get-by-type-have-image', productController.getByTypeHaveImage);
+// Lấy sản phẩm theo brand (có ảnh)
+router.get('/get-by-brand-have-image', productController.getByBrandHaveImage);
+// Lấy sản phẩm theo origin (có ảnh)
+router.get('/get-by-origin-have-image', productController.getByOriginHaveImage);
+
 
 module.exports = router;
 

@@ -56,6 +56,18 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getProductByNameWithImage: async (req, res) => {
+    try {
+      const name = req.query.name;
+      const productsWithDiscount = await productService.getByNameWithImage(name);
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   findProductsByPriceRange: async (req, res) => {
     try {
       const { minPrice, maxPrice } = req.query;
@@ -114,6 +126,62 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getByTypeHaveImage: async (req, res) => {
+    try {
+      const type = req.query.type;
+      const products = await productService.getByTypeHaveImage(type);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByBrand: async (req, res) => {
+    try {
+      const brand = req.query.brand;
+      const products = await productService.getByBrand(brand);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByBrandHaveImage: async (req, res) => {
+    try {
+      const brand = req.query.brand;
+      const products = await productService.getByBrandHaveImage(brand);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByOrigin: async (req, res) => {
+    try {
+      const origin = req.query.origin;
+      const products = await productService.getByOrigin(origin);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByOriginHaveImage: async (req, res) => {
+    try {
+      const origin = req.query.origin;
+      const products = await productService.getByOriginHaveImage(origin);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   addQuantityToProduct: async (req, res) => {
     try {
       const { productName, sizeName, colorName, quantity } = req.body;
