@@ -19,6 +19,7 @@ module.exports = (sequelize) => {
         autoIncrement: true,
       },
       categoryName: DataTypes.STRING,
+      unique: true,
     },
     {
       sequelize,
