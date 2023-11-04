@@ -1,5 +1,5 @@
 const db = require('../models');
-const ProductPromotions = db.productpromotion;
+const ProductPromotions = db.ProductPromotions;
 const Product = db.Product;
 const Promotions = db.Promotions;
 
@@ -34,6 +34,19 @@ const productpromotionService = {
           console.log(productPromotions);
         } catch (error) {
           console.error(error);
+        }
+      },
+      getProductPromotionsByProductId: async (productId) => {
+        try {
+          const productPromotion = await ProductPromotions.findOne({
+            where: {
+              productId: productId,
+            },
+          });
+          return productPromotion;
+        } catch (error) {
+          console.error(error);
+          throw error;
         }
       },
       addProductToPromotion: async (productId, promotionId) => {

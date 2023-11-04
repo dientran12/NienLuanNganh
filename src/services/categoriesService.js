@@ -51,37 +51,59 @@ const categoriesService = {
     }
   },
 
-  addProductToCategory: async (categoryId, productId) => {
+  getCategoryByProductId: async (productId) => {
     try {
-        const category = await Categories.findByPk(categoryId);
-        const product = await Product.findByPk(productId);
-
-        if (!category || !product) {
-            return { success: false, message: 'Danh mục hoặc sản phẩm không tồn tại' };
-        }
-
-        const existingLink = await CategoryProducts.findOne({
-            where: {
-                categoryId: categoryId,
-                productId: productId
-            }
-        });
-
-        if (existingLink) {
-            return { success: false, message: 'Sản phẩm đã tồn tại trong danh mục', info: existingLink };
-        }
-
-        const cate = await CategoryProducts.create({
-            categoryId: categoryId,
-            productId: productId
-        });
-
-        return { success: true, message: 'Sản phẩm đã được thêm vào danh mục', info: cate };
+      const product = await Product.findByPk(productId, {
+        include: Categories // Include the Category model to get associated categories
+      });
+  
+      if (!product) {
+        return { success: false, message: 'Sản phẩm không tồn tại.' };
+      }
+  
+      return { success: true, categories: product.Categories };
     } catch (error) {
-        console.error(error);
-        return { success: false, message: 'Internal Server Error' };
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
     }
-},
+  },
+
+  addProductToMultipleCategories: async (productId, categoryId) => {
+    try {
+      const product = await Product.findByPk(productId);  
+      if (!product) {
+        return { success: false, message: 'Sản phẩm không tồn tại' };
+      }
+  
+      const existingLinks = await CategoryProducts.findAll({
+        where: {
+          productId: productId,
+          categoryId: categoryId
+        }
+      });
+  
+      const existingCategoryIds = existingLinks.map(link => link.categoryId);
+      const newCategoryIds = categoryId.filter(categoryId => !existingCategoryIds.includes(categoryId));
+  
+      if (newCategoryIds.length === 0) {
+        return { success: false, message: 'Sản phẩm đã tồn tại trong tất cả các danh mục' };
+      }
+  
+      const newLinks = newCategoryIds.map(categoryId => {
+        return {
+          productId: productId,
+          categoryId: categoryId
+        };
+      });
+  
+      const createdLinks = await CategoryProducts.bulkCreate(newLinks);
+  
+      return { success: true, message: 'Sản phẩm đã được thêm vào các danh mục', info: createdLinks };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  },
 
   getAllCategories: async () => {
     try {
@@ -120,7 +142,51 @@ const categoriesService = {
         console.error(error);
         return { success: false, message: 'Internal Server Error' };
     }
-  }
+  },
+
+  update: async (id, categoryName) => {
+    try {
+      const category = await Categories.findByPk(id);
+      if (category) {
+        category.categoryName = categoryName;
+        await category.save();
+        return { success: true, message: 'Category updated successfully.', category };
+      } else {
+        throw new Error('Category not found.');
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getCategoryById: async (id) => {
+    try {
+      const category = await Categories.findByPk(id);
+      if (category) {
+        return { success: true, 'category': category };
+      } else {
+        return { success: false, message: 'Category not found.' };
+      }
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  },
+
+  getCategoryProductByProductId: async (productId) => {
+    try {
+      const productCategory = await CategoryProducts.findOne({
+        where: {
+          productId: productId,
+        },
+      });
+      return productCategory;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+  
 };
 
 module.exports = categoriesService;

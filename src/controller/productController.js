@@ -2,27 +2,35 @@ const productService = require('../services/productService');
 
 const productController = {
   
-  // createSize: async (req, res) => {
-  //   try {
-  //     const { name } = req.body;
-  //     const newSize = await productService.createSize(name);
-  //     res.status(201).json({ success: true, size: newSize });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ success: false, message: 'Internal Server Error' });
-  //   }
-  // },
+  getAllUniqueTypes: async (req, res) => {
+    try {
+      const uniqueBrand = await productService.getAllUniqueTypes();
+      res.json({ success: true, types: uniqueBrand });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
 
-  // createColor: async (req, res) => {
-  //   try {
-  //     const { name } = req.body;
-  //     const newColor = await productService.createColor(name);
-  //     res.status(201).json({ success: true, color: newColor });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ success: false, message: 'Internal Server Error' });
-  //   }
-  // },
+  getAllUniqueBrand: async (req, res) => {
+    try {
+      const uniqueBrand = await productService.getAllUniqueBrand();
+      res.json({ success: true, types: uniqueBrand });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+
+  getAllUniqueOrigin: async (req, res) => {
+    try {
+      const uniqueOrigin = await productService.getAllUniqueOrigin();
+      res.json({ success: true, types: uniqueOrigin });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
   
   getProductDetail: async (req, res) => {
     const productId = req.params.id; // Lấy ID sản phẩm từ request parameters
@@ -113,28 +121,30 @@ const productController = {
   },
   updateProduct: async (req, res) => {
     try {
-      const { productId } = req.params;
-      const { name, description, type, price, origin, brand, gender } = req.body;
+        const { productId } = req.params;
+        const { name, description, type, price, origin, brand, gender } = req.body;
 
-      const productData = {
-        name: name,
-        description: description,
-        type: type,
-        price: price,
-        origin: origin,
-        brand: brand,
-        gender: gender,
-      };    
+        const productData = {
+            name: name,
+            description: description,
+            type: type,
+            price: price,
+            origin: origin,
+            brand: brand,
+            gender: gender,
+        };
 
-      const updatedProduct = await productService.updateProductAndRelatedInfo(productId, productData);
+        // Lấy danh sách id danh mục từ req.body (giả sử được gửi dưới dạng mảng categoryIds)
+        const { categoryIds } = req.body;
 
-      res.status(200).json({ success: true, product: updatedProduct });
+        const updatedProduct = await productService.updateProductAndCategories(productId, productData, categoryIds);
+
+        res.status(200).json({ success: true, product: updatedProduct });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-
   createProduct: async (req, res) => {
     try {
       const { name, description, type, price, origin, brand, gender } = req.body;
@@ -196,7 +206,7 @@ const productController = {
       const totalQuantity = await productService.getTotalQuantityForProduct(productId);
   
       // Trả về kết quả thành công
-      res.status(200).json({ success: true, Total: totalQuantity });
+      res.status(200).json({ success: true, Data: totalQuantity });
     } catch (error) {
       // Xử lý lỗi nếu có
       console.error(error);

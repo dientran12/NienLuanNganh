@@ -5,7 +5,7 @@ module.exports = (sequelize) => {
     static associate(models) {      
       // // Mối quan hệ "nhiều-nhiều" giữa Colors và Product thông qua ProductDetails
       Color.belongsToMany(models.Product, {
-        through: 'ProductDetails', // Tên của bảng trung gian
+        through: 'Version', // Tên của bảng trung gian
         foreignKey: 'colorId', // Tên trường khóa ngoại trong bảng trung gian liên kết với Colors
       });      
     }
