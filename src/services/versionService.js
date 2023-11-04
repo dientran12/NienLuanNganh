@@ -2,60 +2,88 @@ const db = require('../models/index');
 const Version = db.Versions;
 const Product = db.Product;
 const Color = db.Color;
+const Size = db.Size;
 const SizeItem = db.SizeItem;
 const path = require('path');
 
 
 const VersionService = {
     createProductDetail: async (productId, colorName, image) => {
-        try {
-          // Kiểm tra xem màu sắc đã tồn tại chưa
-          let color = await Color.findOne({
-            where: {
-              colorName: colorName,
-            },
+      try {
+        // Kiểm tra xem màu sắc đã tồn tại chưa
+        let color = await Color.findOne({
+          where: {
+            colorName: colorName,
+          },
+        });
+    
+        // Nếu màu sắc chưa tồn tại, tạo màu sắc mới
+        if (!color) {
+          color = await Color.create({
+            colorName: colorName,
           });
-      
-          // Nếu màu sắc chưa tồn tại, tạo màu sắc mới
-          if (!color) {
-            color = await Color.create({
-              colorName: colorName,              
-            });
-          }
-      
-          // Tạo version với productId, colorId và image
-          const newVersion = await Version.create({
-            productId: productId,
-            colorId: color.id, 
-            image: image,            
-          });
-      
-          return newVersion;
-        } catch (error) {
-          throw new Error('Error creating version: ' + error.message);
         }
+    
+        // Kiểm tra xem version với productId và colorId đã tồn tại chưa
+        const existingVersion = await Version.findOne({
+          where: {
+            productId: productId,
+            colorId: color.id,
+          },
+        });
+    
+        // Nếu version đã tồn tại, thông báo lỗi
+        if (existingVersion) {
+          return {error: "Version đã tồn tại"}
+        } else {
+          // Tạo version với productId, colorId và image
+        const newVersion = await Version.create({
+          productId: productId,
+          colorId: color.id,
+          image: image,
+        });
+    
+          return newVersion;
+        }   
+        
+      } catch (error) {
+        throw new Error('Error creating version: ' + error.message);
+      }
     },
     
     getProductDetailById: async (productDetailId) => {
-        try {
-            const productDetail = await Version.findByPk(productDetailId);            
-            if (productDetail) {
-                const formattedResult = {
-                    id: productDetail.id,
-                    colorId: productDetail.colorId,
-                    productId: productDetail.productId,                    
-                    image: path.join(__dirname, '..', 'public', 'images', productDetail.image)                               
-                    
-                  };
-            
-                  console.log(formattedResult);
-                  return formattedResult;
-            } else {
-                throw new Error('Version not found.');
-            }
-        } catch (error) {
-            throw new Error('Error getting product detail: ' + error.message);
+      try {
+        const productDetail = await Version.findByPk(productDetailId);
+        if (!productDetail) {
+          throw new Error('Version not found.');
         }
+  
+        // Tìm tổng số lượng của version trong bảng sizeitem
+        const totalQuantity = await SizeItem.sum('quantity', {
+          where: {
+            versionId: productDetailId
+          }
+        });
+  
+        // Tìm tất cả các tên size liên kết với version trong bảng sizeitem
+        const sizes = await Size.findAll({
+          include: {
+            model: SizeItem,
+            where: {
+              versionId: productDetailId
+            },
+            attributes: [],
+          },
+          attributes: ['sizeName']
+        });
+        const version = { ...productDetail?.dataValues, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
+        // console.log('-----------------version', version)
+        return {
+          version: version
+        };
+      } catch (error) {
+        throw new Error('Error getting product detail: ' + error.message);
+      }
     },
 
     getProductDetailByProducId: async (productId) => {

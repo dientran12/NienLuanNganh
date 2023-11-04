@@ -333,7 +333,10 @@ const productService = {
               {
                 model: Color,
                 attributes: ['id', 'colorName'],
-              },                         
+              },
+              {
+                model: SizeItem,
+              }                         
             ],
           },          
           {
