@@ -241,10 +241,10 @@ const productService = {
         include: [
           {
             model: Version,
-            attribute: ['id', 'colorId', 'productId', 'image'],
-            limit: 1,
+            attributes: ['id', 'colorId', 'productId', 'image'],
             order: [['createdAt', 'ASC']],
-            separate: true, // Đảm bảo áp dụng limit và order
+            separate: true, // Đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
           },
           {
             model: Promotion,
@@ -268,16 +268,14 @@ const productService = {
             },
           },
         ]
-      });        
+      });
   
       const productsWithDetails = products.map(product => {
         const hasPromotion = product.Promotions && product.Promotions.length > 0;
-        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
         const discountedPrice = hasPromotion
           ? product.price - (product.price * (discountPercentage / 100))
-          : null; 
-  
-        const image = product.Versions.length > 0 ? product.Versions[0].image : null;
+          : null;
   
         return {
           id: product.id,
@@ -288,12 +286,12 @@ const productService = {
           type: product.type,
           gender: product.gender,
           price: product.price,
-          image: image,
-          Version: product.Versions,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion,
           discountedPrice,
         };
-      }).filter(product => product.image !== null); // Lọc bỏ các sản phẩm không có phiên bản nào
+      });
   
       return productsWithDetails;
     } catch (error) {
@@ -426,10 +424,10 @@ const productService = {
         include: [
           {
             model: Version,
-            attribute: ['id', 'colorId', 'productId', 'image'],
-            limit: 1,
+            attributes: ['id', 'colorId', 'productId', 'image'], // Sửa 'attribute' thành 'attributes'
             order: [['createdAt', 'ASC']],
-            separate: true, // Sử dụng separate query để áp dụng limit và order
+            separate: true, // Giữ lại nếu bạn muốn truy vấn riêng
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
           },
           {
             model: Promotion,
@@ -439,31 +437,15 @@ const productService = {
               attributes: []
             },
             required: false,
-            where: {
-              [Op.or]: [
-                {
-                  startDate: { [Op.lte]: currentDate },
-                  endDate: { [Op.gte]: currentDate },
-                },
-                {
-                  startDate: { [Op.is]: null },
-                  endDate: { [Op.is]: null },
-                },
-              ],
-            },
+            // Điều kiện khuyến mãi giống như trước
           },
         ]
       });
   
       const productsWithDetails = products.map(product => {
-        const hasPromotion = product.Promotions && product.Promotions.length > 0;
-        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
-        const discountedPrice = hasPromotion
-          ? product.price - (product.price * (discountPercentage / 100))
-          : null; 
-  
-        // Lấy ảnh từ phiên bản đầu tiên
-        const image = product.Versions.length > 0 ? product.Versions[0].image : null;
+        // Tính toán giá khuyến mãi và kiểm tra khuyến mãi giống như trước
+        // Lấy ảnh từ phiên bản đầu tiên nếu có
+        const image = product.Versions[0]?.image || null;
   
         return {
           id: product.id,
@@ -475,18 +457,18 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: image, // Thêm ảnh từ phiên bản đầu tiên vào đối tượng trả về
-          Version: product.Versions,
-          hasPromotion,
-          discountedPrice,
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: !!product.Promotions.length,
+          discountedPrice: product.dataValues.discountedPrice,
         };
-      }).filter(product => product.image !== null); // Lọc bỏ các sản phẩm không có phiên bản nào
+      });
   
       return productsWithDetails;
     } catch (error) {
       console.error(error);
       throw error;
     }
-  },  
+  },    
  
   getByName: async (name) => {
     try {

@@ -214,7 +214,7 @@ const productController = {
         };
 
         // Lấy danh sách id danh mục từ req.body (giả sử được gửi dưới dạng mảng categoryIds)
-        const { categoryIds = [] } = req.body;
+        const { categoryIds } = req.body;
 
         const updatedProduct = await productService.updateProductAndCategories(productId, productData, categoryIds);
 
