@@ -47,7 +47,6 @@ router.get('/get-by-brand-have-image', productController.getByBrandHaveImage);
 // Lấy sản phẩm theo origin (có ảnh)
 router.get('/get-by-origin-have-image', productController.getByOriginHaveImage);
 
-
 module.exports = router;
 
 // // Lấy số lượng sản phẩm theo id +++
