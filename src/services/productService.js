@@ -665,7 +665,12 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-    
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
           return {
             id: product.id,
             name: product.name,
@@ -675,6 +680,8 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
           };
