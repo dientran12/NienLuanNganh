@@ -1,6 +1,12 @@
-const { Categories, Product, CategoryProducts, Versions, Promotion, ProductPromotions } = require('../models');
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
+const db = require('../models/index');
+const Categories = db.Categories;
+const CategoryProducts = db.CategoryProducts;
+const Product = db.Product;
+const Version = db.Versions;
+const Promotion = db.Promotions;
+const ProductPromotions = db.ProductPromotions;
 
 const categoriesService = {
   createCategory: async (categoryName) => {
@@ -53,10 +59,73 @@ const categoriesService = {
       const products = await category.getProducts({
         include: [
           {
-            model: Versions,
-            attributes: ['image'],
-            limit: 1,
+            model: Version,
+            attributes: ['id', 'productId', 'colorId', 'image'],
             order: [['createdAt', 'ASC']],
+            separate: true,
+            required: false
+          },
+          {
+            model: Promotion,
+            attributes: ['percentage'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              startDate: { [Op.lte]: currentDate },
+              endDate: { [Op.gte]: currentDate }
+            }
+          }
+        ]
+      });
+  
+      // Transform the products array to calculate discounted price and add image
+      const productsWithDetails = products.map(product => {
+        const productJson = product.get({ plain: true });
+        delete productJson.CategoryProducts; // Xóa thông tin CategoryProducts
+  
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        const firstVersionImage = product.Versions[0]?.image || null;
+  
+        return {
+          ...productJson,
+          discountedPrice,
+          image: firstVersionImage,
+          Versions: product.Versions || []
+        };
+      });
+  
+      return { success: true, products: productsWithDetails };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  },    
+
+  getCategoryByProductId: async (productId) => {
+    try {
+      const currentDate = new Date();
+      const product = await Product.findByPk(productId, {
+        include: [
+          {
+            model: Categories,
+            attributes: ['id', 'categoryName', 'createdAt', 'updatedAt'],
+            through: {
+              attributes: []
+            }
+          },
+          {
+            model: Version,
+            attributes: ['id', 'productId', 'colorId', 'image'],
+            order: [['createdAt', 'ASC']],
+            limit: 1,
             separate: true
           },
           {
@@ -75,46 +144,42 @@ const categoriesService = {
         ]
       });
   
-      // Chuyển đổi mảng sản phẩm để tính toán giá khuyến mãi và thêm ảnh
-      const productsWithDetails = products.map(product => {
-        const hasPromotion = product.Promotions && product.Promotions.length > 0;
-        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
-        const discountedPrice = hasPromotion
-          ? product.price - (product.price * (discountPercentage / 100))
-          : null;
-  
-        const firstVersionImage = product.Versions[0]?.image || null;
-  
-        return {
-          ...product.get({ plain: true }),
-          discountedPrice,
-          image: firstVersionImage
-        };
-      });
-  
-      return { success: true, products: productsWithDetails };
-    } catch (error) {
-      console.error(error);
-      return { success: false, message: 'Internal Server Error' };
-    }
-  },  
-
-  getCategoryByProductId: async (productId) => {
-    try {
-      const product = await Product.findByPk(productId, {
-        include: Categories // Include the Category model to get associated categories
-      });
-  
       if (!product) {
         return { success: false, message: 'Sản phẩm không tồn tại.' };
       }
   
-      return { success: true, categories: product.Categories };
+      const hasPromotion = product.Promotions && product.Promotions.length > 0;
+      const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+      const discountedPrice = hasPromotion
+        ? product.price - (product.price * (discountPercentage / 100))
+        : null;
+  
+      const firstVersionImage = product.Versions.length > 0 ? product.Versions[0].image : null;
+      const categories = product.Categories.map(({ id, categoryName, createdAt, updatedAt }) => ({
+        id,
+        categoryName,
+        createdAt,
+        updatedAt
+      }));
+  
+      // Remove the Categories association from the product object
+      const productData = product.get({ plain: true });
+      delete productData.Categories;
+  
+      return {
+        success: true,
+        product: {
+          ...productData,
+          discountedPrice,
+          image: firstVersionImage
+        },
+        categories // Only return the categories array
+      };
     } catch (error) {
       console.error(error);
       return { success: false, message: 'Internal Server Error' };
     }
-  },
+  },      
 
   addProductToMultipleCategories: async (productId, categoryId) => {
     try {
