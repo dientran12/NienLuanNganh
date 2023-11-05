@@ -156,7 +156,7 @@ const productService = {
       return productsWithDetails;
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      throw error;
     }
   },  
 
@@ -294,7 +294,7 @@ const productService = {
       return productsWithDetails;
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      throw error;
     }
   }, 
 
@@ -477,12 +477,15 @@ const productService = {
       return productsWithDetails;
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      throw error;
     }
   },  
  
   getByName: async (name) => {
     try {
+      if (!name) {
+        throw new Error;
+      }
       const products = await Product.findAll({
           where: {
               name: {
@@ -550,6 +553,9 @@ const productService = {
 
   getByNameWithImage: async (name) => {
     try {
+      if (!name) {
+        throw new Error;
+      }
       const currentDate = new Date();
       const products = await Product.findAll({
         where: {
@@ -617,7 +623,7 @@ const productService = {
   
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      throw error;
     }
   },  
 
