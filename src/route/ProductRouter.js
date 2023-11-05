@@ -24,11 +24,11 @@ router.put('/update/:productId', productController.updateProduct);
 router.get('/get-price-low-to-high', productController.getPricesLowToHigh);
 // Lấy sản phẩm theo giá từ cao tới thấp
 router.get('/get-price-high-to-low', productController.getPricesHighToLow);
-// Lấy tất cả type
+// Lấy danh sách type
 router.get('/get-all-type', productController.getAllUniqueTypes);
-// Lấy tất cả brand
+// Lấy danh sách brand
 router.get('/get-all-brand', productController.getAllUniqueBrand);
-// Lấy tất cả origin
+// Lấy danh sách origin
 router.get('/get-all-origin', productController.getAllUniqueOrigin);
 // Lấy sản phẩm theo tên
 router.get('/search', productController.getProductByName);
