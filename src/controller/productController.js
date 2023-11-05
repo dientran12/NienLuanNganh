@@ -214,7 +214,7 @@ const productController = {
         };
 
         // Lấy danh sách id danh mục từ req.body (giả sử được gửi dưới dạng mảng categoryIds)
-        const { categoryIds } = req.body;
+        const { categoryIds = [] } = req.body;
 
         const updatedProduct = await productService.updateProductAndCategories(productId, productData, categoryIds);
 
@@ -224,6 +224,7 @@ const productController = {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
   createProduct: async (req, res) => {
     try {
       const { name, description, type, price, origin, brand, gender } = req.body;
