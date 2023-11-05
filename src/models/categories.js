@@ -18,8 +18,10 @@ module.exports = (sequelize) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      categoryName: DataTypes.STRING,
-      unique: true,
+      categoryName: {
+        type: DataTypes.STRING,
+        unique: true, // Đặt thuộc tính unique ở đây
+      },
     },
     {
       sequelize,
