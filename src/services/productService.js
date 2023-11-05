@@ -102,10 +102,10 @@ const productService = {
         include: [
           {
             model: Version,
-            attribute: ['id', 'colorId', 'productId', 'image'],
-            limit: 1,
+            attributes: ['id', 'colorId', 'productId', 'image'],
             order: [['createdAt', 'ASC']],
-            separate: true, // Để đảm bảo áp dụng limit và order
+            separate: true, // Để đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
           },
           {
             model: Promotion,
@@ -133,12 +133,10 @@ const productService = {
   
       const productsWithDetails = products.map(product => {
         const hasPromotion = product.Promotions && product.Promotions.length > 0;
-        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
         const discountedPrice = hasPromotion
           ? product.price - (product.price * (discountPercentage / 100))
           : null; 
-  
-        const image = product.Versions.length > 0 ? product.Versions[0].image : null;
   
         return {
           id: product.id,
@@ -149,19 +147,19 @@ const productService = {
           type: product.type,
           gender: product.gender,
           price: product.price,
-          image: image,
-          Version: product.Versions,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion,
           discountedPrice,
         };
-      }).filter(product => product.image !== null); // Lọc bỏ các sản phẩm không có phiên bản nào
+      });
   
       return productsWithDetails;
     } catch (error) {
       console.error(error);
       throw error;
     }
-  },  
+  },    
 
   getByBrand: async (brand) => {
     try {

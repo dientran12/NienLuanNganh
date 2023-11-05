@@ -1,4 +1,6 @@
-const { Categories, Product, CategoryProducts } = require('../models');
+const { Categories, Product, CategoryProducts, Versions, Promotion, ProductPromotions } = require('../models');
+const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 
 const categoriesService = {
   createCategory: async (categoryName) => {
@@ -42,18 +44,60 @@ const categoriesService = {
   getProductsByCategory: async (id) => {
     try {
       const category = await Categories.findByPk(id);
-
+  
       if (!category) {
         return { success: false, message: 'Danh mục không tồn tại' };
       }
-
-      const products = await category.getProducts();
-      return { success: true, products };
+  
+      const currentDate = new Date();
+      const products = await category.getProducts({
+        include: [
+          {
+            model: Versions,
+            attributes: ['image'],
+            limit: 1,
+            order: [['createdAt', 'ASC']],
+            separate: true
+          },
+          {
+            model: Promotion,
+            attributes: ['percentage'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              startDate: { [Op.lte]: currentDate },
+              endDate: { [Op.gte]: currentDate }
+            }
+          }
+        ]
+      });
+  
+      // Chuyển đổi mảng sản phẩm để tính toán giá khuyến mãi và thêm ảnh
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        const firstVersionImage = product.Versions[0]?.image || null;
+  
+        return {
+          ...product.get({ plain: true }),
+          discountedPrice,
+          image: firstVersionImage
+        };
+      });
+  
+      return { success: true, products: productsWithDetails };
     } catch (error) {
       console.error(error);
       return { success: false, message: 'Internal Server Error' };
     }
-  },
+  },  
 
   getCategoryByProductId: async (productId) => {
     try {
