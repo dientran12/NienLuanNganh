@@ -96,7 +96,7 @@ const productService = {
       const products = await Product.findAll({
         where: {
           origin: {
-            [Op.like]: `%${origin.replace(/\s/g, '')}%`, // Tìm kiếm theo xuất xứ sản phẩm
+            [Op.like]: `%${origin}%`, // Tìm kiếm theo xuất xứ sản phẩm
           }
         },
         include: [
