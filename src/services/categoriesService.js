@@ -9,23 +9,34 @@ const Promotion = db.Promotions;
 const ProductPromotions = db.ProductPromotions;
 
 const categoriesService = {
-  createCategory: async (categoryName) => {
-    // Kiểm tra dữ liệu đầu vào
-    if (!categoryName) {
-      return { success: false, message: 'Tên danh mục không được để trống.' };
-    }
-  
+  createCategory: async (categoryName, description) => {
     try {
-      // Nếu categoryName hợp lệ, tiến hành tạo danh mục mới
-      const newCategory = await Categories.create({ categoryName });
+      // Kiểm tra dữ liệu đầu vào
+      if (!categoryName) {
+        return { success: false, message: 'Tên danh mục không được để trống.' };
+      }
+  
+      // Chuẩn hóa tên danh mục
+      categoryName = categoryName.trim().toLowerCase();
+  
+      // Kiểm tra xem tên danh mục đã chuẩn hóa có tồn tại chưa
+      const existingCategory = await Categories.findOne({
+        where: { categoryName: categoryName }
+      });
+  
+      if (existingCategory) {
+        return { success: false, message: 'Danh mục đã tồn tại. Vui lòng chọn tên khác.' };
+      }
+  
+      // Nếu categoryName hợp lệ và chưa tồn tại, tiến hành tạo danh mục mới
+      const newCategory = await Categories.create({ categoryName, description });
       return { success: true, category: newCategory };
+  
     } catch (error) {
+      console.error(error);
       if (error.name === 'SequelizeUniqueConstraintError') {
-        // Nếu lỗi là do vi phạm ràng buộc duy nhất, thông báo danh mục đã tồn tại
         return { success: false, message: 'Danh mục đã tồn tại. Vui lòng chọn tên khác.' };
       } else {
-        // Đối với các lỗi khác, thông báo lỗi server nội bộ
-        console.error(error);
         return { success: false, message: 'Internal Server Error' };
       }
     }
@@ -257,11 +268,12 @@ const categoriesService = {
     }
   },
 
-  update: async (id, categoryName) => {
+  update: async (id, categoryName, description) => {
     try {
       const category = await Categories.findByPk(id);
       if (category) {
         category.categoryName = categoryName;
+        category.description = description;
         await category.save();
         return { success: true, message: 'Category updated successfully.', category };
       } else {

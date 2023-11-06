@@ -12,6 +12,10 @@ router.post('/create', productController.createProduct);
 router.delete('/delete/:id', productController.deleteProductById);
 // Lấy tất cả sản phẩm cho admin
 router.get('/get-all-for-admin', productController.getAllProducts);
+// Lấy tất cả sản phẩm cho admin (sắp xếp theo ngày tạo cũ đến mới)
+router.get('/get-all-for-admin-old', productController.getAllProductsOld);
+// Lấy tất cả sản phẩm cho admin (sắp xếp theo ngày tạo mới đến cũ)
+router.get('/get-all-for-admin-new', productController.getAllProductsNew);
 // Lấy tất cả sản phẩm cho custom
 router.get('/get-all-for-customer', productController.getAllProductsCustomer);
 // Lấy tất cả sản phẩm và phân trang theo yêu cầu

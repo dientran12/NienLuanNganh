@@ -94,6 +94,26 @@ const productController = {
     }
   },
 
+  getAllProductsOld: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsOld();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getAllProductsNew: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsNew();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   getAllProductsCustomer: async (req, res) => {
     try {
       const productsWithDiscount = await productService.getAllProductsCustomer();
@@ -227,20 +247,30 @@ const productController = {
 
   createProduct: async (req, res) => {
     try {
-      const { name, description, type, price, origin, brand, gender } = req.body;
-      const result = await productService.createProduct(name, description, type, price, origin, brand, gender);
-
+      const { name, description, type, price, origin, brand, gender, categoryIds = [] } = req.body;
+  
+      // Kiểm tra các trường bắt buộc
+      if (!name) return res.status(400).json({ success: false, message: 'Tên sản phẩm là bắt buộc.' });
+      if (!type) return res.status(400).json({ success: false, message: 'Loại sản phẩm là bắt buộc.' });
+      if (!price) return res.status(400).json({ success: false, message: 'Giá sản phẩm là bắt buộc.' });
+      if (!origin) return res.status(400).json({ success: false, message: 'Xuất xứ sản phẩm là bắt buộc.' });
+      if (!brand) return res.status(400).json({ success: false, message: 'Thương hiệu sản phẩm là bắt buộc.' });
+      if (!gender) return res.status(400).json({ success: false, message: 'Giới tính sản phẩm là bắt buộc.' });
+      
+      // Nếu tất cả các trường bắt buộc đã được nhập, tiếp tục tạo sản phẩm
+      const result = await productService.createProduct(name, description, type, price, origin, brand, gender, categoryIds);
+  
       if (result.success) {
         res.status(201).json(result);
       } else {
-        res.status(500).json(result);
+        res.status(400).json(result);
       }
-
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
   deleteProductById: async (req, res) => {
     try {      
       const id = req.params.id;

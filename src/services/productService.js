@@ -27,7 +27,7 @@ const productService = {
       const products = await Product.findAll({
         where: {
           origin: {
-            [Op.like]: `%${origin.replace(/\s/g, '')}%`,
+            [Op.like]: `%${origin}%`,
           }
         },
         include: [
@@ -149,7 +149,7 @@ const productService = {
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
-          hasPromotion,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
         };
       });
@@ -166,7 +166,7 @@ const productService = {
       const products = await Product.findAll({
         where: {
           brand: {
-            [Op.like]: `%${brand.replace(/\s/g, '')}%`,
+            [Op.like]: `%${brand}%`,
           }
         },
         include: [
@@ -235,7 +235,7 @@ const productService = {
       const products = await Product.findAll({
         where: {
           brand: {
-            [Op.like]: `%${brand.replace(/\s/g, '')}%`, // Xóa khoảng trắng và tìm kiếm theo thương hiệu
+            [Op.like]: `%${brand}%`, 
           }
         },
         include: [
@@ -288,7 +288,7 @@ const productService = {
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
-          hasPromotion,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
         };
       });
@@ -349,7 +349,7 @@ const productService = {
       const products = await Product.findAll({
         where: {
           type: {
-            [Op.like]: `%${type.replace(/\s/g, '')}%`,
+            [Op.like]: `%${type}%`,
           }
         },
         include: [
@@ -418,15 +418,15 @@ const productService = {
       const products = await Product.findAll({
         where: {
           type: {
-            [Op.like]: `%${type.replace(/\s/g, '')}%`, // Xóa khoảng trắng và tìm kiếm kiểu sản phẩm
+            [Op.like]: `%${type}%`, 
           }
         },
         include: [
           {
             model: Version,
-            attributes: ['id', 'colorId', 'productId', 'image'], // Sửa 'attribute' thành 'attributes'
+            attributes: ['id', 'colorId', 'productId', 'image'],
             order: [['createdAt', 'ASC']],
-            separate: true, // Giữ lại nếu bạn muốn truy vấn riêng
+            separate: true, // Đảm bảo áp dụng order
             required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
           },
           {
@@ -437,15 +437,28 @@ const productService = {
               attributes: []
             },
             required: false,
-            // Điều kiện khuyến mãi giống như trước
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
           },
         ]
       });
   
       const productsWithDetails = products.map(product => {
-        // Tính toán giá khuyến mãi và kiểm tra khuyến mãi giống như trước
-        // Lấy ảnh từ phiên bản đầu tiên nếu có
-        const image = product.Versions[0]?.image || null;
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
   
         return {
           id: product.id,
@@ -456,10 +469,10 @@ const productService = {
           type: product.type,
           gender: product.gender,
           price: product.price,
-          image: image, // Thêm ảnh từ phiên bản đầu tiên vào đối tượng trả về
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
-          hasPromotion: !!product.Promotions.length,
-          discountedPrice: product.dataValues.discountedPrice,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
         };
       });
   
@@ -649,6 +662,140 @@ const productService = {
               },
           },
         ]        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
+      
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getAllProductsOld: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({        
+        include: [
+          {
+            model: Version,            
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ],
+        order: [['createdAt', 'ASC']],        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
+      
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getAllProductsNew: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({        
+        include: [
+          {
+            model: Version,            
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ],
+        order: [['createdAt', 'DESC']],        
         });        
       
         const productsWithDiscountedPrice = products.map(product => {
@@ -889,15 +1036,35 @@ const productService = {
     }
   },
   
-  createProduct: async (name, description, type, price, origin, brand, gender) => {
+  createProduct: async (name, description, type, price, origin, brand, gender, categoryIds) => {
     try {
+      // Tạo sản phẩm mới
       const newProduct = await Product.create({ name, description, type, price, origin, brand, gender });
-      return { success: true, product: newProduct };
+  
+      // Kiểm tra xem có danh sách categoryIds để liên kết không
+      if (categoryIds && categoryIds.length) {
+        // Kiểm tra xem mỗi ID danh mục có tồn tại không
+        for (const categoryId of categoryIds) {
+          const categoryExists = await Category.findByPk(categoryId);
+          if (!categoryExists) {
+            // Nếu một trong những ID danh mục không tồn tại, hủy thao tác và thông báo lỗi
+            throw new Error(`Category with ID ${categoryId} does not exist.`);
+          }
+        }
+        // Nếu tất cả các ID danh mục đều tồn tại, liên kết sản phẩm với danh mục
+        await newProduct.setCategories(categoryIds);
+      }
+  
+      // Tải lại thông tin sản phẩm để lấy cả thông tin liên kết với danh mục
+      const productWithCategories = await Product.findByPk(newProduct.id, { include: [Category] });
+  
+      return { success: true, product: productWithCategories };
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      return { success: false, message: error.message || 'Internal Server Error' };
     }
   },
+
   deleteProductById: async (id) => {
     try {
       const product = await Product.findByPk(id);
