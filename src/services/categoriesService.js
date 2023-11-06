@@ -78,7 +78,7 @@ const categoriesService = {
           },
           {
             model: Promotion,
-            attributes: ['percentage'],
+            attributes: ['name', 'percentage'],
             through: {
               model: ProductPromotions,
               attributes: []
@@ -107,6 +107,7 @@ const categoriesService = {
   
         return {
           ...productJson,
+          discountPercentage: hasPromotion ? discountPercentage : null,
           discountedPrice,
           image: firstVersionImage,
           Versions: product.Versions || []
@@ -181,6 +182,7 @@ const categoriesService = {
         success: true,
         product: {
           ...productData,
+          discountPercentage: hasPromotion ? discountPercentage : null,
           discountedPrice,
           image: firstVersionImage
         },
@@ -192,31 +194,35 @@ const categoriesService = {
     }
   },      
 
-  addProductToMultipleCategories: async (productId, categoryId) => {
+  addProductToMultipleCategories: async (productId, categoryIds) => {
     try {
       const product = await Product.findByPk(productId);  
       if (!product) {
         return { success: false, message: 'Sản phẩm không tồn tại' };
       }
-  
+      
+      // Đảm bảo categoryIds là một mảng
+      const categoryIdsArray = Array.isArray(categoryIds) ? categoryIds : [categoryIds];
+
       const existingLinks = await CategoryProducts.findAll({
         where: {
           productId: productId,
-          categoryId: categoryId
+          categoryId: categoryIdsArray
         }
       });
   
       const existingCategoryIds = existingLinks.map(link => link.categoryId);
-      const newCategoryIds = categoryId.filter(categoryId => !existingCategoryIds.includes(categoryId));
+      // Sử dụng categoryIdsArray thay vì categoryId để tránh lỗi
+      const newCategoryIds = categoryIdsArray.filter(id => !existingCategoryIds.includes(id));
   
       if (newCategoryIds.length === 0) {
         return { success: false, message: 'Sản phẩm đã tồn tại trong tất cả các danh mục' };
       }
   
-      const newLinks = newCategoryIds.map(categoryId => {
+      const newLinks = newCategoryIds.map(id => {
         return {
           productId: productId,
-          categoryId: categoryId
+          categoryId: id
         };
       });
   
