@@ -1,9 +1,5 @@
 import * as services from '../services/CartItemServices.js'
 
-
-// controllers/cartController.js
-import { addToCartItem } from '../services/CartItemServices.js';
-
 export const addtocartitem = async (req, res) => {
   try {
     
@@ -17,18 +13,19 @@ export const addtocartitem = async (req, res) => {
       });
     }
 
-    const response = await addToCartItem(userId, productId);
+    const response = await services.addToCartItem(userId, productId);
 
     if (response.success) {
-      return res.status(200).json({
+      return res.status(201).json({
         status: 'OK',
         message: response.message,
-        cartItem: response.cartItem,
+        cartItem: response.newcartitem,
       });
     } else {
       return res.status(404).json({
         err: -1,
         message: response.message,
+        cartItem: response.cartItem,
       });
     }
   } catch (error) {

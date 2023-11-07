@@ -129,9 +129,6 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
 
       const totalPrice = cartItem.price * cartItem.quantity;
 
-      // Sau đó, cập nhật totalPrice trong OrderDetail
-      await orderdetail.update({ totalPrice });
-
       // Tính toán tổng giá trị của tất cả các mục đơn hàng trong đơn hàng
       const totalAmount = await db.OrderDetail.sum('totalPrice', {
         where: { orderId: order.id },
@@ -141,6 +138,9 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       await db.Order.update({ totalAmount }, {
         where: { id: order.id },
       });
+
+        // Sau đó, cập nhật totalPrice trong OrderDetail
+        await orderdetail.update({ totalPrice });
 
       return {
         success: true,
@@ -197,7 +197,7 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
       // Giảm số lượng sản phẩm còn lại
       product.quantity -= orderDetail.quantity;
 
-      console.log("quantity "+product.quantity)
+      console.log("quantity " + product.quantity)
 
       if(product.quantity<0){
         return{
