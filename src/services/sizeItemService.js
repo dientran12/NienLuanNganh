@@ -1,5 +1,7 @@
 const db = require('../models/index');
 const SizeItem = db.SizeItem;
+const Size = db.Size;
+const Versions = db.Versions;
 
 const sizeItemService = {
     addSizeItem: async (sizeId, versionId, quantity) => {
@@ -82,6 +84,32 @@ const sizeItemService = {
         return totalQuantity;
       } catch (error) {
         throw error;
+      }
+    },
+
+    getSizeItemDetails: async (id) => {
+      try {
+        const sizeItem = await SizeItem.findByPk(id, {
+          include: [
+            {
+              model: Versions,
+              required: true
+            },
+            {
+              model: Size,
+              required: true
+            }
+          ]
+        });
+    
+        if (!sizeItem) {
+          return { success: false, message: 'SizeItem not found.' };
+        }
+    
+        return { success: true, sizeItem };
+      } catch (error) {
+        console.error('Error getting SizeItem details:', error);
+        return { success: false, message: 'Internal server error.' };
       }
     }
 

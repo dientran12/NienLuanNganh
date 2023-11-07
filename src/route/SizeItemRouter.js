@@ -12,5 +12,7 @@ router.post('/add-sizeitem', sizeItemController.addSizeItem);
 router.get('/get-quantity/:id', sizeItemController.getQuantity);
 // Lấy tổng số lượng dựa trên versionId
 router.get('/get-total-quantity/:versionId', sizeItemController.getTotalQuantityByVersionId);
+// Lấy chi tiết SizeItem
+router.get('/get-detail/:id', sizeItemController.getSizeItemDetails);;
 
 module.exports = router;

@@ -84,6 +84,22 @@ const sizeItemController = {
           error: error.message
         });
       }
+    },
+
+    getSizeItemDetails: async (req, res) => {
+      try {
+        const { id } = req.params; // Lấy ID từ request parameters
+        const result = await SizeItemService.getSizeItemDetails(id);
+    
+        if (result.success) {
+          res.status(200).json(result);
+        } else {
+          res.status(404).json(result); // Sử dụng mã 404 nếu không tìm thấy SizeItem
+        }
+      } catch (error) {
+        console.error('Error in getSizeItemDetailsController:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' }); // Trả về lỗi server nếu có sự cố
+      }
     }
 }
 
