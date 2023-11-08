@@ -70,7 +70,7 @@ const VersionService = {
         }
     
         const sizesWithQuantities = productDetail.SizeItems.map(item => {
-          return { sizeName: item.Size.sizeName, quantity: item.quantity };
+          return { id: item.Size.id, sizeName: item.Size.sizeName, quantity: item.quantity };
         });
     
         const version = { 
