@@ -17,11 +17,27 @@ const promotionService = {
     getPromotionById: async (id) => {
       try {
         const promotion = await Promotion.findByPk(id);
-        if (promotion) {
-          return promotion;
-        } else {
-          throw new Error('Promotion not found.');
+        if (!promotion) {
+          return { success: false, message: 'Promotion not found.' };
         }
+    
+        // Định dạng ngày theo dd/mm/yyyy
+        const startDateFormatted = promotion.startDate 
+          ? new Date(promotion.startDate).toLocaleDateString('en-GB') 
+          : null;
+        const endDateFormatted = promotion.endDate 
+          ? new Date(promotion.endDate).toLocaleDateString('en-GB') 
+          : null;
+    
+        // Trả về đối tượng promotion với ngày đã được định dạng
+        return {
+          success: true,
+          promotion: {
+            ...promotion.get({ plain: true }),
+            startDate: startDateFormatted,
+            endDate: endDateFormatted,
+          }
+        };
       } catch (error) {
         console.error(error);
         throw error;
