@@ -1,4 +1,5 @@
 const db = require('../models/index');
+const { Op } = require('sequelize');
 const SizeItem = db.SizeItem;
 const Size = db.Size;
 const Versions = db.Versions;
@@ -18,8 +19,45 @@ const sizeItemService = {
         throw new Error('Error adding SizeItem: ' + error.message);
       }
     },
-  
-    updateSizeItem: async (Id, newQuantity) => {
+
+    updateSizeItem: async (sizeItemId, quantity, sizeName, versionId) => {
+      try {
+        // Tìm Size hoặc tạo mới nếu chưa tồn tại
+        let size = await Size.findOne({ where: { sizeName: sizeName } });
+        if (!size) {
+          size = await Size.create({ sizeName: sizeName });
+        }
+    
+        // Tìm và xóa SizeItem cũ nếu có cùng versionId và sizeId mới
+        await SizeItem.destroy({
+          where: {
+            versionId: versionId,
+            sizeId: size.id,
+            id: { [Op.ne]: sizeItemId } // Loại trừ SizeItem hiện tại
+          }
+        });
+    
+        // Cập nhật hoặc tạo mới SizeItem với sizeId và versionId mới
+        const [sizeItem, created] = await SizeItem.upsert({
+          id: sizeItemId,
+          quantity: quantity,
+          versionId: versionId,
+          sizeId: size.id
+        }, { returning: true });
+    
+        // Kiểm tra để xác định hành động đã thực hiện là cập nhật hay tạo mới
+        const message = created 
+          ? 'SizeItem created successfully.' 
+          : 'SizeItem updated successfully.';
+    
+        return { success: true, message: message, sizeItem: sizeItem };
+      } catch (error) {
+        console.error('Error updating or creating SizeItem:', error);
+        return { success: false, message: 'Internal server error.', error: error };
+      }
+    },
+
+    updateSizeItemQuantity: async (Id, newQuantity) => {
       try {
         // Kiểm tra xem SizeItem có tồn tại không
         const existingSizeItem = await SizeItem.findByPk(Id);
