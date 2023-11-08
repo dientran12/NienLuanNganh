@@ -56,6 +56,18 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getProductByNameWithImage: async (req, res) => {
+    try {
+      const name = req.query.name;
+      const productsWithDiscount = await productService.getByNameWithImage(name);
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   findProductsByPriceRange: async (req, res) => {
     try {
       const { minPrice, maxPrice } = req.query;
@@ -81,6 +93,37 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getAllProductsOld: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsOld();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getAllProductsNew: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsNew();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getAllProductsCustomer: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsCustomer();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   getAllProductsOnPage: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) || 1; // Chuyển đổi giá trị của page thành số nguyên, mặc định là 1 nếu không có giá trị
@@ -103,6 +146,62 @@ const productController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getByTypeHaveImage: async (req, res) => {
+    try {
+      const type = req.query.type;
+      const products = await productService.getByTypeHaveImage(type);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByBrand: async (req, res) => {
+    try {
+      const brand = req.query.brand;
+      const products = await productService.getByBrand(brand);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByBrandHaveImage: async (req, res) => {
+    try {
+      const brand = req.query.brand;
+      const products = await productService.getByBrandHaveImage(brand);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByOrigin: async (req, res) => {
+    try {
+      const origin = req.query.origin;
+      const products = await productService.getByOrigin(origin);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  getByOriginHaveImage: async (req, res) => {
+    try {
+      const origin = req.query.origin;
+      const products = await productService.getByOriginHaveImage(origin);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   addQuantityToProduct: async (req, res) => {
     try {
       const { productName, sizeName, colorName, quantity } = req.body;
@@ -145,22 +244,33 @@ const productController = {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
   createProduct: async (req, res) => {
     try {
-      const { name, description, type, price, origin, brand, gender } = req.body;
-      const result = await productService.createProduct(name, description, type, price, origin, brand, gender);
-
+      const { name, description, type, price, origin, brand, gender, categoryIds = [] } = req.body;
+  
+      // Kiểm tra các trường bắt buộc
+      if (!name) return res.status(400).json({ success: false, message: 'Tên sản phẩm là bắt buộc.' });
+      if (!type) return res.status(400).json({ success: false, message: 'Loại sản phẩm là bắt buộc.' });
+      if (!price) return res.status(400).json({ success: false, message: 'Giá sản phẩm là bắt buộc.' });
+      if (!origin) return res.status(400).json({ success: false, message: 'Xuất xứ sản phẩm là bắt buộc.' });
+      if (!brand) return res.status(400).json({ success: false, message: 'Thương hiệu sản phẩm là bắt buộc.' });
+      if (!gender) return res.status(400).json({ success: false, message: 'Giới tính sản phẩm là bắt buộc.' });
+      
+      // Nếu tất cả các trường bắt buộc đã được nhập, tiếp tục tạo sản phẩm
+      const result = await productService.createProduct(name, description, type, price, origin, brand, gender, categoryIds);
+  
       if (result.success) {
         res.status(201).json(result);
       } else {
-        res.status(500).json(result);
+        res.status(400).json(result);
       }
-
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
   deleteProductById: async (req, res) => {
     try {      
       const id = req.params.id;

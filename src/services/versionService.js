@@ -4,7 +4,7 @@ const Product = db.Product;
 const Color = db.Color;
 const Size = db.Size;
 const SizeItem = db.SizeItem;
-const path = require('path');
+// const path = require('path');
 
 
 const VersionService = {
@@ -53,36 +53,37 @@ const VersionService = {
     
     getProductDetailById: async (productDetailId) => {
       try {
-        const productDetail = await Version.findByPk(productDetailId);
-        if (!productDetail) {
-          throw new Error('Version not found.');
-        }
-  
-        // Tìm tổng số lượng của version trong bảng sizeitem
-        const totalQuantity = await SizeItem.sum('quantity', {
-          where: {
-            versionId: productDetailId
-          }
-        });
-  
-        // Tìm tất cả các tên size liên kết với version trong bảng sizeitem
-        const sizes = await Size.findAll({
-          include: {
-            model: SizeItem,
-            where: {
-              versionId: productDetailId
+        const productDetail = await Version.findByPk(productDetailId, {
+          include: [
+            {
+              model: SizeItem,
+              include: [Size], // Đảm bảo rằng model Size đã được import
             },
-            attributes: [],
-          },
-          attributes: ['sizeName']
+            {
+              model: Color // Đảm bảo rằng model Color đã được import
+            }
+          ]
         });
-        const version = { ...productDetail?.dataValues, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
-        // console.log('-----------------version', version)
-        return {
-          version: version
+    
+        if (!productDetail) {
+          return { success: false, message: 'Version not found.' };
+        }
+    
+        const sizesWithQuantities = productDetail.SizeItems.map(item => {
+          return { id: item.Size.id, sizeName: item.Size.sizeName, quantity: item.quantity };
+        });
+    
+        const version = { 
+          ...productDetail.get({ plain: true }), 
+          colorName: productDetail.Color.colorName, // Giả định rằng trường màu sắc được lưu trong thuộc tính colorName
+          // sizes: sizesWithQuantities,
+          totalQuantity: sizesWithQuantities.reduce((sum, item) => sum + item.quantity, 0) // Tính tổng số lượng
         };
+    
+        return { success: true, version };
       } catch (error) {
-        throw new Error('Error getting product detail: ' + error.message);
+        console.error('Error getting product detail:', error);
+        return { success: false, message: 'Error getting product detail: ' + error.message };
       }
     },
 

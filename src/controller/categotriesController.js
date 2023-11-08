@@ -3,8 +3,8 @@ const categoriesService = require('../services/categoriesService');
 const categoriesController = {
   createCategory: async (req, res) => {
     try {
-      const { categoryName } = req.body;
-      const result = await categoriesService.createCategory(categoryName);
+      const { categoryName, description } = req.body;
+      const result = await categoriesService.createCategory( categoryName, description );
 
       if (result.success) {
         res.status(201).json(result);
@@ -110,10 +110,10 @@ const categoriesController = {
 
   updateCategory: async (req, res) => {
     const categoryId = req.params.id; // Lấy ID danh mục từ request parameters
-    const { categoryName } = req.body; // Lấy thông tin danh mục cần cập nhật từ request body
+    const { categoryName, description } = req.body; // Lấy thông tin danh mục cần cập nhật từ request body
 
     try {
-      const updatedCategory = await categoriesService.update(categoryId, categoryName);
+      const updatedCategory = await categoriesService.update( categoryId, categoryName, description);
       res.status(200).json(updatedCategory); // Trả về danh mục đã được cập nhật
     } catch (error) {
       res.status(500).json({ error: error.message }); // Trả về lỗi nếu có lỗi xảy ra trong quá trình xử lý

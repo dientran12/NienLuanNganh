@@ -18,7 +18,14 @@ module.exports = (sequelize) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      categoryName: DataTypes.STRING,
+      categoryName: {
+        type: DataTypes.STRING,
+        unique: true, // Đặt thuộc tính unique ở đây
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true, // Hoặc false nếu bạn muốn trường này là bắt buộc
+      },
     },
     {
       sequelize,

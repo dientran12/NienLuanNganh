@@ -15,13 +15,13 @@ const promotionController = {
   },
 
   createPromotion: async (req, res) => {
-    const { name, percentage, startDate, endDate } = req.body;
+    const { name, percentage, description, startDate, endDate } = req.body;
     // Chuyển đổi định dạng ngày tháng từ DD/MM/YYYY sang MM/DD/YYYY
     const formattedStartDate = moment(startDate, 'DD/MM/YYYY').format('MM/DD/YYYY');
     const formattedEndDate = moment(endDate, 'DD/MM/YYYY').format('MM/DD/YYYY');
 
     try {
-    const newPromotion = await promotionService.createPromotion(name, percentage, formattedStartDate, formattedEndDate);
+    const newPromotion = await promotionService.createPromotion(name, percentage, description, formattedStartDate, formattedEndDate);
       res.status(201).json(newPromotion);
     } catch (error) {
       console.error(error);
@@ -31,9 +31,9 @@ const promotionController = {
 
   updatePromotion: async (req, res) => {
     const { id } = req.params;
-    const { name, percentage, startDate, endDate } = req.body;
+    const { name, percentage, description, startDate, endDate } = req.body;
     try {
-      const updatedPromotion = await promotionService.updatePromotion(id, name, percentage, startDate, endDate);
+      const updatedPromotion = await promotionService.updatePromotion(id, name, percentage, description, startDate, endDate);
       if (updatedPromotion.success) {
         res.status(200).json(updatedPromotion);
       } else {

@@ -22,60 +22,18 @@ const sequelize = new Sequelize('db-hkt-d-shop', 'root', '', {
 });
 
 const productService = {
-  findProductsByPriceRange: async (minPrice, maxPrice) => {
+  getByOrigin: async (origin) => {
     try {
       const products = await Product.findAll({
         where: {
-          price: {
-            [Op.between]: [minPrice, maxPrice],
-          },
-        },
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            where: {
-              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
-            }
-          }
-        ],
-        attributes: [
-          'id',
-          'name',
-          'description',
-          'origin',
-          'brand',
-          'type',
-          'gender',
-          'price',
-          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
-        ],
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
-          }
-        ]
-      });
-
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  },
-  getByType: async (type) => {
-    try {
-      const products = await Product.findAll({
-        where: {
-          type: {
-            [Op.like]: `%${type.replace(/\s/g, '')}%`,
+          origin: {
+            [Op.like]: `%${origin}%`,
           }
         },
         include: [
           {
             model: Version,
+            attribute: ['id', 'colorId', 'productId', 'image'],
             where: {
                 productId:  Sequelize.col('Product.id') 
             }
@@ -120,6 +78,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Version: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
           };
@@ -130,9 +89,405 @@ const productService = {
       throw error;
     }
   },
+
+  getByOriginHaveImage: async (origin) => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          origin: {
+            [Op.like]: `%${origin}%`, // Tìm kiếm theo xuất xứ sản phẩm
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'colorId', 'productId', 'image'],
+            order: [['createdAt', 'ASC']],
+            separate: true, // Để đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ]
+      });        
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; 
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },    
+
+  getByBrand: async (brand) => {
+    try {
+      const products = await Product.findAll({
+        where: {
+          brand: {
+            [Op.like]: `%${brand}%`,
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attribute: ['id', 'colorId', 'productId', 'image'],
+            where: {
+                productId:  Sequelize.col('Product.id') 
+            }
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ]        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+    
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            Version: product.Versions,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+
+        return productsWithDiscountedPrice;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getByBrandHaveImage: async (brand) => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          brand: {
+            [Op.like]: `%${brand}%`, 
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'colorId', 'productId', 'image'],
+            order: [['createdAt', 'ASC']],
+            separate: true, // Đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ]
+      });
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }, 
+
+  findProductsByPriceRange: async (minPrice, maxPrice) => {
+    try {
+      const products = await Product.findAll({
+        where: {
+          price: {
+            [Op.between]: [minPrice, maxPrice],
+          },
+        },
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            where: {
+              startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
+              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+            }
+          }
+        ],
+        attributes: [
+          'id',
+          'name',
+          'description',
+          'origin',
+          'brand',
+          'type',
+          'gender',
+          'price',
+          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
+        ],
+        include: [
+          {
+            model: Promotion,
+            through: 'productpromotions',
+            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
+          }
+        ]
+      });
+
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getByType: async (type) => {
+    try {
+      const products = await Product.findAll({
+        where: {
+          type: {
+            [Op.like]: `%${type}%`,
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attribute: ['id', 'colorId', 'productId', 'image'],
+            where: {
+                productId:  Sequelize.col('Product.id') 
+            }
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ]        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+    
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            Versions: product.Versions || [],
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+
+        return productsWithDiscountedPrice;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getByTypeHaveImage: async (type) => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          type: {
+            [Op.like]: `%${type}%`, 
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'colorId', 'productId', 'image'],
+            order: [['createdAt', 'ASC']],
+            separate: true, // Đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ]
+      });
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },    
  
   getByName: async (name) => {
     try {
+      if (!name) {
+        throw new Error;
+      }
       const products = await Product.findAll({
           where: {
               name: {
@@ -142,6 +497,7 @@ const productService = {
           include: [
             {
               model: Version,
+              attribute: ['id', 'colorId', 'productId', 'image'],
               where: {
                   productId:  Sequelize.col('Product.id') 
               }
@@ -186,6 +542,7 @@ const productService = {
               type: product.type,
               gender: product.gender, 
               price: product.price,
+              Versions: product.Versions || [],
               hasPromotion: hasPromotion ? discountPercentage : null,
               discountedPrice: discountedPrice,
             };
@@ -197,13 +554,91 @@ const productService = {
         throw error;
     }
   },
+
+  getByNameWithImage: async (name) => {
+    try {
+      if (!name) {
+        throw new Error;
+      }
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          name: {
+            [Op.like]: `%${name}%`
+          }
+        },          
+        include: [
+          {
+            model: Version,
+            attribute: ['id', 'colorId', 'productId', 'image'],
+            limit: 1,
+            order: [['createdAt', 'ASC']],
+            separate: true // Để đảm bảo lấy đúng phiên bản đầu tiên
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ]
+      });        
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; 
+  
+        const image = product.Versions.length > 0 ? product.Versions[0].image : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: image, // Thêm ảnh từ phiên bản đầu tiên
+          Version: product.Versions,
+          hasPromotion: hasPromotion,
+          discountedPrice: discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+  
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },  
+
   getAllProducts: async () => {
     try {
       const currentDate = new Date();
       const products = await Product.findAll({        
         include: [
           {
-            model: Version,     
+            model: Version,            
           },
           {
             model: Promotion,
@@ -235,7 +670,12 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-    
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
           return {
             id: product.id,
             name: product.name,
@@ -245,6 +685,8 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
           };
@@ -256,17 +698,13 @@ const productService = {
     }
   },
 
-  getProductsOnpage: async (page = 1, pageSize = 10) => {
+  getAllProductsOld: async () => {
     try {
-      const offset = (page - 1) * pageSize;
       const currentDate = new Date();
       const products = await Product.findAll({        
         include: [
           {
             model: Version,            
-            where: {
-                productId:  Sequelize.col('Product.id') 
-            }
           },
           {
             model: Promotion,
@@ -289,17 +727,156 @@ const productService = {
                 ],
               },
           },
-        ],    
-        offset: offset,
-        limit: pageSize,
+        ],
+        order: [['createdAt', 'ASC']],        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
+      
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getAllProductsNew: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({        
+        include: [
+          {
+            model: Version,            
+          },
+          {
+            model: Promotion,
+            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false, // Sử dụng left join thay vì inner join
+              where: {
+                [Op.or]: [
+                  {
+                    '$Promotions.startDate$': { [Op.lte]: currentDate },
+                    '$Promotions.endDate$': { [Op.gte]: currentDate },
+                  },
+                  {
+                    '$Promotions.startDate$': { [Op.is]: null },
+                    '$Promotions.endDate$': { [Op.is]: null },
+                  },
+                ],
+              },
+          },
+        ],
+        order: [['createdAt', 'DESC']],        
+        });        
+      
+        const productsWithDiscountedPrice = products.map(product => {
+          const hasPromotion = product.Promotions && product.Promotions.length > 0;
+          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+          const discountedPrice = hasPromotion
+            ? product.price - (product.price * (discountPercentage / 100))
+            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+          
+          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+          const firstVersionImage = product.Versions && product.Versions.length 
+            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+            : null;
+
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            origin: product.origin,
+            brand: product.brand,
+            type: product.type,
+            gender: product.gender, 
+            price: product.price,
+            image: firstVersionImage,
+            Versions: product.Versions,
+            hasPromotion: hasPromotion ? discountPercentage : null,
+            discountedPrice: discountedPrice,
+          };
+        });
+        return productsWithDiscountedPrice;
+      
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getAllProductsCustomer: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'productId', 'colorId', 'image'],
+            limit: 1,
+            order: [['createdAt', 'ASC']],
+            separate: true 
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ]
       });
   
       const productsWithDiscountedPrice = products.map(product => {
         const hasPromotion = product.Promotions && product.Promotions.length > 0;
-        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
         const discountedPrice = hasPromotion
           ? product.price - (product.price * (discountPercentage / 100))
-          : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+          : null;
+  
+        // Sử dụng optional chaining và nullish coalescing để lấy image một cách an toàn
+        const firstVersionImage = product.Versions[0]?.image ?? null;
   
         return {
           id: product.id,
@@ -310,12 +887,86 @@ const productService = {
           type: product.type,
           gender: product.gender, 
           price: product.price,
-          hasPromotion: hasPromotion ? discountPercentage : null,
-          discountedPrice: discountedPrice,
+          image: firstVersionImage, // Thêm ảnh từ phiên bản đầu tiên
+          Versions: product.Versions,
+          hasPromotion,
+          discountedPrice, // Giá đã giảm nếu có khuyến mãi, ngược lại là null
         };
       });
   
       return productsWithDiscountedPrice;
+  
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
+    }
+  }, 
+
+  getProductsOnpage: async (page = 1, pageSize = 10) => {
+    try {
+      const offset = (page - 1) * pageSize;
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Version,
+            attributes: ['image'],
+            // Không có limit và order ở đây, sẽ xử lý sau khi nhận dữ liệu
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+        ],
+        offset: offset,
+        limit: pageSize,
+      });
+  
+      const productsWithDiscountedPrice = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : product.price;
+  
+        // Lấy ảnh từ phiên bản đầu tiên được sắp xếp theo 'createdAt'
+        const firstVersion = product.Versions
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: firstVersion ? firstVersion.image : null,
+          hasPromotion,
+          discountedPrice,
+        };
+      });
+  
+      // Lọc ra những sản phẩm không có Version nào
+      return productsWithDiscountedPrice.filter(product => product.image !== null);
     } catch (error) {
       console.error(error);
       return null;
@@ -385,15 +1036,35 @@ const productService = {
     }
   },
   
-  createProduct: async (name, description, type, price, origin, brand, gender) => {
+  createProduct: async (name, description, type, price, origin, brand, gender, categoryIds) => {
     try {
+      // Tạo sản phẩm mới
       const newProduct = await Product.create({ name, description, type, price, origin, brand, gender });
-      return { success: true, product: newProduct };
+  
+      // Kiểm tra xem có danh sách categoryIds để liên kết không
+      if (categoryIds && categoryIds.length) {
+        // Kiểm tra xem mỗi ID danh mục có tồn tại không
+        for (const categoryId of categoryIds) {
+          const categoryExists = await Category.findByPk(categoryId);
+          if (!categoryExists) {
+            // Nếu một trong những ID danh mục không tồn tại, hủy thao tác và thông báo lỗi
+            throw new Error(`Category with ID ${categoryId} does not exist.`);
+          }
+        }
+        // Nếu tất cả các ID danh mục đều tồn tại, liên kết sản phẩm với danh mục
+        await newProduct.setCategories(categoryIds);
+      }
+  
+      // Tải lại thông tin sản phẩm để lấy cả thông tin liên kết với danh mục
+      const productWithCategories = await Product.findByPk(newProduct.id, { include: [Category] });
+  
+      return { success: true, product: productWithCategories };
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Internal Server Error' };
+      return { success: false, message: error.message || 'Internal Server Error' };
     }
   },
+
   deleteProductById: async (id) => {
     try {
       const product = await Product.findByPk(id);
@@ -454,11 +1125,21 @@ const productService = {
       const productsWithDiscount = await Product.findAll({
         include: [
           {
+            model: Version,
+            attributes: ['image'],
+            required: false
+          },
+          {
             model: Promotion,
-            through: 'productpromotions',
+            attributes: ['percentage'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
             where: {
               startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') },
             }
           }
         ],
@@ -471,34 +1152,61 @@ const productService = {
           'type',
           'gender',
           'price',
+          // Định nghĩa trường tính toán giá đã giảm nếu có, nếu không thì null
           [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
         ],
-        order: [['price', 'asc']], // Sắp xếp theo giá tăng dần hoặc giảm dần
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
-          }
-        ]
+        order: [
+          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE price END'), 'ASC']
+        ],
       });
-      
-      return productsWithDiscount;
+    
+      const productsWithImages = productsWithDiscount.map(product => {
+        // Tìm ảnh đầu tiên trong số các phiên bản
+        const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+    
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          hasPromotion: !!product.Promotions.length,
+          discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
+          Versions: product.Versions // Vẫn giữ thông tin phiên bản
+        };
+      });
+    
+      return productsWithImages;
     } catch (error) {
+      console.error(error);
       throw error;
     }
-  },
+  },    
 
   getPricesHighToLow: async () => {
     try {
       const productsWithDiscount = await Product.findAll({
         include: [
           {
+            model: Version,
+            attributes: ['image'],
+            required: false
+          },
+          {
             model: Promotion,
-            through: 'productpromotions',
+            attributes: ['percentage'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
             where: {
               startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
-              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') }
+              endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') },
             }
           }
         ],
@@ -511,23 +1219,41 @@ const productService = {
           'type',
           'gender',
           'price',
+          // Định nghĩa trường tính toán giá đã giảm nếu có, nếu không thì null
           [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE NULL END'), 'discountedPrice']
         ],
-        order: [['price', 'desc']], // Sắp xếp theo giá tăng dần hoặc giảm dần
-        include: [
-          {
-            model: Promotion,
-            through: 'productpromotions',
-            attributes: [] // Chỉ cần kết hợp để lấy ra các sản phẩm không có khuyến mãi, không cần lấy các trường từ bảng Promotion
-          }
-        ]
+        order: [
+          [Sequelize.literal('CASE WHEN Promotions.percentage IS NOT NULL THEN price - (price * Promotions.percentage / 100) ELSE price END'), 'DESC']
+        ],
       });
-      
-      return productsWithDiscount;
+    
+      const productsWithImages = productsWithDiscount.map(product => {
+        // Tìm ảnh đầu tiên trong số các phiên bản
+        const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+    
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          hasPromotion: !!product.Promotions.length,
+          discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
+          Versions: product.Versions // Vẫn giữ thông tin phiên bản
+        };
+      });
+    
+      return productsWithImages;
     } catch (error) {
+      console.error(error);
       throw error;
     }
   },
+
   getTotalQuantityForProduct: async (productId) => {
     try {
       // Tìm sản phẩm theo id

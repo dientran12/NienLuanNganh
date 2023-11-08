@@ -23,6 +23,10 @@ module.exports = (sequelize) => {
       percentage: DataTypes.FLOAT,
       startDate: DataTypes.DATE,
       endDate: DataTypes.DATE,
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true, 
+      },
     },
     {
       sequelize,
