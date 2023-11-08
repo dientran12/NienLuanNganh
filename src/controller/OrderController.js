@@ -66,7 +66,9 @@ export const moveFromCartToNewOrderController = async (req, res) => {
     const errorResults = results.filter((result) => !result.success);
 
     if (successResults.length === results.length) {
-      return res.status(201).json({ message: 'Products moved from cart to new order successfully' });
+      return res.status(201).json({ 
+        results,
+      });
     } else {
       return res.status(400).json({ errors: errorResults.map((result) => result.message) });
     }

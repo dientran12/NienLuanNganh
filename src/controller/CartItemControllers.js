@@ -5,6 +5,7 @@ export const addtocartitem = async (req, res) => {
     
     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
     const productId = req.params.productId;
+    const quantity = req.body.quantity;
 
     if (!productId) {
       return res.status(400).json({
@@ -13,7 +14,7 @@ export const addtocartitem = async (req, res) => {
       });
     }
 
-    const response = await services.addToCartItem(userId, productId);
+    const response = await services.addToCartItem(userId, productId, quantity);
 
     if (response.success) {
       return res.status(201).json({

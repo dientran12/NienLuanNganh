@@ -4,7 +4,7 @@ import db from '../models'
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
 
-export const addToCartItem = async (userId, productId) => {
+export const addToCartItem = async (userId, productId, quantity) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userID: userId } });
@@ -37,7 +37,7 @@ export const addToCartItem = async (userId, productId) => {
     const newcartitem = await db.CartItem.create({
       cartID: cart.id,
       productID: productId,
-      quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
+      quantity, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
       price, // Thay thế bằng giá của sản phẩm
     });
 
