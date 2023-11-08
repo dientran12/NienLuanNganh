@@ -76,7 +76,7 @@ const VersionService = {
         const version = { 
           ...productDetail.get({ plain: true }), 
           colorName: productDetail.Color.colorName, // Giả định rằng trường màu sắc được lưu trong thuộc tính colorName
-          sizes: sizesWithQuantities,
+          // sizes: sizesWithQuantities,
           totalQuantity: sizesWithQuantities.reduce((sum, item) => sum + item.quantity, 0) // Tính tổng số lượng
         };
     
