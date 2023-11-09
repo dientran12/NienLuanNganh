@@ -5,13 +5,28 @@ const ProductPromotions = db.ProductPromotions;
 
 const promotionService = {
     getAllPromotions: async () => {
-        try {
-          const promotions = await Promotion.findAll();
-          console.log(promotions);
-          return promotions;
-        } catch (error) {
-          console.error(error);
-        }
+      try {
+        const promotions = await Promotion.findAll();
+        // Duyệt qua danh sách promotions và định dạng ngày tháng
+        const formattedPromotions = promotions.map(promotion => {
+          const startDateFormatted = promotion.startDate 
+            ? new Date(promotion.startDate).toLocaleDateString('en-GB') 
+            : null;
+          const endDateFormatted = promotion.endDate 
+            ? new Date(promotion.endDate).toLocaleDateString('en-GB') 
+            : null;
+          return {
+            ...promotion.get({ plain: true }),
+            startDate: startDateFormatted,
+            endDate: endDateFormatted,
+          };
+        });
+        console.log(formattedPromotions);
+        return formattedPromotions;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
     },
 
     getPromotionById: async (id) => {
