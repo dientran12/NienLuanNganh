@@ -721,7 +721,13 @@ const productService = {
       const products = await Product.findAll({        
         include: [
           {
-            model: Version,            
+            model: Version, 
+            include: [
+              {
+                model: SizeItem, // Thêm mối quan hệ với SizeItem
+                attributes: ['quantity']
+              },
+            ],            
           },
           {
             model: Promotion,
@@ -754,6 +760,15 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+
+          // Tính tổng số lượng từ các phiên bản
+          const totalQuantity = product.Versions.reduce((sum, version) => {
+            if (version.SizeItems && version.SizeItems.length > 0) {
+              const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+              return sum + versionQuantity;
+            }
+            return sum;
+          }, 0);    
           
           // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
           const firstVersionImage = product.Versions && product.Versions.length 
@@ -769,10 +784,12 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
+            total: totalQuantity, // Tổng số lượng của sản phẩm
           };
         });
         return productsWithDiscountedPrice;
@@ -789,6 +806,12 @@ const productService = {
         include: [
           {
             model: Version,            
+            include: [
+              {
+                model: SizeItem, // Thêm mối quan hệ với SizeItem
+                attributes: ['quantity']
+              },
+            ],  
           },
           {
             model: Promotion,
@@ -821,7 +844,16 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-          
+
+          // Tính tổng số lượng từ các phiên bản
+          const totalQuantity = product.Versions.reduce((sum, version) => {
+            if (version.SizeItems && version.SizeItems.length > 0) {
+              const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+              return sum + versionQuantity;
+            }
+            return sum;
+          }, 0);  
+            
           // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
           const firstVersionImage = product.Versions && product.Versions.length 
             ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
@@ -836,10 +868,12 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
+            total: totalQuantity, // Tổng số lượng của sản phẩm
           };
         });
         return productsWithDiscountedPrice;
