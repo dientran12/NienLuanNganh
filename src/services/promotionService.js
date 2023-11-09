@@ -74,13 +74,13 @@ const promotionService = {
             promotion.endDate = endDate;
             promotion.description = description;
             await promotion.save();
-            console.log('Promotion updated:', promotion);
-            return promotion;
+            return { success: true, promotion }; // Trả về giá trị success và promotion
           } else {
-            console.log('Promotion not found');
+            return { success: false, message: 'Promotion not found.' };
           }
         } catch (error) {
           console.error(error);
+          return { success: false, message: 'Internal Server Error' };
         }
       },
       //updatePromotion(1, 'New Year Sale', 20, new Date('2023-01-01'), new Date('2023-01-10'));
