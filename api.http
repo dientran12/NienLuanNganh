@@ -1,9 +1,9 @@
-POST http://localhost:3001/api/cart/addtocart/1/4
+POST http://localhost:3001/api/cart/addtocart/1/6
 Content-Type: application/json
 
-# {
-#   "quantity": 2
-# }
+{
+  "quantity": 3
+}
 
 ###
 DELETE http://localhost:3001/api/cart/deletecart/1/5
@@ -31,7 +31,7 @@ POST http://localhost:3001/api/order/addProduct/1
 Content-Type: application/json
 
 {
-  "productId": "4",
+  "productId": "6",
   "quantity": "6"
 }
 
@@ -44,11 +44,11 @@ Content-Type: application/json
 
 {
   "userId": "1",
-  "cartItemIds": [73,74]
+  "cartItemIds": [75,76]
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/92
+POST http://localhost:3001/api/order/confirmOrder/103
 Content-Type: application/json
 
 {

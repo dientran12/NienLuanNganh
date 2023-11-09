@@ -190,6 +190,8 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
       const cartitem = await db.CartItem.findOne({ where: { productID: orderDetail.productId } })
 
+      const version = await db.Versions.findByPk(product.versionId)
+
       if (!product) {
         throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.productId}`);
       }
@@ -197,7 +199,7 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
       // Giảm số lượng sản phẩm còn lại
       product.quantity -= orderDetail.quantity;
 
-      console.log("quantity " + product.quantity)
+      // console.log("quantity " + product.quantity)
 
       if (product.quantity < 0) {
         return {
@@ -220,8 +222,15 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
         // Gửi email xác nhận
         emailService.sendConfirmationEmail(userEmail);
       }
-
       await product.save();
+
+      const productId = version.productId
+      const soldproduct = await db.Product.findByPk(productId);
+
+      soldproduct.soldQuantity += orderDetail.quantity;
+      soldproduct.update(soldproduct.soldQuantity);
+      await soldproduct.save();
+
       if (!cartitem) {
         console.log("không có cartitem")
       } else {
@@ -246,8 +255,8 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
         where: { confirmed: true },
       });
 
-      const orderdetail=await db.OrderDetail.findOne({
-        where: {orderId: minIdOrder.id}
+      const orderdetail = await db.OrderDetail.findOne({
+        where: { orderId: minIdOrder.id }
       })
 
       orderdetail.destroy();
