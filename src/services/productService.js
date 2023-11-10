@@ -703,6 +703,7 @@ const productService = {
           soldQuantity: product.soldQuantity,
           image: firstVersionImage,
           Versions: product.Versions,
+          Promotion: product.Promotions,
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice: discountedPrice,
           total: totalQuantity, // Tổng số lượng của sản phẩm
@@ -787,6 +788,7 @@ const productService = {
             soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
+            Promotion: product.Promotions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
             total: totalQuantity, // Tổng số lượng của sản phẩm
@@ -871,6 +873,7 @@ const productService = {
             soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
+            Promotion: product.Promotions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
             total: totalQuantity, // Tổng số lượng của sản phẩm
