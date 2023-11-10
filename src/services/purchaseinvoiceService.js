@@ -85,7 +85,7 @@ export const createPurchaseInvoice = async (supplierId, versionId, price, purcha
 export const createPurchaseInvoiceNew = async (data) => {
   const { productName, colorName, sizeName, supplierName, supplierPhone, supplierAddress, quantity, price, purchaseDate } = data;
 
-  let supplier = await Supplier.findOrCreate({ where: { name: supplierName } });
+  let supplier = await Supplier.findOrCreate({ where: { name: supplierName, phone: supplierPhone, address: supplierAddress } });
   let supplierId;
   if (supplier[1]) {
     supplierId = supplier[0].id;
