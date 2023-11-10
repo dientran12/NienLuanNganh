@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3700/api/supplier/deleteSupplier/1
+DELETE http://localhost:3700/api/supplier/deleteSupplier/3
 
 ###
 PUT http://localhost:3700/api/supplier/updateSupplier/2
@@ -36,16 +36,16 @@ POST http://localhost:3700/api/purchaseInvoice/createNew
 Content-Type: application/json
 
 {   
-    "productName": "quần đi chơi", 
+    "productName": "quần đi biển", 
     "colorName": "Đỏ", 
     "sizeName": "S", 
-    "supplierName": "Khang localss", 
+    "supplierName": "Khang xịn sò", 
     "supplierPhone": "0345425175", 
-    "supplierAddress": "ấp Ninh Hòa", 
+    "supplierAddress": "ấp Ninh Hòa chài", 
     "quantity": "1000", 
     "price": "5", 
     "purchaseDate": "2023/12/11"
 }
 
 ###
-DELETE http://localhost:3700/api/purchaseInvoice/delete/4
+DELETE http://localhost:3700/api/purchaseInvoice/delete/8
