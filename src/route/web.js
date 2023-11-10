@@ -9,6 +9,8 @@ import categoryRouter from './CategoriesRouter.js';
 import PromotionRouter from './PromotionRouter.js';
 import ReviewRouter from './ReviewRouter.js';
 import SizeItemRouter from './SizeItemRouter.js';
+import supplierRoute from './supplierRoute.js';
+import purchaseinvoiceRoute from './purchaseinvoiceRoute.js';
 
 let initWebRouter = (app) => {
     // API của User
@@ -29,6 +31,11 @@ let initWebRouter = (app) => {
     router.use('/api/review', ReviewRouter);
     // API của SizeItem
     router.use('/api/sizeitem', SizeItemRouter)
+    router.use('/api/supplier', supplierRoute);
+    router.use('/api/purchaseInvoice', purchaseinvoiceRoute);
+
+
+
 
     return app.use('/', router);
 }

@@ -1,0 +1,51 @@
+###
+POST http://localhost:3700/api/supplier/createSupplier
+Content-Type: application/json
+ 
+{
+    "name": "nhân l",
+    "phone": "0123456789",
+    "address": "ninh hòa"
+}
+
+###
+DELETE http://localhost:3700/api/supplier/deleteSupplier/1
+
+###
+PUT http://localhost:3700/api/supplier/updateSupplier/2
+Content-Type: application/json
+
+{
+    "address": "Ngan Dừa",
+     "name": "nhân óc chó"
+}
+
+###
+POST http://localhost:3700/api/purchaseInvoice/create
+Content-Type: application/json
+
+{   
+    "supplierId": 1,
+    "versionId": 1,
+    "price": 50000,
+    "purchaseDate": "2023/11/06"
+}
+
+###
+POST http://localhost:3700/api/purchaseInvoice/createNew
+Content-Type: application/json
+
+{   
+    "productName": "quần đi chơi", 
+    "colorName": "Đỏ", 
+    "sizeName": "S", 
+    "supplierName": "Khang localss", 
+    "supplierPhone": "0345425175", 
+    "supplierAddress": "ấp Ninh Hòa", 
+    "quantity": "1000", 
+    "price": "5", 
+    "purchaseDate": "2023/12/11"
+}
+
+###
+DELETE http://localhost:3700/api/purchaseInvoice/delete/4
