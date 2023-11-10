@@ -60,6 +60,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -70,6 +73,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -79,6 +86,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Version: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -129,6 +137,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });        
   
@@ -139,6 +150,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null; 
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
         return {
           id: product.id,
           name: product.name,
@@ -149,6 +165,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -199,6 +216,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -209,6 +229,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -218,6 +242,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Version: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -268,6 +293,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });
   
@@ -278,6 +306,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null;
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
         return {
           id: product.id,
           name: product.name,
@@ -288,6 +321,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -382,6 +416,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -392,6 +429,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -401,6 +442,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Versions: product.Versions || [],
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -451,6 +493,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });
   
@@ -461,6 +506,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null;
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
+
         return {
           id: product.id,
           name: product.name,
@@ -471,6 +521,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -524,6 +575,9 @@ const productService = {
                   ],
                 },
             },
+            {
+              model: Review,  // Thêm mối quan hệ với Review            
+            },
           ]        
           });        
         
@@ -533,7 +587,11 @@ const productService = {
             const discountedPrice = hasPromotion
               ? product.price - (product.price * (discountPercentage / 100))
               : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-            
+              
+            // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+            const averageRating = product.Reviews && product.Reviews.length > 0
+              ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+              : null;
       
             return {
               id: product.id,
@@ -544,6 +602,7 @@ const productService = {
               type: product.type,
               gender: product.gender, 
               price: product.price,
+              Rating: averageRating,
               Versions: product.Versions || [],
               hasPromotion: hasPromotion ? discountPercentage : null,
               discountedPrice: discountedPrice,
@@ -610,6 +669,10 @@ const productService = {
           : null; 
   
         const image = product.Versions.length > 0 ? product.Versions[0].image : null;
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
   
         
 
@@ -623,6 +686,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: image, // Thêm ảnh từ phiên bản đầu tiên
+          Rating: averageRating,
           Version: product.Versions,
           hasPromotion: hasPromotion,
           discountedPrice: discountedPrice,
