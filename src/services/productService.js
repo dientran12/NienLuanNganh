@@ -8,6 +8,7 @@ const Category = db.Categories;
 const CategoryProducts = db.CategoryProducts;
 const Product = db.Product;
 const SizeItem = db.SizeItem;
+const Size = db.Size;
 const Color = db.Color;
 const Version = db.Versions;
 const Promotion = db.Promotions;
@@ -587,7 +588,7 @@ const productService = {
             const discountedPrice = hasPromotion
               ? product.price - (product.price * (discountPercentage / 100))
               : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-              
+
             // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
             const averageRating = product.Reviews && product.Reviews.length > 0
               ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
@@ -1155,7 +1156,8 @@ const productService = {
                             attributes: ['id', 'colorName'],
                         },
                         {
-                            model: SizeItem,
+                            model: SizeItem,                       
+                            include: [ Size ]
                         }
                     ],
                 },
