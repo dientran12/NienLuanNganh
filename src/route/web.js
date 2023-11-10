@@ -1,6 +1,10 @@
 import express from 'express';
 let router = express.Router();
 import UserRouter from './UserRouter.js';
+
+import order from './OrderRouter.js';
+
+import CartRouter from './CartRouter.js'
 import ProductRouter from './ProductRouter.js';
 import colorRouter from './ColorRouter.js';
 import sizeRouter from './SizeRouter.js';
@@ -15,6 +19,7 @@ import purchaseinvoiceRoute from './purchaseinvoiceRoute.js';
 let initWebRouter = (app) => {
     // API của User
     router.use('/api/user', UserRouter);
+<<<<<<< HEAD
     // API của Product
     router.use('/api/product', ProductRouter);
     // API của Color
@@ -36,6 +41,12 @@ let initWebRouter = (app) => {
 
 
 
+=======
+    router.use('/api/order',order);
+    router.use('/api/cart',CartRouter);
+    router.use('/api/user', UserRouter);
+    router.use('/apiproduct', ProductRouter);
+>>>>>>> 9de5a05addae7d275c6fdd3dae31d7a72a583198
 
     return app.use('/', router);
 }

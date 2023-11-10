@@ -206,11 +206,31 @@ const getDetailsUser = async (id) => {
     })
 }
 
-export default {
-    createNewUser,
-    getAllUsers,
-    loginUser,
-    updateUser,
-    deleteUser,
-    getDetailsUser,
-}
+// export default {
+//     createNewUser,
+//     getAllUsers,
+//     loginUser,
+//     updateUser,
+//     deleteUser,
+//     getDetailsUser,
+// }
+
+
+
+// Service để xác nhận đơn hàng dựa trên ID
+exports.confirmOrder = async (orderId) => {
+  try {
+    const order = await db.findByPk(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    // Thực hiện các hoạt động để xác nhận đơn hàng, ví dụ: order.confirmed = true;
+    // Lưu ý: Bạn có thể thực hiện nhiều hoạt động khác để xác nhận đơn hàng.
+
+    await order.save();
+    return order;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ###
 POST http://localhost:3700/api/supplier/createSupplier
 Content-Type: application/json
@@ -49,3 +50,44 @@ Content-Type: application/json
 
 ###
 DELETE http://localhost:3700/api/purchaseInvoice/delete/8
+=======
+
+###
+//lay thong tin tu cartitem
+POST http://localhost:3300/api/order/addToOrder/5
+
+###
+// tinh tong
+GET http://localhost:3300/api/order/calculate-total/1
+ 
+###
+// xoa don hang
+DELETE http://localhost:3300/api/order/deleteOrder/3
+
+###
+// xac nhan don hang
+PUT http://localhost:3300/api/order/confirmOrder/2
+
+###
+//phuong thuc thanh toan
+POST http://localhost:3300/api/order/setPaymentMethod/2
+Content-Type: application/json
+
+{
+    "paymentMethod": "bankTransfer"
+}
+
+###
+// Xem thông tin đơn hàng
+GET http://localhost:3300/api/order/getOrderInfo/2
+
+
+###
+//cap nhat so luong
+PUT http://localhost:3300/api/order/updateOrderById/5
+Content-Type: application/json
+
+{
+    "newQuantity" : 4
+}
+>>>>>>> 9de5a05addae7d275c6fdd3dae31d7a72a583198
