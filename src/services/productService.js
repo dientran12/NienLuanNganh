@@ -20,6 +20,7 @@ const sequelize = new Sequelize('db-hkt-d-shop', 'root', '', {
   timezone: '+07:00',
   "logging": false
 });
+const moment = require('moment');
 
 const productService = {
   getByOrigin: async (origin) => {
@@ -1029,66 +1030,71 @@ const productService = {
   
   getProductById: async (id) => {
     try {
-      const currentDate = new Date();
-      const product = await Product.findByPk(id, {
-        include: [
-          {
-            model: Version,            
-            include: [              
-              {
-                model: Color,
-                attributes: ['id', 'colorName'],
-              },
-              {
-                model: SizeItem,
-              }                         
+        const currentDate = new Date();
+        const product = await Product.findByPk(id, {
+            include: [
+                {
+                    model: Version,
+                    include: [
+                        {
+                            model: Color,
+                            attributes: ['id', 'colorName'],
+                        },
+                        {
+                            model: SizeItem,
+                        }
+                    ],
+                },
+                {
+                    model: Review,
+                    attributes: ['id', 'comment', 'rating'],
+                },
+                {
+                    model: Promotion,
+                    attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+                    through: {
+                        model: ProductPromotions,
+                        attributes: []
+                    },
+                },
+                {
+                    model: Category,
+                    attributes: ['id', 'categoryName'],
+                },
             ],
-          },          
-          {
-            model: Review,
-            attributes: ['id', 'comment', 'rating'],
-          },       
-          {
-            model: Promotion,
-            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
-            through: {
-              model: ProductPromotions,
-              attributes: []
-            },
-          },
-          {
-            model: Category, // Thêm mối quan hệ với danh mục sản phẩm
-            attributes: ['id', 'categoryName'], // Chọn các thuộc tính bạn muốn hiển thị từ danh mục sản phẩm
-          },
-          
-        ],
-      });
-  
-      if (product) {                      
-        const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);        
-        if (productpromotion){                
-          const percent = await promotionService.getPromotionById(productpromotion.id);
-          if (percent){
-            if (percent.startDate <= currentDate && percent.endDate >= currentDate ){
-              product.dataValues.promotionName = percent.name;
-              const discount = percent.percentage;
-              const discountedPrice = product.price - (product.price * (discount / 100));
-              product.dataValues.discountedPrice = discountedPrice;
-            }        
-          } 
+        });
+
+        if (product) {
+            const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);
+            if (productpromotion) {
+                const percent = await promotionService.getPromotionById(productpromotion.id);                
+                if (percent) {            
+                  const startDate = moment(percent.startDate, 'DD/MM/YYYY');
+                  const endDate = moment(percent.endDate, 'DD/MM/YYYY');
+                  const currentDateMoment = moment(currentDate, 'YYYY/MM/DD');                          
+                    if (startDate <= currentDateMoment && endDate >= currentDateMoment) {
+                        product.dataValues.promotionName = percent.name;
+                        const discount = percent.percentage;
+                        const discountedPrice = product.price - (product.price * (discount / 100));
+                        
+                        product.dataValues.discountedPrice = discountedPrice;
+                        product.dataValues.promotionEndDate = percent.endDate;
+                    }
+                }
+            } else {
+                product.dataValues.promotionName = null;
+                product.dataValues.discountedPrice = null;
+            }
+
+            return product;
         } else {
-          product.dataValues.promotionName = null;
-          product.dataValues.discountedPrice = 0;
-        }    
-        
-        return product;
-      } else {
-        throw new Error('Product not found.');
-      }
+            throw new Error('Product not found.');
+        }
     } catch (error) {
-      throw new Error('Error getting product: ' + error.message);
+        throw new Error('Error getting product: ' + error.message);
     }
-  },
+},
+
   
   createProduct: async (name, description, type, price, origin, brand, gender, categoryIds) => {
     try {
