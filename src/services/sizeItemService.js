@@ -5,29 +5,39 @@ const Size = db.Size;
 const Versions = db.Versions;
 
 const sizeItemService = {
-    addSizeItem: async (sizeName, versionId, quantity) => {
-      try {
-        // Kiểm tra xem size có tồn tại chưa
-        let size = await Size.findOne({ where: { sizeName: sizeName } });
-        console.log(size);
-    
-        // Nếu size chưa tồn tại, tạo mới
-        if (!size) {
-          size = await Size.create({ sizeName: sizeName });
-        }
-    
-        // Tạo một SizeItem mới dựa trên thông tin được cung cấp
-        const newSizeItem = await SizeItem.create({
-          sizeId: size.id, // Sử dụng sizeId của Size đã có hoặc mới tạo
-          versionId: versionId,
-          quantity: quantity
-        });
-    
-        return newSizeItem;
-      } catch (error) {
-        throw new Error('Error adding SizeItem: ' + error.message);
+  addSizeItem: async (sizeName, versionId, quantity) => {
+    try {
+      // Kiểm tra xem size có tồn tại chưa
+      let size = await Size.findOne({ where: { sizeName: sizeName } });
+  
+      // Nếu size chưa tồn tại, tạo mới
+      if (!size) {
+        size = await Size.create({ sizeName: sizeName });
       }
-    },
+  
+      // Kiểm tra xem phiên bản đã có kích thước này chưa
+      const existingSizeItem = await SizeItem.findOne({
+        where: { versionId: versionId, sizeId: size.id }
+      });
+  
+      if (existingSizeItem) {
+        // Nếu phiên bản đã có kích thước này, thông báo lỗi
+        throw new Error(`Version ${versionId} already has size ${sizeName}.`);
+      }
+  
+      // Tạo một SizeItem mới dựa trên thông tin được cung cấp
+      const newSizeItem = await SizeItem.create({
+        sizeId: size.id,
+        versionId: versionId,
+        quantity: quantity
+      });
+  
+      return newSizeItem;
+    } catch (error) {
+      throw new Error('Error adding SizeItem: ' + error.message);
+    }
+  },
+  
 
     updateSizeItem: async (sizeItemId, quantity, sizeName, versionId) => {
       try {
