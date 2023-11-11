@@ -18,7 +18,10 @@ module.exports = (sequelize) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      colorName: DataTypes.STRING,
+      colorName: {
+        type: DataTypes.STRING,
+        unique: true, // Đặt thuộc tính unique ở đây
+      },
     },
     {
       sequelize,

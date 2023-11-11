@@ -14,7 +14,7 @@ const promotionService = {
         }
     },
 
-    getPromotionById: async (id) => {
+    getPromotionById:  async (id) => {
       try {
         const promotion = await Promotion.findByPk(id);
         if (promotion) {
@@ -28,22 +28,50 @@ const promotionService = {
       }
     },
 
-    createPromotion: async (name, percentage, startDate, endDate) => {
-        try {
-          const newPromotion = await Promotion.create({
-            name: name,
-            percentage: percentage,
-            startDate: startDate,
-            endDate: endDate,
-          });
-          console.log('New promotion created:', newPromotion);
-          return newPromotion;
-        } catch (error) {
-          console.error(error);
+    createPromotion: async (name, percentage, description, startDate, endDate) => {
+      try {
+        // Kiểm tra tính hợp lệ của các đối số trước khi tạo promotion
+        if (!name) {
+          throw new Error("Tên khuyến mãi là bắt buộc.");
         }
-      },
+        if (percentage === undefined || percentage < 0 || percentage > 100) {
+          throw new Error("Phần trăm khuyến mãi phải là một số từ 0 đến 100.");
+        }        
+        if (!startDate) {
+          throw new Error("Ngày bắt đầu khuyến mãi là bắt buộc.");
+        }
+        if (!endDate) {
+          throw new Error("Ngày kết thúc khuyến mãi là bắt buộc.");
+        }
+        if (new Date(startDate) >= new Date(endDate)) {
+          throw new Error("Ngày bắt đầu phải trước ngày kết thúc.");
+        }
+    
+        // Kiểm tra xem có khuyến mãi nào có cùng tên tồn tại không
+        const existingPromotion = await Promotion.findOne({ where: { name } });
+        if (existingPromotion) {
+          throw new Error("Khuyến mãi đã tồn tại với tên này.");
+        }
+    
+        // Tạo mới promotion nếu tất cả đối số hợp lệ và không có trùng tên
+        const newPromotion = await Promotion.create({
+          name,
+          percentage,
+          startDate,
+          endDate,
+          description,
+        });
+    
+        console.log('New promotion created:', newPromotion);
+        return newPromotion;
+      } catch (error) {
+        console.error(error.message);
+        return { error: error.message }; // Trả về thông báo lỗi
+      }
+    },       
+
       //createPromotion('Special Sale', 15, new Date(), new Date('2023-12-31'));
-      updatePromotion: async (id, name, percentage, startDate, endDate) => {
+      updatePromotion: async (id, name, percentage, description, startDate, endDate) => {
         try {
           const promotion = await Promotion.findByPk(id);
           if (promotion) {
@@ -51,14 +79,15 @@ const promotionService = {
             promotion.percentage = percentage;
             promotion.startDate = startDate;
             promotion.endDate = endDate;
+            promotion.description = description;
             await promotion.save();
-            console.log('Promotion updated:', promotion);
-            return promotion;
+            return { success: true, promotion }; // Trả về giá trị success và promotion
           } else {
-            console.log('Promotion not found');
+            return { success: false, message: 'Promotion not found.' };
           }
         } catch (error) {
           console.error(error);
+          return { success: false, message: 'Internal Server Error' };
         }
       },
       //updatePromotion(1, 'New Year Sale', 20, new Date('2023-01-01'), new Date('2023-01-10'));

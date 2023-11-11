@@ -53,38 +53,37 @@ const VersionService = {
     
     getProductDetailById: async (productDetailId) => {
       try {
-        const productDetail = await Version.findByPk(productDetailId);
-        if (!productDetail) {
-          throw new Error('Version not found.');
-        }
-  
-        // Tìm tổng số lượng của version trong bảng sizeitem
-        const totalQuantity = await SizeItem.sum('quantity', {
-          where: {
-            versionId: productDetailId
-          }
-        });
-  
-        // Tìm tất cả các tên size liên kết với version trong bảng sizeitem
-        const sizes = await Size.findAll({
-          include: {
-            model: SizeItem,
-            where: {
-              versionId: productDetailId
+        const productDetail = await Version.findByPk(productDetailId, {
+          include: [
+            {
+              model: SizeItem,
+              include: [Size], // Đảm bảo rằng model Size đã được import
             },
-            attributes: [],
-          },
-          attributes: ['sizeName']
+            {
+              model: Color // Đảm bảo rằng model Color đã được import
+            }
+          ]
         });
-        const color = await Color.findByPk(productDetail.colorId);
-        console.log(color?.dataValues?.colorName);
-        const version = { ...productDetail?.dataValues, color: color?.dataValues?.colorName, sizes: sizes.map(size => size.sizeName), total: totalQuantity };
-        // console.log('-----------------version', version)
-        return {
-          version: version
+    
+        if (!productDetail) {
+          return { success: false, message: 'Version not found.' };
+        }
+    
+        const sizesWithQuantities = productDetail.SizeItems.map(item => {
+          return { id: item.Size.id, sizeName: item.Size.sizeName, quantity: item.quantity };
+        });
+    
+        const version = { 
+          ...productDetail.get({ plain: true }), 
+          colorName: productDetail.Color.colorName, // Giả định rằng trường màu sắc được lưu trong thuộc tính colorName
+          // sizes: sizesWithQuantities,
+          totalQuantity: sizesWithQuantities.reduce((sum, item) => sum + item.quantity, 0) // Tính tổng số lượng
         };
+    
+        return { success: true, version };
       } catch (error) {
-        throw new Error('Error getting product detail: ' + error.message);
+        console.error('Error getting product detail:', error);
+        return { success: false, message: 'Error getting product detail: ' + error.message };
       }
     },
 
@@ -168,14 +167,36 @@ const VersionService = {
         }
     },
 
-    getAllProductDetails: async () => {
+    getAllProductDetails:  async () => {
       try {
-        const versions = await Version.findAll();    
-        return {status: "success", data: versions};
+        const versions = await Version.findAll({
+          include: [
+            {
+              model: SizeItem,              
+            },
+          ],
+        });
+    
+        const result = versions.map(version => {
+          // Tính tổng số lượng từ SizeItems của mỗi phiên bản
+          const versionQuantity = version.SizeItems.reduce((sum, sizeItem) => sum + sizeItem.quantity, 0);
+    
+          return {
+            versionId: version.id,
+            colorId: version.colorId,
+            productId: version.productId,
+            image: version.image,
+            versionDescription: version.description,
+            sizeItems: version.SizeItems,
+            quantity: versionQuantity,
+          };
+        });
+    
+        return { status: "success", data: result };
       } catch (error) {
         throw error;
       }
-  }
+    }
 };
 
 module.exports = VersionService;
