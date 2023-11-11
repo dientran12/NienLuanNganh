@@ -1549,7 +1549,87 @@ const productService = {
       console.error('Error fetching unique origins:', error);
       throw error;
     }
-  }
+  },
+
+  getByGenderHaveImage: async (gender) => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          gender: {
+            [Op.like]: `%${gender}%`, // Tìm kiếm theo giới tính sản phẩm
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'colorId', 'productId', 'image'],
+            order: [['createdAt', 'ASC']],
+            separate: true, // Để đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
+        ]
+      });        
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; 
+  
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
     
 };
   

@@ -50,6 +50,8 @@ router.get('/get-by-type-have-image', productController.getByTypeHaveImage);
 router.get('/get-by-brand-have-image', productController.getByBrandHaveImage);
 // Lấy sản phẩm theo origin (có ảnh)
 router.get('/get-by-origin-have-image', productController.getByOriginHaveImage);
+// Lấy sản phẩm theo gender (có ảnh)
+router.get('/get-by-gender-have-image', productController.getByGenderHaveImage);
 
 
 module.exports = router;

@@ -346,7 +346,18 @@ const productController = {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-  }
+  },
+
+  getByGenderHaveImage: async (req, res) => {
+    try {
+      const gender = req.query.gender;
+      const products = await productService.getByGenderHaveImage(gender);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
 
 };
 
