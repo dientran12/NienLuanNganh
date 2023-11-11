@@ -67,7 +67,7 @@ const promotionController = {
     try {
       const deletedPromotion = await promotionService.deletePromotion(id);
       if (deletedPromotion.success) {
-        res.status(200).end();
+        res.status(200).json(deletedPromotion);
       } else {
         res.status(404).json(deletedPromotion);
       }

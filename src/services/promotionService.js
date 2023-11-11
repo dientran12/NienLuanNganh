@@ -97,9 +97,9 @@ const promotionService = {
             where: { id: promotionId },
           });
           if (deletedRows > 0) {
-            return {message: 'Promotion deleted successfully.'};
+            return {success: true, message: 'Promotion deleted successfully.'};
           }  else {
-            return {message: 'Promotion not found.'}
+            return {success: false, message: 'Promotion not found.'}
           }       
         } catch (error) {
           console.error(error);
