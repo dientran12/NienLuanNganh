@@ -63,9 +63,9 @@ const promotionController = {
   },
 
   deletePromotion: async (req, res) => {
-    const { promotionId } = req.params.id;
+    const  id  = req.params.id;
     try {
-      const deletedPromotion = await promotionService.deletePromotion(promotionId);
+      const deletedPromotion = await promotionService.deletePromotion(id);
       if (deletedPromotion.success) {
         res.status(200).end();
       } else {
