@@ -1220,7 +1220,7 @@ const productService = {
     try {
       // Tạo sản phẩm mới
       const newProduct = await Product.create({ name, description, type, price, origin, brand, gender });
-  
+
       // Kiểm tra xem có danh sách categoryIds để liên kết không
       if (categoryIds && categoryIds.length) {
         // Kiểm tra xem mỗi ID danh mục có tồn tại không
@@ -1234,16 +1234,37 @@ const productService = {
         // Nếu tất cả các ID danh mục đều tồn tại, liên kết sản phẩm với danh mục
         await newProduct.setCategories(categoryIds);
       }
-  
+
+      // Tìm danh mục "New Product" hoặc tạo mới nếu không tồn tại
+      const [newProductCategory] = await Category.findOrCreate({
+        where: { categoryName: 'New Product' },
+      });
+
+      // Liên kết sản phẩm mới với danh mục "New Product"
+      await newProduct.addCategory(newProductCategory);
+
+      // Kiểm tra và xóa sản phẩm cũ nhất nếu danh sách "New Product" đã đạt tối đa 20 sản phẩm
+      const productListCount = await newProductCategory.countProducts();      
+      if (productListCount > 20) {
+        // Lấy danh sách sản phẩm "New Product" và sắp xếp theo thời gian tạo
+        const products = await newProductCategory.getProducts({ order: [['createdAt', 'ASC']] });
+
+        // Xóa sản phẩm cũ nhất
+        await newProductCategory.removeProduct(products[0]);
+      }
+
       // Tải lại thông tin sản phẩm để lấy cả thông tin liên kết với danh mục
       const productWithCategories = await Product.findByPk(newProduct.id, { include: [Category] });
-  
+
       return { success: true, product: productWithCategories };
     } catch (error) {
       console.error(error);
       return { success: false, message: error.message || 'Internal Server Error' };
     }
   },
+
+
+
 
   deleteProductById: async (id) => {
     try {
@@ -1259,6 +1280,7 @@ const productService = {
       throw error;
     }
   },
+
   updateProductAndCategories: async (productId, productData, categoryIds) => {
     const t = await sequelize.transaction(); // Bắt đầu một giao dịch mới
 
