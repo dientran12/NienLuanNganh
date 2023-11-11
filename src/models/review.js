@@ -31,10 +31,6 @@ module.exports = (sequelize) => {
           key: 'id', // Tên trường khóa chính của bảng User
         }
       },
-      comment: {
-        type: DataTypes.TEXT, // Kiểu dữ liệu cho nội dung đánh giá (dài hơn kiểu STRING)
-        allowNull: false, // Không được phép giá trị null
-      },
       rating: {
         type: DataTypes.INTEGER, // Kiểu dữ liệu cho điểm đánh giá (sử dụng INTEGER hoặc DECIMAL tùy theo yêu cầu)
         allowNull: false,

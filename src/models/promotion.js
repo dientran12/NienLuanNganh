@@ -11,6 +11,16 @@ module.exports = (sequelize) => {
     }
   }
 
+  const formatDate = (date) => {
+    if (date instanceof Date) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    return date;
+  }
+
   Promotions.init(
     {
       id: {
@@ -21,8 +31,20 @@ module.exports = (sequelize) => {
       // Các trường của bảng Promotion
       name: DataTypes.STRING,
       percentage: DataTypes.FLOAT,
-      startDate: DataTypes.DATE,
-      endDate: DataTypes.DATE,
+      startDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        get() {
+          return formatDate(this.getDataValue('startDate'));
+        },
+      },
+      endDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        get() {
+          return formatDate(this.getDataValue('endDate'));
+        },
+      },
       description: {
         type: DataTypes.TEXT,
         allowNull: true, 

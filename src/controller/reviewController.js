@@ -2,8 +2,16 @@ const reviewService = require('../services/reviewService');
 
 const createReview = async (req, res) => {
     try {
-        const { productId, userId, comment, rating } = req.body;
-        const result = await reviewService.createReview(productId, userId, comment, rating);
+        const { productId, userId } = req.body;
+        let { rating } = req.body; 
+        rating = parseInt(rating, 10);
+        const isValidRating = Number.isInteger(rating) && rating >= 1 && rating <= 5;
+
+        if (!isValidRating) {
+            return res.status(400).json({ success: false, message: 'Invalid rating. Rating must be an integer between 1 and 5.' });
+        }
+
+        const result = await reviewService.createReview(productId, userId, rating);
         res.status(201).json(result);
     } catch (error) {
         console.error(error);
@@ -46,8 +54,16 @@ const getReviewsByUser = async (req, res) => {
 const updateReview = async (req, res) => {
     try {
         const reviewId = req.params.id;
-        const { comment, rating } = req.body;
-        const result = await reviewService.updateReview(reviewId, comment, rating);
+        let { rating } = req.body; 
+        
+        rating = parseInt(rating);
+        const isValidRating = Number.isInteger(rating) && rating >= 1 && rating <= 5;
+
+        if (!isValidRating) {
+            return res.status(400).json({ success: false, message: 'Invalid rating. Rating must be an integer between 1 and 5.' });
+        }
+
+        const result = await reviewService.updateReview(reviewId, rating);
         if (result.success) {
             res.status(200).json(result);
         } else {

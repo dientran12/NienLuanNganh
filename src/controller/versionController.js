@@ -5,11 +5,17 @@ const productDetailController = {
     createProductDetail: async (req, res) => {
         try {            
             const { colorName, image, productId } = req.body;         
-                                 
+            if (!colorName)
+              throw new Error('colorName không được cung cấp')
+            if (!productId)
+              throw new Error('productId không được cung cấp')
+            if (!image)
+              throw new Error('image không được cung cấp')
+                                   
             const productDetail = await productDetailService.createProductDetail(productId, colorName, image);
             res.status(201).json(productDetail);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(422).json({ error: error.message });
         }
     },
 

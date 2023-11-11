@@ -15,7 +15,10 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    sizeName: DataTypes.STRING, 
+    sizeName: {
+      type: DataTypes.STRING,
+      unique: true, // Đặt thuộc tính unique ở đây
+    }, 
   }, {
     sequelize,
     modelName: 'Size',

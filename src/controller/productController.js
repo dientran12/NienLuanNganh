@@ -60,8 +60,11 @@ const productController = {
   getProductByNameWithImage: async (req, res) => {
     try {
       const name = req.query.name;
+      if (!name) {
+        throw new Error('vui lòng nhập thông tin cần tìm kiếm');
+      }
       const productsWithDiscount = await productService.getByNameWithImage(name);
-      res.status(200).json({ success: true, products: productsWithDiscount });
+      res.status(201).json({ success: true, products: productsWithDiscount });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -343,7 +346,18 @@ const productController = {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-  }
+  },
+
+  getByGenderHaveImage: async (req, res) => {
+    try {
+      const gender = req.query.gender;
+      const products = await productService.getByGenderHaveImage(gender);
+      res.status(200).json({ success: true, products: products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
 
 };
 

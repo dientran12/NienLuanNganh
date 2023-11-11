@@ -32,12 +32,14 @@ const promotionController = {
   updatePromotion: async (req, res) => {
     const { id } = req.params;
     const { name, percentage, description, startDate, endDate } = req.body;
+    const formattedStartDate = moment(startDate, 'DD/MM/YYYY').format('MM/DD/YYYY');
+    const formattedEndDate = moment(endDate, 'DD/MM/YYYY').format('MM/DD/YYYY');
     try {
-      const updatedPromotion = await promotionService.updatePromotion(id, name, percentage, description, startDate, endDate);
+      const updatedPromotion = await promotionService.updatePromotion(id, name, percentage, description, formattedStartDate, formattedEndDate);
       if (updatedPromotion.success) {
-        res.status(200).json(updatedPromotion);
+        res.status(200).json(updatedPromotion.promotion);
       } else {
-        res.status(404).json(updatedPromotion);
+        res.status(404).json({ message: updatedPromotion.message });
       }
     } catch (error) {
       console.error(error);

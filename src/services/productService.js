@@ -8,6 +8,7 @@ const Category = db.Categories;
 const CategoryProducts = db.CategoryProducts;
 const Product = db.Product;
 const SizeItem = db.SizeItem;
+const Size = db.Size;
 const Color = db.Color;
 const Version = db.Versions;
 const Promotion = db.Promotions;
@@ -20,6 +21,7 @@ const sequelize = new Sequelize('db-hkt-d-shop', 'root', '', {
   timezone: '+07:00',
   "logging": false
 });
+const moment = require('moment');
 
 const productService = {
   getByOrigin: async (origin) => {
@@ -59,6 +61,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -69,6 +74,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -78,6 +87,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Version: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -128,6 +138,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });        
   
@@ -138,6 +151,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null; 
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
         return {
           id: product.id,
           name: product.name,
@@ -148,6 +166,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -198,6 +217,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -208,6 +230,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -217,6 +243,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Version: product.Versions,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -267,6 +294,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });
   
@@ -277,6 +307,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null;
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
         return {
           id: product.id,
           name: product.name,
@@ -287,6 +322,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -381,6 +417,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]        
         });        
       
@@ -391,6 +430,10 @@ const productService = {
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
     
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;
           return {
             id: product.id,
             name: product.name,
@@ -400,6 +443,7 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            Rating: averageRating,
             Versions: product.Versions || [],
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
@@ -450,6 +494,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });
   
@@ -460,6 +507,11 @@ const productService = {
           ? product.price - (product.price * (discountPercentage / 100))
           : null;
   
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
+
         return {
           id: product.id,
           name: product.name,
@@ -470,6 +522,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
           Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
           hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice,
@@ -523,6 +576,9 @@ const productService = {
                   ],
                 },
             },
+            {
+              model: Review,  // Thêm mối quan hệ với Review            
+            },
           ]        
           });        
         
@@ -532,6 +588,11 @@ const productService = {
             const discountedPrice = hasPromotion
               ? product.price - (product.price * (discountPercentage / 100))
               : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+
+            // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+            const averageRating = product.Reviews && product.Reviews.length > 0
+              ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+              : null;
       
             return {
               id: product.id,
@@ -542,6 +603,7 @@ const productService = {
               type: product.type,
               gender: product.gender, 
               price: product.price,
+              Rating: averageRating,
               Versions: product.Versions || [],
               hasPromotion: hasPromotion ? discountPercentage : null,
               discountedPrice: discountedPrice,
@@ -557,9 +619,7 @@ const productService = {
 
   getByNameWithImage: async (name) => {
     try {
-      if (!name) {
-        throw new Error;
-      }
+      
       const currentDate = new Date();
       const products = await Product.findAll({
         where: {
@@ -596,6 +656,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });        
   
@@ -607,7 +670,13 @@ const productService = {
           : null; 
   
         const image = product.Versions.length > 0 ? product.Versions[0].image : null;
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
   
+        
+
         return {
           id: product.id,
           name: product.name,
@@ -618,6 +687,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: image, // Thêm ảnh từ phiên bản đầu tiên
+          Rating: averageRating,
           Version: product.Versions,
           hasPromotion: hasPromotion,
           discountedPrice: discountedPrice,
@@ -638,7 +708,13 @@ const productService = {
       const products = await Product.findAll({        
         include: [
           {
-            model: Version,            
+            model: Version,      
+            include: [
+              {
+                model: SizeItem, // Thêm mối quan hệ với SizeItem
+                attributes: ['quantity']
+              },
+            ],           
           },
           {
             model: Promotion,
@@ -647,56 +723,78 @@ const productService = {
               model: ProductPromotions,
               attributes: []
             },
-            required: false, // Sử dụng left join thay vì inner join
-              where: {
-                [Op.or]: [
-                  {
-                    '$Promotions.startDate$': { [Op.lte]: currentDate },
-                    '$Promotions.endDate$': { [Op.gte]: currentDate },
-                  },
-                  {
-                    '$Promotions.startDate$': { [Op.is]: null },
-                    '$Promotions.endDate$': { [Op.is]: null },
-                  },
-                ],
-              },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                },
+                {
+                  '$Promotions.startDate$': { [Op.is]: null },
+                  '$Promotions.endDate$': { [Op.is]: null },
+                },
+              ],
+            },
           },
-        ]        
-        });        
-      
-        const productsWithDiscountedPrice = products.map(product => {
-          const hasPromotion = product.Promotions && product.Promotions.length > 0;
-          const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
-          const discountedPrice = hasPromotion
-            ? product.price - (product.price * (discountPercentage / 100))
-            : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-          
-          // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
-          const firstVersionImage = product.Versions && product.Versions.length 
-            ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
-            : null;
-
-          return {
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            origin: product.origin,
-            brand: product.brand,
-            type: product.type,
-            gender: product.gender, 
-            price: product.price,
-            image: firstVersionImage,
-            Versions: product.Versions,
-            hasPromotion: hasPromotion ? discountPercentage : null,
-            discountedPrice: discountedPrice,
-          };
-        });
-        return productsWithDiscountedPrice;
-      
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
+        ]                
+      });        
+  
+      const productsWithDiscountedPrice = products.map(product => {        
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Tính tổng số lượng từ các phiên bản
+        const totalQuantity = product.Versions.reduce((sum, version) => {
+          if (version.SizeItems && version.SizeItems.length > 0) {
+            const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+            return sum + versionQuantity;
+          }
+          return sum;
+        }, 0);
+  
+        // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+        const firstVersionImage = product.Versions && product.Versions.length 
+          ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
+          : null;
+  
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender, 
+          price: product.price,
+          soldQuantity: product.soldQuantity,
+          image: firstVersionImage,
+          Versions: product.Versions,
+          Promotion: product.Promotions,
+          Rating: averageRating,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice: discountedPrice,
+          total: totalQuantity, // Tổng số lượng của sản phẩm
+        };
+      });
+      return productsWithDiscountedPrice;
+  
     } catch (error) {
       throw error;
     }
   },
+  
 
   getAllProductsOld: async () => {
     try {
@@ -704,7 +802,13 @@ const productService = {
       const products = await Product.findAll({        
         include: [
           {
-            model: Version,            
+            model: Version, 
+            include: [
+              {
+                model: SizeItem, // Thêm mối quan hệ với SizeItem
+                attributes: ['quantity']
+              },
+            ],            
           },
           {
             model: Promotion,
@@ -726,6 +830,9 @@ const productService = {
                   },
                 ],
               },
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
           },
         ],
         order: [['createdAt', 'ASC']],        
@@ -737,11 +844,25 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
+
+          // Tính tổng số lượng từ các phiên bản
+          const totalQuantity = product.Versions.reduce((sum, version) => {
+            if (version.SizeItems && version.SizeItems.length > 0) {
+              const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+              return sum + versionQuantity;
+            }
+            return sum;
+          }, 0);    
           
           // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
           const firstVersionImage = product.Versions && product.Versions.length 
             ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
             : null;
+
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;  
 
           return {
             id: product.id,
@@ -752,10 +873,14 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
+            Promotion: product.Promotions,
+            Rating: averageRating,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
+            total: totalQuantity, // Tổng số lượng của sản phẩm
           };
         });
         return productsWithDiscountedPrice;
@@ -772,6 +897,12 @@ const productService = {
         include: [
           {
             model: Version,            
+            include: [
+              {
+                model: SizeItem, // Thêm mối quan hệ với SizeItem
+                attributes: ['quantity']
+              },
+            ],  
           },
           {
             model: Promotion,
@@ -794,6 +925,9 @@ const productService = {
                 ],
               },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ],
         order: [['createdAt', 'DESC']],        
         });        
@@ -804,11 +938,25 @@ const productService = {
           const discountedPrice = hasPromotion
             ? product.price - (product.price * (discountPercentage / 100))
             : null; // Nếu không có khuyến mãi, discountedPrice sẽ là null
-          
+
+          // Tính tổng số lượng từ các phiên bản
+          const totalQuantity = product.Versions.reduce((sum, version) => {
+            if (version.SizeItems && version.SizeItems.length > 0) {
+              const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+              return sum + versionQuantity;
+            }
+            return sum;
+          }, 0);  
+            
           // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
           const firstVersionImage = product.Versions && product.Versions.length 
             ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image 
             : null;
+
+          // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+          const averageRating = product.Reviews && product.Reviews.length > 0
+            ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+            : null;  
 
           return {
             id: product.id,
@@ -819,10 +967,14 @@ const productService = {
             type: product.type,
             gender: product.gender, 
             price: product.price,
+            soldQuantity: product.soldQuantity,
             image: firstVersionImage,
             Versions: product.Versions,
+            Promotion: product.Promotions,
+            Rating: averageRating,
             hasPromotion: hasPromotion ? discountPercentage : null,
             discountedPrice: discountedPrice,
+            total: totalQuantity, // Tổng số lượng của sản phẩm
           };
         });
         return productsWithDiscountedPrice;
@@ -865,6 +1017,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ]
       });
   
@@ -877,6 +1032,11 @@ const productService = {
   
         // Sử dụng optional chaining và nullish coalescing để lấy image một cách an toàn
         const firstVersionImage = product.Versions[0]?.image ?? null;
+
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
   
         return {
           id: product.id,
@@ -889,6 +1049,7 @@ const productService = {
           price: product.price,
           image: firstVersionImage, // Thêm ảnh từ phiên bản đầu tiên
           Versions: product.Versions,
+          Rating: averageRating,
           hasPromotion,
           discountedPrice, // Giá đã giảm nếu có khuyến mãi, ngược lại là null
         };
@@ -934,6 +1095,9 @@ const productService = {
               ],
             },
           },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ],
         offset: offset,
         limit: pageSize,
@@ -949,6 +1113,11 @@ const productService = {
         // Lấy ảnh từ phiên bản đầu tiên được sắp xếp theo 'createdAt'
         const firstVersion = product.Versions
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
+
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
   
         return {
           id: product.id,
@@ -960,6 +1129,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: firstVersion ? firstVersion.image : null,
+          Rating: averageRating,
           hasPromotion,
           discountedPrice,
         };
@@ -975,66 +1145,76 @@ const productService = {
   
   getProductById: async (id) => {
     try {
-      const currentDate = new Date();
-      const product = await Product.findByPk(id, {
-        include: [
-          {
-            model: Version,            
-            include: [              
-              {
-                model: Color,
-                attributes: ['id', 'colorName'],
-              },
-              {
-                model: SizeItem,
-              }                         
+        const currentDate = new Date();
+        const product = await Product.findByPk(id, {
+            include: [
+                {
+                    model: Version,
+                    include: [
+                        {
+                            model: Color,
+                            attributes: ['id', 'colorName'],
+                        },
+                        {
+                            model: SizeItem,                       
+                            include: [ Size ]
+                        }
+                    ],
+                },
+                {
+                    model: Review,
+                },
+                {
+                    model: Promotion,
+                    attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+                    through: {
+                        model: ProductPromotions,
+                        attributes: []
+                    },
+                },
+                {
+                    model: Category,
+                    attributes: ['id', 'categoryName'],
+                },
             ],
-          },          
-          {
-            model: Review,
-            attributes: ['id', 'comment', 'rating'],
-          },       
-          {
-            model: Promotion,
-            attributes: ['id','name', 'percentage', 'startDate', 'endDate'],
-            through: {
-              model: ProductPromotions,
-              attributes: []
-            },
-          },
-          {
-            model: Category, // Thêm mối quan hệ với danh mục sản phẩm
-            attributes: ['id', 'categoryName'], // Chọn các thuộc tính bạn muốn hiển thị từ danh mục sản phẩm
-          },
-          
-        ],
-      });
-  
-      if (product) {                      
-        const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);        
-        if (productpromotion){                
-          const percent = await promotionService.getPromotionById(productpromotion.id);
-          if (percent){
-            if (percent.startDate <= currentDate && percent.endDate >= currentDate ){
-              product.dataValues.promotionName = percent.name;
-              const discount = percent.percentage;
-              const discountedPrice = product.price - (product.price * (discount / 100));
-              product.dataValues.discountedPrice = discountedPrice;
-            }        
-          } 
+        });
+
+        if (product) {
+            // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+            const averageRating = product.Reviews && product.Reviews.length > 0
+              ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+              : null;
+            const productpromotion = await productPromotionService.getProductPromotionsByProductId(product.id);
+            if (productpromotion) {
+                const percent = await promotionService.getPromotionById(productpromotion.id);                
+                if (percent) {            
+                  const startDate = moment(percent.startDate, 'DD/MM/YYYY');
+                  const endDate = moment(percent.endDate, 'DD/MM/YYYY');
+                  const currentDateMoment = moment(currentDate, 'YYYY/MM/DD');                          
+                    if (startDate <= currentDateMoment && endDate >= currentDateMoment) {
+                        product.dataValues.promotionName = percent.name;
+                        const discount = percent.percentage;
+                        const discountedPrice = product.price - (product.price * (discount / 100));
+                        
+                        product.dataValues.discountedPrice = discountedPrice;
+                        product.dataValues.promotionEndDate = percent.endDate;
+                    }
+                }
+            } else {
+                product.dataValues.promotionName = null;
+                product.dataValues.discountedPrice = null;
+            }
+            product.dataValues.Rating = averageRating;
+
+            return product;
         } else {
-          product.dataValues.promotionName = null;
-          product.dataValues.discountedPrice = 0;
-        }    
-        
-        return product;
-      } else {
-        throw new Error('Product not found.');
-      }
+            throw new Error('Product not found.');
+        }
     } catch (error) {
-      throw new Error('Error getting product: ' + error.message);
+        throw new Error('Error getting product: ' + error.message);
     }
-  },
+},
+
   
   createProduct: async (name, description, type, price, origin, brand, gender, categoryIds) => {
     try {
@@ -1141,7 +1321,10 @@ const productService = {
               startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
               endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') },
             }
-          }
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ],
         attributes: [
           'id',
@@ -1163,6 +1346,10 @@ const productService = {
       const productsWithImages = productsWithDiscount.map(product => {
         // Tìm ảnh đầu tiên trong số các phiên bản
         const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
     
         return {
           id: product.id,
@@ -1174,6 +1361,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          Rating: averageRating,
           hasPromotion: !!product.Promotions.length,
           discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
           Versions: product.Versions // Vẫn giữ thông tin phiên bản
@@ -1208,7 +1396,10 @@ const productService = {
               startDate: { [Op.lte]: Sequelize.literal('CURRENT_TIMESTAMP') },
               endDate: { [Op.gte]: Sequelize.literal('CURRENT_TIMESTAMP') },
             }
-          }
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
         ],
         attributes: [
           'id',
@@ -1230,6 +1421,10 @@ const productService = {
       const productsWithImages = productsWithDiscount.map(product => {
         // Tìm ảnh đầu tiên trong số các phiên bản
         const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
     
         return {
           id: product.id,
@@ -1241,6 +1436,7 @@ const productService = {
           gender: product.gender,
           price: product.price,
           image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          Rating: averageRating,
           hasPromotion: !!product.Promotions.length,
           discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
           Versions: product.Versions // Vẫn giữ thông tin phiên bản
@@ -1353,7 +1549,87 @@ const productService = {
       console.error('Error fetching unique origins:', error);
       throw error;
     }
-  }
+  },
+
+  getByGenderHaveImage: async (gender) => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        where: {
+          gender: {
+            [Op.like]: `%${gender}%`, // Tìm kiếm theo giới tính sản phẩm
+          }
+        },
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'colorId', 'productId', 'image'],
+            order: [['createdAt', 'ASC']],
+            separate: true, // Để đảm bảo áp dụng order
+            required: false // Đảm bảo rằng không cần Version để trả về sản phẩm
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+                {
+                  startDate: { [Op.is]: null },
+                  endDate: { [Op.is]: null },
+                },
+              ],
+            },
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
+        ]
+      });        
+  
+      const productsWithDetails = products.map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null; 
+  
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          image: product.Versions[0]?.image || null, // Sử dụng optional chaining để lấy ảnh
+          Rating: averageRating,
+          Versions: product.Versions || [], // Trả về mảng rỗng nếu không có Versions
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice,
+        };
+      });
+  
+      return productsWithDetails;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
     
 };
   

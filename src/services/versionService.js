@@ -167,14 +167,36 @@ const VersionService = {
         }
     },
 
-    getAllProductDetails: async () => {
+    getAllProductDetails:  async () => {
       try {
-        const versions = await Version.findAll();    
-        return {status: "success", data: versions};
+        const versions = await Version.findAll({
+          include: [
+            {
+              model: SizeItem,              
+            },
+          ],
+        });
+    
+        const result = versions.map(version => {
+          // Tính tổng số lượng từ SizeItems của mỗi phiên bản
+          const versionQuantity = version.SizeItems.reduce((sum, sizeItem) => sum + sizeItem.quantity, 0);
+    
+          return {
+            versionId: version.id,
+            colorId: version.colorId,
+            productId: version.productId,
+            image: version.image,
+            versionDescription: version.description,
+            sizeItems: version.SizeItems,
+            quantity: versionQuantity,
+          };
+        });
+    
+        return { status: "success", data: result };
       } catch (error) {
         throw error;
       }
-  }
+    }
 };
 
 module.exports = VersionService;

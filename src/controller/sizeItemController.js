@@ -3,10 +3,10 @@ const SizeItemService = require('../services/sizeItemService');
 const sizeItemController = {
   addSizeItem: async (req, res) => {
     try {
-      const { sizeId, versionId, quantity } = req.body; // Lấy thông tin sizeId, versionId, quantity từ body request
+      const { sizeName, versionId, quantity } = req.body; // Lấy thông tin sizeId, versionId, quantity từ body request
   
       // Gọi service để thêm SizeItem
-      const newSizeItem = await SizeItemService.addSizeItem(sizeId, versionId, quantity);
+      const newSizeItem = await SizeItemService.addSizeItem(sizeName, versionId, quantity);
   
       // Trả về SizeItem vừa được tạo
       res.status(200).json(newSizeItem);

@@ -5,11 +5,20 @@ const Size = db.Size;
 const Versions = db.Versions;
 
 const sizeItemService = {
-    addSizeItem: async (sizeId, versionId, quantity) => {
+    addSizeItem: async (sizeName, versionId, quantity) => {
       try {
+        // Kiểm tra xem size có tồn tại chưa
+        let size = await Size.findOne({ where: { sizeName: sizeName } });
+        console.log(size);
+    
+        // Nếu size chưa tồn tại, tạo mới
+        if (!size) {
+          size = await Size.create({ sizeName: sizeName });
+        }
+    
         // Tạo một SizeItem mới dựa trên thông tin được cung cấp
         const newSizeItem = await SizeItem.create({
-          sizeId: sizeId,
+          sizeId: size.id, // Sử dụng sizeId của Size đã có hoặc mới tạo
           versionId: versionId,
           quantity: quantity
         });
