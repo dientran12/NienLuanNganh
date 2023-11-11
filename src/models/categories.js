@@ -7,6 +7,7 @@ module.exports = (sequelize) => {
       Categories.belongsToMany(models.Product, {
         through: 'CategoryProducts', // Tên của bảng trung gian
         foreignKey: 'categoryId', // Khóa ngoại trong bảng trung gian liên kết với Categories
+        onDelete: ' CASCADE '
       });
     }
   }
