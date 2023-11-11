@@ -21,4 +21,5 @@ router.get('/get-by-id/:id', categoriesController.getCategoryById);
 // Xóa sản phẩm khỏi danh mục
 router.delete('/delete-product-from-category/:categoryId/IdProducts/:productId', categoriesController.removeProductFromCategory);
 
+// /delete-product-from-category?productId="uuuuu"&categoryId="paruiuhu"
 module.exports = router;
