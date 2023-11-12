@@ -4,6 +4,10 @@ const sizeItemController = {
   addSizeItem: async (req, res) => {
     try {
       const { sizeName, versionId, quantity } = req.body; // Lấy thông tin sizeId, versionId, quantity từ body request
+      // Kiểm tra các trường bắt buộc
+      if (!sizeName) return res.status(400).json({ success: false, message: 'Tên Size là bắt buộc.' });
+      if (!versionId) return res.status(400).json({ success: false, message: 'VersionId là bắt buộc.' });
+      if (!quantity) return res.status(400).json({ success: false, message: 'Số lượng là bắt buộc.' });
   
       // Gọi service để thêm SizeItem
       const newSizeItem = await SizeItemService.addSizeItem(sizeName, versionId, quantity);
