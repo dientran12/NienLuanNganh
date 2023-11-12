@@ -108,6 +108,22 @@ const promotionController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
+
+  getProductsByPromotion: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await promotionService.getProductsByPromotion(id);
+
+      if (result.success) {
+        res.status(200).json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
 };
 
 module.exports = promotionController;
