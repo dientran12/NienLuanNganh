@@ -61,7 +61,7 @@ router.get('/get-all-for-customer-in-promotion', productController.getAllProduct
 
 module.exports = router;
 
-// // Lấy số lượng sản phẩm theo id +++
+// // Lấy số lượng sản phẩm theo id 
 // router.get('/get-total-quantity/:productId', productController.getTotalQuantityForProductController);
 // // Lấy số lượng với version cụ thể +++
 // router.get('/get-quantity-version/:productId/:colorId/:sizeId', productController.getQuantityVersion);
