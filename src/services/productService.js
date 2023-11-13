@@ -1023,7 +1023,9 @@ const productService = {
         ]
       });
   
-      const productsWithDiscountedPrice = products.map(product => {
+      const productsWithDiscountedPrice = products
+      .filter(product => product.Versions && product.Versions.length > 0)
+      .map(product => {
         const hasPromotion = product.Promotions && product.Promotions.length > 0;
         const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
         const discountedPrice = hasPromotion
@@ -1826,6 +1828,83 @@ const productService = {
       return productsWithDiscountedPrice;
     } catch (error) {
       throw error;
+    }
+  },
+
+  getAllProductsInPromotionCustomer: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Version,
+            attributes: ['id', 'productId', 'colorId', 'image'],
+            limit: 1,
+            order: [['createdAt', 'ASC']],
+            separate: true 
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: []
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                }
+              ],
+            },
+          },
+          {
+            model: Review,  // Thêm mối quan hệ với Review            
+          },
+        ]
+      });
+  
+      const productsWithDiscountedPrice = products
+      .filter(product => product.Versions && product.Versions.length > 0)
+      .map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Sử dụng optional chaining và nullish coalescing để lấy image một cách an toàn
+        const firstVersionImage = product.Versions[0]?.image ?? null;
+
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null; 
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender, 
+          price: product.price,
+          image: firstVersionImage, // Thêm ảnh từ phiên bản đầu tiên
+          Versions: product.Versions,
+          Rating: averageRating,
+          hasPromotion,
+          discountedPrice, // Giá đã giảm nếu có khuyến mãi, ngược lại là null
+        };
+      }).filter((product) => product.hasPromotion !== false);
+  
+      return productsWithDiscountedPrice;
+  
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Internal Server Error' };
     }
   },
     

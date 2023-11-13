@@ -379,6 +379,16 @@ const productController = {
     }
   },
 
+  getAllProductsInPromotionCustomer: async (req, res) => {
+    try {
+      const productsWithDiscount = await productService.getAllProductsInPromotionCustomer();
+      res.status(200).json({ success: true, products: productsWithDiscount });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
 };
 
 module.exports = productController;

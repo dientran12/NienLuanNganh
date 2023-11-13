@@ -16,7 +16,7 @@ router.get('/get-all-for-admin', productController.getAllProducts);
 router.get('/get-all-for-admin-old', productController.getAllProductsOld);
 // Lấy tất cả sản phẩm cho admin (sắp xếp theo ngày tạo mới đến cũ)
 router.get('/get-all-for-admin-new', productController.getAllProductsNew);
-// Lấy tất cả sản phẩm cho custom
+// Lấy tất cả sản phẩm cho customer
 router.get('/get-all-for-customer', productController.getAllProductsCustomer);
 // Lấy tất cả sản phẩm và phân trang theo yêu cầu
 router.get('/get-product-on-page', productController.getAllProductsOnPage);
@@ -56,6 +56,8 @@ router.get('/get-by-gender-have-image', productController.getByGenderHaveImage);
 router.get('/get-all-in-promotion', productController.getAllProductsInPromotion);
 // Lấy tất cả sản phẩm chưa có khuyến mãi
 router.get('/get-all-no-promotion', productController.getAllProductsNoPromotion);
+// Lấy tất cả sản phẩm còn trong thời gian khuyến mãi cho customer
+router.get('/get-all-for-customer-in-promotion', productController.getAllProductsInPromotionCustomer);
 
 module.exports = router;
 
