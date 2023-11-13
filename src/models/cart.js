@@ -11,11 +11,11 @@
        */
       static associate(models) {
         // define association here
-        Cart.belongsTo(models.User, {foreignKey:'userID', targetKey:'id', as:'userdata'})
+        Cart.belongsTo(models.User, {foreignKey:'userId', targetKey:'id', as:'userdata'})
       }
     }
     Cart.init({
-      userID: {
+      userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
