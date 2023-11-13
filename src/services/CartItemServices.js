@@ -4,18 +4,15 @@ import db from '../models'
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
 
-export const addToCartItem = async (userId, productId) => {
+export const addToCartItem = async (userId, productId, quantity) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userID: userId } });
 
     const Versions = await db.Versions.findByPk(productId);
-
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
-
-
     const price = product.price;
 
     if (!cart) {
@@ -31,24 +28,25 @@ export const addToCartItem = async (userId, productId) => {
     if (cartItem) {
       // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng quantity lên 1
       return {
-        success: true,
+        success: false,
         message: 'Product already exists',
         cartItem,
       }
-    } else {
-      // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
-      await db.CartItem.create({
-        cartID: cart.id,
-        productID: productId,
-        quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
-        price, // Thay thế bằng giá của sản phẩm
-      });
     }
+    // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
+    const newcartitem = await db.CartItem.create({
+      cartID: cart.id,
+      productID: productId,
+      quantity, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
+      price, // Thay thế bằng giá của sản phẩm
+    });
 
     return {
       success: true,
       message: 'Product added to cart successfully',
+      newcartitem,
     };
+
   } catch (error) {
     console.error('Error in addToCartItem service:', error);
     return {
@@ -105,7 +103,8 @@ export const deletecart = async (userId, productId) => {
 
       resolve({
         status: 'OK',
-        message: `Delete product SUCCESSFULLY`
+        message: `Delete product SUCCESSFULLY`,
+        cartItem,
       })
     } catch (e) {
       reject(e)
