@@ -4,12 +4,12 @@ import db from '../models'
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
 
-export const addToCartItem = async (userId, productId, quantity) => {
+export const addToCartItem = async (userId, versionId, quantity) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userID: userId } });
 
-    const Versions = await db.Versions.findByPk(productId);
+    const Versions = await db.Versions.findByPk(versionId);
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
@@ -22,7 +22,7 @@ export const addToCartItem = async (userId, productId, quantity) => {
 
     // Tìm sản phẩm trong giỏ hàng dựa trên productId
     const cartItem = await db.CartItem.findOne({
-      where: { cartID: cart.id, productID: productId },
+      where: { cartID: cart.id, versionID: versionId },
     });
 
     if (cartItem) {
@@ -36,7 +36,7 @@ export const addToCartItem = async (userId, productId, quantity) => {
     // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
     const newcartitem = await db.CartItem.create({
       cartID: cart.id,
-      productID: productId,
+      versionID: versionId,
       quantity, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
       price, // Thay thế bằng giá của sản phẩm
     });
@@ -57,14 +57,14 @@ export const addToCartItem = async (userId, productId, quantity) => {
 };
 
 
-export const updatecart = async (userId, productId, data) => {
+export const updatecart = async (userId, versionId, data) => {
   return new Promise(async (resolve, reject) => {
     try {
       let cart = await db.Cart.findOne({ where: { userID: userId } });
       const cartItem = await db.CartItem.findOne({
-        where: { cartID: cart.id, productID: productId },
+        where: { cartID: cart.id, versionID: versionId },
       });
-      console.log('product ' + productId + ' dataUpdate in backend ', data)
+      console.log('product ' + versionId + ' dataUpdate in backend ', data)
       if (!cartItem) {
         resolve({
           status: 'OK',
@@ -84,13 +84,13 @@ export const updatecart = async (userId, productId, data) => {
   })
 }
 
-export const deletecart = async (userId, productId) => {
+export const deletecart = async (userId, versionId) => {
   return new Promise(async (resolve, reject) => {
     try {
       let cart = await db.Cart.findOne({ where: { userID: userId } });
 
       const cartItem = await db.CartItem.findOne({
-        where: { cartID: cart.id, productID: productId },
+        where: { cartID: cart.id, versionID: versionId },
       });
 
       if (!cartItem) {

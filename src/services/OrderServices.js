@@ -2,7 +2,7 @@ import { response } from 'express';
 import db from '../models'
 import * as emailService from './emailService';
 
-export const addToOrder = async (userId, productId, quantity) => {
+export const addToOrder = async (userId, versionId, quantity) => {
   try {
 
     const order = await db.Order.create({ userId });
@@ -17,11 +17,11 @@ export const addToOrder = async (userId, productId, quantity) => {
 
 
 
-    const version = await db.Versions.findByPk(productId);
+    const version = await db.Versions.findByPk(versionId);
     const productID = version.productId;
     const product = await db.Product.findByPk(productID);
     const price = product.price;
-    const sizeitem = await db.SizeItem.findOne({ where: { versionId: productId } })
+    const sizeitem = await db.SizeItem.findOne({ where: { versionId: versionId } })
     const quantityproduct = sizeitem.quantity;
 
     if (quantity > quantityproduct) {
@@ -32,7 +32,7 @@ export const addToOrder = async (userId, productId, quantity) => {
     } else {
       const orderDetail = await db.OrderDetail.create({
         orderId: order.id,
-        productId: productId,
+        versionId: versionId,
         quantity,
         price,
         totalPrice: 0,
@@ -88,7 +88,8 @@ export const cancelOrder = async (orderId) => {
 
     return {
       success: true,
-      message: 'Order canceled successfully'
+      message: 'Order canceled successfully',
+      order
     };
   } catch (error) {
     console.error('Error in cancelOrder service:', error);
@@ -120,7 +121,7 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       // Tạo một mục đơn hàng mới từ thông tin mục giỏ hàng
       const orderdetail = await db.OrderDetail.create({
         orderId: order.id,
-        productId: cartItem.productID,
+        versionId: cartItem.versionID,
         quantity: cartItem.quantity,
         price: cartItem.price,
         totalPrice: 0,
@@ -186,14 +187,14 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
     // Cập nhật số lượng sản phẩm còn lại sau khi xác nhận đơn hàng
     for (const orderDetail of orderDetails) {
-      const product = await db.SizeItem.findOne({ where: { versionId: orderDetail.productId } });
+      const product = await db.SizeItem.findOne({ where: { versionId: orderDetail.versionId } });
 
-      const cartitem = await db.CartItem.findOne({ where: { productID: orderDetail.productId } })
+      const cartitem = await db.CartItem.findOne({ where: { versionID: orderDetail.versionId } })
 
       const version = await db.Versions.findByPk(product.versionId)
 
       if (!product) {
-        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.productId}`);
+        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.versionId}`);
       }
 
       // Giảm số lượng sản phẩm còn lại

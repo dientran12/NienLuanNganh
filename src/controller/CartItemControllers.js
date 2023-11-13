@@ -4,17 +4,17 @@ export const addtocartitem = async (req, res) => {
   try {
     
     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const productId = req.params.productId;
+    const versionId = req.params.versionId;
     const quantity = req.body.quantity;
 
-    if (!productId) {
+    if (!versionId) {
       return res.status(400).json({
         err: 1,
         mes: 'Missing payload',
       });
     }
 
-    const response = await services.addToCartItem(userId, productId, quantity);
+    const response = await services.addToCartItem(userId, versionId, quantity);
 
     if (response.success) {
       return res.status(201).json({
@@ -41,16 +41,16 @@ export const addtocartitem = async (req, res) => {
 
 export const updatecart = async (req, res) => {
     try {
-        const productId = req.params.productId
+        const versionId = req.params.versionId
         const userId = req.params.userId
         const data = req.body
-        if (!productId) {
+        if (!versionId) {
             return res.status(200).json({
                 status: "error",
                 message: "The Id is required"
             })
         }
-        const response = await services.updatecart(userId, productId, data)
+        const response = await services.updatecart(userId, versionId, data)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
@@ -61,15 +61,15 @@ export const updatecart = async (req, res) => {
 
 export const deletecart = async (req, res) => {
     try {
-        const productId = req.params.productId
+        const versionId = req.params.versionId
         const userId = req.params.userId
-        if (!productId) {
+        if (!versionId) {
             return res.status(200).json({
                 status: "error",
                 message: "The Id is required"
             })
         }
-        const response = await services.deletecart(userId,productId)
+        const response = await services.deletecart(userId,versionId)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
