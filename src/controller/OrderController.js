@@ -18,7 +18,7 @@ export const addtoOrder= async (req, res) => {
     const response = await services.addToOrder(userId, productId, quantity);
 
     if (response.success) {
-      return res.status(200).json({
+      return res.status(201).json({
         status: 'OK',
         message: response.message,
         OrderDetail: response.OrderDetail,
@@ -66,7 +66,9 @@ export const moveFromCartToNewOrderController = async (req, res) => {
     const errorResults = results.filter((result) => !result.success);
 
     if (successResults.length === results.length) {
-      return res.status(200).json({ message: 'Products moved from cart to new order successfully' });
+      return res.status(201).json({ 
+        results,
+      });
     } else {
       return res.status(400).json({ errors: errorResults.map((result) => result.message) });
     }
@@ -100,5 +102,16 @@ export const confirmOrder = async (req, res) => {
       success: false,
       message: 'Lỗi máy chủ nội bộ',
     });
+  }
+};
+
+export const getTotalForMonth = async (req, res) => {
+  const { month, year } = req.body;
+  const total = await services.calculateTotalForMonth(month, year);
+
+  if (total !== null) {
+    res.json({ total });
+  } else {
+    res.status(500).json({ error: 'Lỗi khi tính tổng giá trị đơn hàng trong tháng.' });
   }
 };

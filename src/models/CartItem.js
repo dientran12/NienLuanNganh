@@ -30,7 +30,10 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id', // Tên trường khóa chính của bảng Size
       },
     },
-    quantity: DataTypes.INTEGER,
+    quantity: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
     price: DataTypes.INTEGER
   }, {
     sequelize,
