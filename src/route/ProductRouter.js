@@ -16,7 +16,7 @@ router.get('/get-all-for-admin', productController.getAllProducts);
 router.get('/get-all-for-admin-old', productController.getAllProductsOld);
 // Lấy tất cả sản phẩm cho admin (sắp xếp theo ngày tạo mới đến cũ)
 router.get('/get-all-for-admin-new', productController.getAllProductsNew);
-// Lấy tất cả sản phẩm cho custom
+// Lấy tất cả sản phẩm cho customer
 router.get('/get-all-for-customer', productController.getAllProductsCustomer);
 // Lấy tất cả sản phẩm và phân trang theo yêu cầu
 router.get('/get-product-on-page', productController.getAllProductsOnPage);
@@ -52,6 +52,7 @@ router.get('/get-by-brand-have-image', productController.getByBrandHaveImage);
 router.get('/get-by-origin-have-image', productController.getByOriginHaveImage);
 // Lấy sản phẩm theo gender (có ảnh)
 router.get('/get-by-gender-have-image', productController.getByGenderHaveImage);
+
 
 module.exports = router;
 
