@@ -1,6 +1,7 @@
 import express from 'express';
 let router = express.Router();
 import UserRouter from './UserRouter.js';
+import CartRouter from './CartRouter.js'
 import ProductRouter from './ProductRouter.js';
 import colorRouter from './ColorRouter.js';
 import sizeRouter from './SizeRouter.js';
@@ -8,11 +9,18 @@ import detailRouter from './VersionRouter.js';
 import categoryRouter from './CategoriesRouter.js';
 import PromotionRouter from './PromotionRouter.js';
 import ReviewRouter from './ReviewRouter.js';
+import OrderRouter from './OrderRouter.js';
 import SizeItemRouter from './SizeItemRouter.js';
 
 let initWebRouter = (app) => {
     // API của User
     router.use('/api/user', UserRouter);
+
+    // router.use('/api/product', ProductRouter);
+    router.use('/api/cart',CartRouter)
+    router.use('/api/user', UserRouter);
+    router.use('/apiproduct', ProductRouter);
+
     // API của Product
     router.use('/api/product', ProductRouter);
     // API của Color
@@ -29,6 +37,8 @@ let initWebRouter = (app) => {
     router.use('/api/review', ReviewRouter);
     // API của SizeItem
     router.use('/api/sizeitem', SizeItemRouter)
+
+    router.use('/api/order', OrderRouter);
 
     return app.use('/', router);
 }
