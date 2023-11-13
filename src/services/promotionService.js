@@ -1,7 +1,10 @@
 const db = require('../models/index');
+const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 const Promotion = db.Promotions;
 const Product = db.Product;
 const ProductPromotions = db.ProductPromotions;
+const Version = db.Versions;
 
 const promotionService = {
     getAllPromotions: async () => {
@@ -105,40 +108,125 @@ const promotionService = {
           console.error(error);
         }
       },
+
       applyPromotionToProduct: async (productId, promotionId) => {
         try {
-            const product = await Product.findByPk(productId);
-            const promotion = await Promotion.findByPk(promotionId);
-    
-            if (!product || !promotion) {
-                return { success: false, message: 'Sản phẩm hoặc khuyến mãi không tồn tại' };
+          const product = await Product.findByPk(productId);
+          const promotion = await Promotion.findByPk(promotionId);
+      
+          if (!product || !promotion) {
+            return { success: false, message: 'Sản phẩm hoặc khuyến mãi không tồn tại' };
+          }
+      
+          // Tìm thông tin khuyến mãi cũ của sản phẩm
+          const existingLink = await ProductPromotions.findOne({
+            where: {
+              productId: productId,
+            },
+            include: [
+              {
+                model: Promotion,
+              },
+            ],
+          });
+      
+          // Nếu sản phẩm đã được áp dụng khuyến mãi trước đó
+          if (existingLink) {
+            const oldPromotion = existingLink.Promotion;
+            // Nếu đã có khuyến mãi này trước đó
+            if (oldPromotion && oldPromotion.id == promotionId) {
+              return {
+                success: false,
+                message: 'Sản phẩm đã được áp dụng khuyến mãi này trước đó.',
+                oldPromotion: oldPromotion,
+              };
+            } else {
+              // Nếu sản phẩm đã có khuyến mãi khác, thực hiện cập nhật khuyến mãi mới
+              await existingLink.update({ promotionId: promotionId });
+              return {
+                success: true,
+                message: 'Sản phẩm đã được cập nhật khuyến mãi thành công.',
+                oldPromotion: oldPromotion,
+                newPromotion: promotion,
+              };
             }
-    
-            const existingLink = await ProductPromotions.findOne({
-                where: {
-                    productId: productId                    
-                }
-            });
-    
-            if (existingLink) {
-                const id = existingLink.promotionId;
-                const applyPromotion = await Promotion.findByPk(id);
-                return { success: false, message: 'Sản phẩm này đã được áp dụng khuyến mãi.', Detail: applyPromotion };
-            }
-    
-            const apply = await ProductPromotions.create({
-                productId: productId,
-                promotionId: promotionId
-            });
-    
-            // Áp dụng logic khuyến mãi (ví dụ: giảm giá sản phẩm)
-    
-            return { infomation: apply, success: true, message: 'Áp dụng khuyến mãi cho sản phẩm thành công.' };
+          }
+      
+          // Nếu sản phẩm chưa được áp dụng khuyến mãi trước đó
+          const apply = await ProductPromotions.create({
+            productId: productId,
+            promotionId: promotionId,
+          });
+      
+          return { success: true, message: 'Áp dụng khuyến mãi cho sản phẩm thành công.' };
         } catch (error) {
-            console.error(error);
-            return { success: false, message: 'Internal Server Error' };
+          console.error(error);
+          return { success: false, message: 'Internal Server Error' };
         }
       },
+    
+      getProductsByPromotion: async (id) => {
+        try {
+          const promotion = await Promotion.findByPk(id);
+      
+          if (!promotion) {
+            return { success: false, message: 'Khuyến mãi không tồn tại' };
+          }
+      
+          const currentDate = new Date();
+          const products = await promotion.getProducts({
+            include: [
+              {
+                model: Version,
+                attributes: ['id', 'productId', 'colorId', 'image'],
+                order: [['createdAt', 'ASC']],
+                separate: true,
+                required: false,
+              },
+              {
+                model: Promotion,
+                attributes: ['name', 'percentage'],
+                through: {
+                  model: ProductPromotions,
+                  attributes: [],
+                },
+                required: false,
+                where: {
+                  startDate: { [Op.lte]: currentDate },
+                  endDate: { [Op.gte]: currentDate },
+                },
+              },
+            ],
+          });
+      
+          // Transform the products array to calculate discounted price and add image
+          const productsWithDetails = products.map((product) => {
+            const productJson = product.get({ plain: true });
+            delete productJson.CategoryProducts; // Xóa thông tin CategoryProducts
+      
+            const hasPromotion = product.Promotions && product.Promotions.length > 0;
+            const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+            const discountedPrice = hasPromotion
+              ? product.price - (product.price * (discountPercentage / 100))
+              : null;
+      
+            const firstVersionImage = product.Versions[0]?.image || null;
+      
+            return {
+              ...productJson,
+              discountPercentage: hasPromotion ? discountPercentage : null,
+              discountedPrice,
+              image: firstVersionImage,
+              Versions: product.Versions || [],
+            };
+          });
+      
+          return { success: true, products: productsWithDetails };
+        } catch (error) {
+          console.error(error);
+          return { success: false, message: 'Lỗi Server Nội bộ' };
+        }
+      },    
 
 }
 module.exports = promotionService;

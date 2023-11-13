@@ -14,6 +14,8 @@ router.post('/create', promotionController.createPromotion);
 router.put('/update/:id', promotionController.updatePromotion);
 // Xóa khuyến mãi
 router.delete('/delete/:id', promotionController.deletePromotion);
+// Lấy tất cả sản phẩm với id khuyến mãi
+router.get('/get-by-promotion/:id', promotionController.getProductsByPromotion);
 
 // Áp dụng khuyến mãi cho sản phẩm thông qua id
 router.post('/products/:productId/promotions/:promotionId', promotionController.applyPromotionToProduct);
