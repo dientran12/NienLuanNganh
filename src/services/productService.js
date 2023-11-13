@@ -1652,6 +1652,182 @@ const productService = {
       throw error;
     }
   },
+
+  getAllProductsInPromotion: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Version,
+            include: [
+              {
+                model: SizeItem,
+                attributes: ['quantity'],
+              },
+            ],
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: [],
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                }
+              ],
+            },
+          },
+          {
+            model: Review,
+          },
+        ],
+      });
+  
+      const productsWithDiscountedPrice = products.map((product) => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Tính tổng số lượng từ các phiên bản
+        const totalQuantity = product.Versions.reduce((sum, version) => {
+          if (version.SizeItems && version.SizeItems.length > 0) {
+            const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+            return sum + versionQuantity;
+          }
+          return sum;
+        }, 0);
+  
+        // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+        const firstVersionImage = product.Versions && product.Versions.length
+          ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image
+          : null;
+  
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          soldQuantity: product.soldQuantity,
+          image: firstVersionImage,
+          Versions: product.Versions,
+          Promotion: product.Promotions,
+          Rating: averageRating,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice: discountedPrice,
+          total: totalQuantity, // Tổng số lượng của sản phẩm
+        };
+      }).filter((product) => product.hasPromotion !== null);
+      return productsWithDiscountedPrice;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  getAllProductsNoPromotion: async () => {
+    try {
+      const currentDate = new Date();
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Version,
+            include: [
+              {
+                model: SizeItem,
+                attributes: ['quantity'],
+              },
+            ],
+          },
+          {
+            model: Promotion,
+            attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+            through: {
+              model: ProductPromotions,
+              attributes: [],
+            },
+            required: false,
+            where: {
+              [Op.or]: [
+                {
+                  '$Promotions.startDate$': { [Op.lte]: currentDate },
+                  '$Promotions.endDate$': { [Op.gte]: currentDate },
+                }
+              ],
+            },
+          },
+          {
+            model: Review,
+          },
+        ],
+      });
+  
+      const productsWithDiscountedPrice = products.map((product) => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Tính tổng số lượng từ các phiên bản
+        const totalQuantity = product.Versions.reduce((sum, version) => {
+          if (version.SizeItems && version.SizeItems.length > 0) {
+            const versionQuantity = version.SizeItems.reduce((subSum, sizeItem) => subSum + sizeItem.quantity, 0);
+            return sum + versionQuantity;
+          }
+          return sum;
+        }, 0);
+  
+        // Sắp xếp các Versions theo 'createdAt' và lấy ra image từ phiên bản đầu tiên
+        const firstVersionImage = product.Versions && product.Versions.length
+          ? product.Versions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0].image
+          : null;
+  
+        // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
+        const averageRating = product.Reviews && product.Reviews.length > 0
+          ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+          : null;
+  
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          origin: product.origin,
+          brand: product.brand,
+          type: product.type,
+          gender: product.gender,
+          price: product.price,
+          soldQuantity: product.soldQuantity,
+          image: firstVersionImage,
+          Versions: product.Versions,
+          Promotion: product.Promotions,
+          Rating: averageRating,
+          hasPromotion: hasPromotion ? discountPercentage : null,
+          discountedPrice: discountedPrice,
+          total: totalQuantity, // Tổng số lượng của sản phẩm
+        };
+      }).filter((product) => product.hasPromotion === null);
+      return productsWithDiscountedPrice;
+    } catch (error) {
+      throw error;
+    }
+  },
     
 };
   

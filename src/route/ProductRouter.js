@@ -52,7 +52,10 @@ router.get('/get-by-brand-have-image', productController.getByBrandHaveImage);
 router.get('/get-by-origin-have-image', productController.getByOriginHaveImage);
 // Lấy sản phẩm theo gender (có ảnh)
 router.get('/get-by-gender-have-image', productController.getByGenderHaveImage);
-
+// Lấy tất cả sản phẩm còn khuyến mãi
+router.get('/get-all-in-promotion', productController.getAllProductsInPromotion);
+// Lấy tất cả sản phẩm chưa có khuyến mãi
+router.get('/get-all-no-promotion', productController.getAllProductsNoPromotion);
 
 module.exports = router;
 
