@@ -176,7 +176,11 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
       include: [{ model: db.OrderDetail }]
     });
 
-
+    if(!paymentMethod){
+      return{
+        success: false,
+      }
+    }
     await order.update({ shippingAddress, paymentMethod })
 
     // Lấy thông tin sản phẩm trong đơn hàng

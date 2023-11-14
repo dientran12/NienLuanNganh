@@ -84,7 +84,7 @@ export const confirmOrder = async (req, res) => {
     const {shippingAddress, paymentMethod} = req.body;
     const order = await services.confirmOrder(orderId, shippingAddress, paymentMethod);
 
-    if (!order) {
+    if (!order || !paymentMethod) {
       return res.status(400).json({
         success: false,
         message: 'Không thể xác nhận đơn hàng do thiếu thông tin liên hệ',

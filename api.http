@@ -44,16 +44,17 @@ Content-Type: application/json
 
 {
   "userId": "1",
-  "cartItemIds": [3,2]
+  "cartItemIds": [9,11]
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/4
+POST http://localhost:3001/api/order/confirmOrder/2
 Content-Type: application/json
 
 {
-  "shippingAddress": "hau giang", 
+  "shippingAddress": "hau giang",
   "paymentMethod": "PayPal"
+  
 }
 
 ###
