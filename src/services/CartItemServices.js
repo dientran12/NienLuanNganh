@@ -116,7 +116,7 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
   try {
     const cartID = await db.CartItem.findOne({
       where: { id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Versions, as: 'productdata' }]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.SizeItem, as: 'productdata' }]
     })
     resolve({
       err: response ? 0 : 1,
@@ -144,7 +144,7 @@ export const getAllCartItem = async (userId) => {
     // Tìm tất cả các mục trong giỏ hàng của người dùng
     const cartItems = await db.CartItem.findAll({
       where: { cartId: cart.id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Versions, as: 'productdata' }]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.SizeItem, as: 'productdata' }]
     });
 
     return {
