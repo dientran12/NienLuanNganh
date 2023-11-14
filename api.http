@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/cart/addtocart/1/2
+POST http://localhost:3001/api/cart/addtocart/1/4
 Content-Type: application/json
 
 {
@@ -6,7 +6,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3001/api/cart/deletecart/1/5
+DELETE http://localhost:3001/api/cart/deletecart/1/4
 Content-Type: application/json
 
 ###

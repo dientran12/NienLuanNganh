@@ -9,7 +9,9 @@ export const addToCartItem = async (userId, sizeItemId, quantity) => {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userId: userId } });
 
-    const Versions = await db.Versions.findByPk(sizeItemId);
+    const sizeitem = await db.SizeItem.findByPk(sizeItemId);
+    const versionid = sizeitem.versionId;
+    const Versions = await db.Versions.findByPk(versionid);
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
