@@ -104,6 +104,14 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
     // Tạo một đơn hàng mới cho người dùng
     const order = await db.Order.create({ userId });
 
+    const userid = order.userId; // Lấy userId từ đối tượng order
+    const user = await db.User.findByPk(userid); // Sử dụng userId để truy xuất người dùng
+
+    const address = user.address;
+    await db.Order.update({ shippingAddress: address }, {
+      where: { id: order.id },
+    });
+
     // Tạo một mảng các promise để chuyển từ giỏ hàng sang đơn hàng
     const promises = cartItemIds.map(async (cartItemId) => {
       const cartItem = await db.CartItem.findByPk(cartItemId);
