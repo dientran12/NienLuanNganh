@@ -2,7 +2,7 @@ import { response } from 'express';
 import db from '../models'
 import * as emailService from './emailService';
 
-export const addToOrder = async (userId, versionId, quantity) => {
+export const addToOrder = async (userId, sizeItemId, quantity) => {
   try {
 
     const order = await db.Order.create({ userId });
@@ -14,14 +14,12 @@ export const addToOrder = async (userId, versionId, quantity) => {
       where: { id: order.id },
     });
 
-
-
-
+    const sizeitem = await db.SizeItem.findByPk(sizeItemId)
+    const versionId = sizeitem.versionId
     const version = await db.Versions.findByPk(versionId);
     const productID = version.productId;
     const product = await db.Product.findByPk(productID);
     const price = product.price;
-    const sizeitem = await db.SizeItem.findOne({ where: { versionId: versionId } })
     const quantityproduct = sizeitem.quantity;
 
     if (quantity > quantityproduct) {
@@ -32,7 +30,7 @@ export const addToOrder = async (userId, versionId, quantity) => {
     } else {
       const orderDetail = await db.OrderDetail.create({
         orderId: order.id,
-        versionId: versionId,
+        sizeItemId: sizeItemId,
         quantity,
         price,
         totalPrice: 0,
@@ -121,7 +119,7 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       // Tạo một mục đơn hàng mới từ thông tin mục giỏ hàng
       const orderdetail = await db.OrderDetail.create({
         orderId: order.id,
-        versionId: cartItem.versionID,
+        sizeItemId: cartItem.sizeItemId,
         quantity: cartItem.quantity,
         price: cartItem.price,
         totalPrice: 0,
@@ -129,6 +127,9 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
 
 
       const totalPrice = cartItem.price * cartItem.quantity;
+
+      // Sau đó, cập nhật totalPrice trong OrderDetail
+      await orderdetail.update({ totalPrice });
 
       // Tính toán tổng giá trị của tất cả các mục đơn hàng trong đơn hàng
       const totalAmount = await db.OrderDetail.sum('totalPrice', {
@@ -139,9 +140,6 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       await db.Order.update({ totalAmount }, {
         where: { id: order.id },
       });
-
-      // Sau đó, cập nhật totalPrice trong OrderDetail
-      await orderdetail.update({ totalPrice });
 
       return {
         success: true,
@@ -187,14 +185,14 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
     // Cập nhật số lượng sản phẩm còn lại sau khi xác nhận đơn hàng
     for (const orderDetail of orderDetails) {
-      const product = await db.SizeItem.findOne({ where: { versionId: orderDetail.versionId } });
-
-      const cartitem = await db.CartItem.findOne({ where: { versionID: orderDetail.versionId } })
+      const product = await db.SizeItem.findByPk(orderDetail.sizeItemId);
+      console.log(product)
+      const cartitem = await db.CartItem.findOne({ where: { sizeItemId: orderDetail.sizeItemId } })
 
       const version = await db.Versions.findByPk(product.versionId)
 
       if (!product) {
-        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.versionId}`);
+        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.sizeItemId}`);
       }
 
       // Giảm số lượng sản phẩm còn lại

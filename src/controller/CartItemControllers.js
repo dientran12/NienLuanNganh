@@ -4,17 +4,17 @@ export const addtocartitem = async (req, res) => {
   try {
     
     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const versionId = req.params.versionId;
+    const sizeItemId = req.params.sizeItemId;
     const quantity = req.body.quantity;
 
-    if (!versionId) {
+    if (!sizeItemId) {
       return res.status(400).json({
         err: 1,
         mes: 'Missing payload',
       });
     }
 
-    const response = await services.addToCartItem(userId, versionId, quantity);
+    const response = await services.addToCartItem(userId, sizeItemId, quantity);
 
     if (response.success) {
       return res.status(201).json({
@@ -41,16 +41,16 @@ export const addtocartitem = async (req, res) => {
 
 export const updatecart = async (req, res) => {
     try {
-        const versionId = req.params.versionId
+        const sizeItemId = req.params.sizeItemId
         const userId = req.params.userId
         const data = req.body
-        if (!versionId) {
+        if (!sizeItemId) {
             return res.status(200).json({
                 status: "error",
                 message: "The Id is required"
             })
         }
-        const response = await services.updatecart(userId, versionId, data)
+        const response = await services.updatecart(userId, sizeItemId, data)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
@@ -61,15 +61,15 @@ export const updatecart = async (req, res) => {
 
 export const deletecart = async (req, res) => {
     try {
-        const versionId = req.params.versionId
+        const sizeItemId = req.params.sizeItemId
         const userId = req.params.userId
-        if (!versionId) {
+        if (!sizeItemId) {
             return res.status(200).json({
                 status: "error",
                 message: "The Id is required"
             })
         }
-        const response = await services.deletecart(userId,versionId)
+        const response = await services.deletecart(userId,sizeItemId)
         return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({

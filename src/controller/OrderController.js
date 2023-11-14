@@ -5,17 +5,17 @@ export const addtoOrder= async (req, res) => {
   try {
     
     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const versionId = req.body.versionId;
+    const sizeItemId = req.body.sizeItemId;
     const quantity = req.body.quantity;
 
-    if (!versionId) {
+    if (!sizeItemId) {
       return res.status(400).json({
         err: 1,
         mes: 'Missing payload',
       });
     }
 
-    const response = await services.addToOrder(userId, versionId, quantity);
+    const response = await services.addToOrder(userId, sizeItemId, quantity);
 
     if (response.success) {
       return res.status(201).json({
