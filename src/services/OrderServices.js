@@ -368,10 +368,27 @@ export const addMultipleToOrder = async (userId, items) => {
       const { sizeItemId, quantity } = item;
 
       const sizeItem = await db.SizeItem.findByPk(sizeItemId);
+
+      // Kiểm tra xem sizeItem có tồn tại không
+      if (!sizeItem) {
+        return {
+          success: false,
+          message: "Sản phẩm không tồn tại.",
+        };
+      }
+
       const versionId = sizeItem.versionId;
       const version = await db.Versions.findByPk(versionId);
       const productID = version.productId;
       const product = await db.Product.findByPk(productID);
+
+      if (!product) {
+        return {
+          success: false,
+          message: "Sản phẩm không tồn tại.",
+        };
+      }
+      
       const price = product.price;
       const quantityproduct = sizeItem.quantity;
 
