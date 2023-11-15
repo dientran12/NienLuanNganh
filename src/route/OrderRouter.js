@@ -5,10 +5,14 @@ import { cancelOrderController } from '../controller/OrderController';
 import { moveFromCartToNewOrderController } from '../controller/OrderController';
 import { confirmOrder } from '../controller/OrderController';
 import { getTotalForMonth } from '../controller/OrderController';
+import {updateorder} from '../controller/OrderController';
 const router = express.Router();
 
 //thêm sản phẩm vào đơn hàng bằng sizeiemid
 router.post('/addProduct/:userId', addtoOrder);
+
+// chỉnh sửa đơn hàng
+router.post('/updateorder/:orderId/:sizeItemId', updateorder)
 
 //hủy đơn hàng (xóa đơn hàng)
 router.delete('/cancel/:orderId', cancelOrderController);

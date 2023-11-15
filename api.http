@@ -10,7 +10,7 @@ DELETE http://localhost:3001/api/cart/deletecart/1/4
 Content-Type: application/json
 
 ###
-POST http://localhost:3001/api/cart/updatecart/1/1
+POST http://localhost:3001/api/cart/updatecart/1/4
 Content-Type: application/json
 
 {
@@ -32,7 +32,7 @@ Content-Type: application/json
 
 {
   "sizeItemId": "1",
-  "quantity": "6"
+  "quantity": "3"
 }
 
 ###
@@ -64,4 +64,12 @@ Content-Type: application/json
 {
   "month": "11",
   "year": "2023"
+}
+
+###
+POST http://localhost:3001/api/order/updateorder/10/4
+Content-Type: application/json
+
+{
+  "quantity": "2"
 }

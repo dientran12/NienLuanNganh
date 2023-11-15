@@ -38,6 +38,26 @@ export const addtoOrder= async (req, res) => {
   }
 };
 
+export const updateorder = async (req, res) => {
+  try {
+      const sizeItemId = req.params.sizeItemId
+      const orderId = req.params.orderId
+      const data = req.body
+      if (!sizeItemId) {
+          return res.status(200).json({
+              status: "error",
+              message: "The Id is required"
+          })
+      }
+      const response = await services.updateorder(orderId, sizeItemId, data)
+      return res.status(200).json(response)
+  } catch (e) {
+      return res.status(404).json({
+          message: e
+      })
+  }
+}
+
 
 export const cancelOrderController = async (req, res) => {
   const orderId = req.params.orderId; // Lấy orderId từ tham số URL

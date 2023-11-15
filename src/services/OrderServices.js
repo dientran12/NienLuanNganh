@@ -2,6 +2,7 @@ import { response } from 'express';
 import db from '../models'
 import * as emailService from './emailService';
 
+
 export const addToOrder = async (userId, sizeItemId, quantity) => {
   try {
 
@@ -36,7 +37,20 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
         totalPrice: 0,
       });
 
-      const totalPrice = price * quantity;
+      const promotionproduct = await db.ProductPromotions.findOne({ where: { productId: productID } })
+
+      if (!promotionproduct) {
+
+      } else {
+        const promotion = await db.Promotions.findByPk(promotionproduct.promotionId)
+        console.log(promotion.percentage)
+        const promotionalPrice = product.price - (product.price * promotion.percentage) / 100;
+        console.log(promotionalPrice)
+        orderDetail.price = promotionalPrice;
+        orderDetail.save()
+      }
+
+      const totalPrice = orderDetail.price * quantity;
 
       // Sau đó, cập nhật totalPrice trong OrderDetail
       await orderDetail.update({ totalPrice });
@@ -64,6 +78,38 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
     };
   }
 };
+
+export const updateorder = async (orderId, sizeItemId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // let order = await db.Order.findByPk(orderId);
+      const orderdetail = await db.OrderDetail.findOne({
+        where: { orderId, sizeItemId: sizeItemId },
+      });
+
+      if (!orderdetail) {
+        resolve({
+          status: 'OK',
+          message: 'Product is not defined',
+        })
+      }
+
+      await orderdetail.update(data);
+
+      orderdetail.totalPrice = orderdetail.quantity * orderdetail.price;
+
+      orderdetail.save();
+
+      resolve({
+        status: 'OK',
+        message: 'Update product SUCCESSFULLY',
+        data: orderdetail
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
 
 // Tạo một service cho việc hủy đơn hàng
 export const cancelOrder = async (orderId) => {
@@ -176,8 +222,8 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
       include: [{ model: db.OrderDetail }]
     });
 
-    if(!paymentMethod){
-      return{
+    if (!paymentMethod) {
+      return {
         success: false,
       }
     }

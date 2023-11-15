@@ -15,7 +15,7 @@ export const addToCartItem = async (userId, sizeItemId, quantity) => {
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
-    const price = product.price;
+    const price = product.price*quantity;
 
     if (!cart) {
       // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
@@ -74,7 +74,14 @@ export const updatecart = async (userId, sizeItemId, data) => {
         })
       }
       await cartItem.update(data);
-      console.log(cartItem)
+
+      const sizeitem = await db.SizeItem.findByPk(sizeItemId)
+      const version = await db.Versions.findByPk(sizeitem.versionId)
+      const product = await db.Product.findByPk(version.productId)
+      cartItem.price = cartItem.quantity*product.price;
+
+      cartItem.save();
+      
       resolve({
         status: 'OK',
         message: 'Update product SUCCESSFULLY',
@@ -145,8 +152,34 @@ export const getAllCartItem = async (userId) => {
 
     // Tìm tất cả các mục trong giỏ hàng của người dùng
     const cartItems = await db.CartItem.findAll({
-      where: { cartId: cart.id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.SizeItem, as: 'productdata' }]
+      include: [
+        {
+          model: db.Cart, as:'cartdata'
+        },
+        {
+          model: db.SizeItem,
+          as: 'productdata',
+          include: [
+            {
+              model: db.Size,
+              attributes:['sizeName']
+            },
+            {
+              model: db.Versions,
+              include: [
+                {
+                  model: db.Color,
+                  attributes: ['colorname'], // Include only the colorname field
+                },
+                {
+                  model: db.Product,
+                  attributes:['name']
+                }
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     return {
