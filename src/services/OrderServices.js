@@ -361,3 +361,63 @@ export const calculateTotalForMonth = async (month, year) => {
     return null;
   }
 };
+
+export const getAllorderDetail = async (userId) => {
+  try {
+    // Tìm giỏ hàng của người dùng dựa trên userId
+    const order = await db.Order.findOne({ where: { userId: userId } });
+
+    if (!order) {
+      return {
+        success: true,
+        message: 'order is empty',
+        order: [],
+      };
+    }
+
+    // Tìm tất cả các mục trong giỏ hàng của người dùng
+    const orderdetail = await db.OrderDetail.findAll({
+      include: [
+        {
+          model: db.Order, as:'orderdata'
+        },
+        {
+          model: db.SizeItem,
+          as: 'productdata',
+          include: [
+            {
+              model: db.Size,
+              attributes:['sizeName']
+            },
+            {
+              model: db.Versions,
+              include: [
+                {
+                  model: db.Color,
+                  attributes: ['colorname'], // Include only the colorname field
+                },
+                {
+                  model: db.Product,
+                  attributes:['name']
+                }
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    return {
+      success: true,
+      message: 'OrderDetail retrieved successfully',
+      orderdetail:orderdetail,
+    };
+  } catch (error) {
+    console.error('Error in OrderDetail service:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      order: [],
+    };
+  }
+};

@@ -6,6 +6,7 @@ import { moveFromCartToNewOrderController } from '../controller/OrderController'
 import { confirmOrder } from '../controller/OrderController';
 import { getTotalForMonth } from '../controller/OrderController';
 import {updateorder} from '../controller/OrderController';
+import {getAllorderDetail} from '../controller/OrderController'
 const router = express.Router();
 
 //thêm sản phẩm vào đơn hàng bằng sizeiemid
@@ -25,5 +26,8 @@ router.post('/confirmOrder/:orderId', confirmOrder);
 
 //xem số đơn hàng đã bán và tổng giá trị trong tháng
 router.get('/orders/total', getTotalForMonth);
+
+//xem lịch sử đơn hàng (tất cả sản phẩm trong đơn hàng)
+router.get('/getallorder/:userId', getAllorderDetail)
 
 export default router;

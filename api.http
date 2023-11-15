@@ -31,7 +31,7 @@ POST http://localhost:3001/api/order/addProduct/1
 Content-Type: application/json
 
 {
-  "sizeItemId": "1",
+  "sizeItemId": "2",
   "quantity": "3"
 }
 
@@ -73,3 +73,6 @@ Content-Type: application/json
 {
   "quantity": "2"
 }
+
+###
+GET http://localhost:3001/api/order/getallorder/1

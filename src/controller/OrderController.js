@@ -125,6 +125,7 @@ export const confirmOrder = async (req, res) => {
   }
 };
 
+
 export const getTotalForMonth = async (req, res) => {
   const { month, year } = req.body;
   const total = await services.calculateTotalForMonth(month, year);
@@ -133,5 +134,31 @@ export const getTotalForMonth = async (req, res) => {
     res.json({ total });
   } else {
     res.status(500).json({ error: 'Lỗi khi tính tổng giá trị đơn hàng trong tháng.' });
+  }
+};
+
+export const getAllorderDetail = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const result = await services.getAllorderDetail(userId);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        orderdetail: result.orderdetail,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error('Error :', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
   }
 };

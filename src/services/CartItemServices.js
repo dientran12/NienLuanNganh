@@ -15,7 +15,7 @@ export const addToCartItem = async (userId, sizeItemId, quantity) => {
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
-    const price = product.price*quantity;
+    const price = product.price;
 
     if (!cart) {
       // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
