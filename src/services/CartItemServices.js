@@ -151,7 +151,7 @@ export const getAllCartItem = async (userId) => {
     }
 
     // Tìm tất cả các mục trong giỏ hàng của người dùng
-    const cartItems = await db.CartItem.findAll({
+    const cartItems = await db.CartItem.findAll({where:{cartId: cart.id},
       include: [
         {
           model: db.Cart, as:'cartdata'

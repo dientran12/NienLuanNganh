@@ -43,7 +43,6 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
 
       } else {
         const promotion = await db.Promotions.findByPk(promotionproduct.promotionId)
-        console.log(promotion.percentage)
         const promotionalPrice = product.price - (product.price * promotion.percentage) / 100;
         console.log(promotionalPrice)
         orderDetail.price = promotionalPrice;
@@ -64,10 +63,13 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
       await db.Order.update({ totalAmount }, {
         where: { id: order.id },
       });
+      const promotion = await db.Promotions.findByPk(promotionproduct.promotionId)
+      const percentage = promotion.percentage;
+      console.log(percentage)
       return {
         success: true,
         message: 'Product added to Order successfully',
-        OrderDetail: orderDetail
+        OrderDetail: orderDetail,
       };
     }
   } catch (error) {
