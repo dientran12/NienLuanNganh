@@ -27,7 +27,7 @@ GET http://localhost:3001/api/cart/getcartitem/4
 GET http://localhost:3001/api/cart/getalldata/1
 
 ###
-POST http://localhost:3001/api/order/addProduct/1
+POST http://localhost:3001/api/order/addProduct/2
 Content-Type: application/json
 
 {
@@ -75,4 +75,5 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3001/api/order/getallorder/1
+GET http://localhost:3001/api/order/getallorder/2
+Content-Type: application/json

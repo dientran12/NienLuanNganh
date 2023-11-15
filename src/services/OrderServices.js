@@ -366,60 +366,67 @@ export const calculateTotalForMonth = async (month, year) => {
 
 export const getAllorderDetail = async (userId) => {
   try {
-    // Tìm giỏ hàng của người dùng dựa trên userId
-    const order = await db.Order.findOne({ where: { userId: userId } });
+    // Bước 1: Tìm tất cả các đơn hàng của người dùng dựa trên userId
+    const orders = await db.Order.findAll({ where: { userId: userId } });
 
-    if (!order) {
+    if (!orders || orders.length === 0) {
       return {
         success: true,
-        message: 'order is empty',
-        order: [],
+        message: 'Order is empty',
+        orderdetail: [],
       };
     }
 
-    // Tìm tất cả các mục trong giỏ hàng của người dùng
-    const orderdetail = await db.OrderDetail.findAll({
-      include: [
-        {
-          model: db.Order, as:'orderdata'
-        },
-        {
-          model: db.SizeItem,
-          as: 'productdata',
-          include: [
-            {
-              model: db.Size,
-              attributes:['sizeName']
-            },
-            {
-              model: db.Versions,
-              include: [
-                {
-                  model: db.Color,
-                  attributes: ['colorname'], // Include only the colorname field
-                },
-                {
-                  model: db.Product,
-                  attributes:['name']
-                }
-              ],
-            },
-          ],
-        },
-      ],
-    });
+    // Bước 2 và 3: Tìm tất cả các mục trong đơn hàng chi tiết của mỗi đơn hàng của người dùng
+    const orderdetail = [];
+    for (const order of orders) {
+      const orderItems = await db.OrderDetail.findAll({
+        where: { orderId: order.id },
+        include: [
+          {
+            model: db.Order, as: 'orderdata',
+          },
+          {
+            model: db.SizeItem,
+            as: 'productdata',
+            include: [
+              {
+                model: db.Size,
+                attributes: ['sizeName'],
+              },
+              {
+                model: db.Versions,
+                include: [
+                  {
+                    model: db.Color,
+                    attributes: ['colorname'],
+                  },
+                  {
+                    model: db.Product,
+                    attributes: ['name'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      orderdetail.push(...orderItems);
+    }
+
 
     return {
       success: true,
       message: 'OrderDetail retrieved successfully',
-      orderdetail:orderdetail,
+      orderdetail: orderdetail,
     };
   } catch (error) {
     console.error('Error in OrderDetail service:', error);
     return {
       success: false,
       message: 'Internal server error',
-      order: [],
+      orderdetail: [],
     };
   }
 };
