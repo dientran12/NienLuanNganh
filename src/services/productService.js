@@ -1052,7 +1052,7 @@ const productService = {
           image: firstVersionImage, // Thêm ảnh từ phiên bản đầu tiên
           Versions: product.Versions,
           Rating: averageRating,
-          hasPromotion,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice, // Giá đã giảm nếu có khuyến mãi, ngược lại là null
         };
       });
@@ -1132,7 +1132,7 @@ const productService = {
           price: product.price,
           image: firstVersion ? firstVersion.image : null,
           Rating: averageRating,
-          hasPromotion,
+          hasPromotion: hasPromotion ? discountPercentage : null, 
           discountedPrice,
         };
       });
@@ -1367,13 +1367,22 @@ const productService = {
         ],
       });
     
-      const productsWithImages = productsWithDiscount.map(product => {
-        // Tìm ảnh đầu tiên trong số các phiên bản
-        const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+      const productsWithDiscountedPrice = productsWithDiscount
+      .filter(product => product.Versions && product.Versions.length > 0)
+      .map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Sử dụng optional chaining và nullish coalescing để lấy image một cách an toàn
+        const firstVersionImage = product.Versions[0]?.image ?? null;
+
         // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
         const averageRating = product.Reviews && product.Reviews.length > 0
           ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
-          : null;
+          : null; 
     
         return {
           id: product.id,
@@ -1384,15 +1393,15 @@ const productService = {
           type: product.type,
           gender: product.gender,
           price: product.price,
-          image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          image: firstVersionImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
           Rating: averageRating,
-          hasPromotion: !!product.Promotions.length,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
           Versions: product.Versions // Vẫn giữ thông tin phiên bản
         };
       });
     
-      return productsWithImages;
+      return productsWithDiscountedPrice;
     } catch (error) {
       console.error(error);
       throw error;
@@ -1442,13 +1451,22 @@ const productService = {
         ],
       });
     
-      const productsWithImages = productsWithDiscount.map(product => {
-        // Tìm ảnh đầu tiên trong số các phiên bản
-        const firstAvailableImage = product.Versions.find(v => v.image)?.image || null;
+      const productsWithDiscountedPrice = productsWithDiscount
+      .filter(product => product.Versions && product.Versions.length > 0)
+      .map(product => {
+        const hasPromotion = product.Promotions && product.Promotions.length > 0;
+        const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+        const discountedPrice = hasPromotion
+          ? product.price - (product.price * (discountPercentage / 100))
+          : null;
+  
+        // Sử dụng optional chaining và nullish coalescing để lấy image một cách an toàn
+        const firstVersionImage = product.Versions[0]?.image ?? null;
+
         // Lấy trung bình điểm rating nếu có đánh giá, ngược lại sử dụng giá trị mặc định
         const averageRating = product.Reviews && product.Reviews.length > 0
           ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
-          : null;
+          : null; 
     
         return {
           id: product.id,
@@ -1459,15 +1477,15 @@ const productService = {
           type: product.type,
           gender: product.gender,
           price: product.price,
-          image: firstAvailableImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
+          image: firstVersionImage, // Thêm ảnh từ phiên bản có ảnh đầu tiên
           Rating: averageRating,
-          hasPromotion: !!product.Promotions.length,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice: product.dataValues.discountedPrice, // Giá đã giảm nếu có, nếu không thì null
           Versions: product.Versions // Vẫn giữ thông tin phiên bản
         };
       });
     
-      return productsWithImages;
+      return productsWithDiscountedPrice;
     } catch (error) {
       console.error(error);
       throw error;
@@ -1895,7 +1913,7 @@ const productService = {
           image: firstVersionImage, // Thêm ảnh từ phiên bản đầu tiên
           Versions: product.Versions,
           Rating: averageRating,
-          hasPromotion,
+          hasPromotion: hasPromotion ? discountPercentage : null,
           discountedPrice, // Giá đã giảm nếu có khuyến mãi, ngược lại là null
         };
       }).filter((product) => product.hasPromotion !== false);
