@@ -35,27 +35,27 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
 
       const promotionProduct = await db.ProductPromotions.findOne({ where: { productId: productID } });
 
-        if (promotionProduct) {
-          const promotion = await db.Promotions.findByPk(promotionProduct.promotionId);
+      if (promotionProduct) {
+        const promotion = await db.Promotions.findByPk(promotionProduct.promotionId);
 
-          // Kiểm tra xem khuyến mãi có hạn không
-          const currentDate = new Date();
-          console.log(currentDate)
-          const startDate = promotion.startDate;
-          console.log(startDate)
-          const endDate = promotion.endDate;
+        // Kiểm tra xem khuyến mãi có hạn không
+        const currentDate = new Date();
+        console.log(currentDate)
+        const startDate = promotion.startDate;
+        console.log(startDate)
+        const endDate = promotion.endDate;
 
-          if ((currentDate < startDate || currentDate > endDate)) {   
-            return {
-              success: false,
-              message: 'Khuyến mãi đã hết hạn.',
-            };
-          }else{
+        if ((currentDate < startDate || currentDate > endDate)) {
+          return {
+            success: false,
+            message: 'Khuyến mãi đã hết hạn.',
+          };
+        } else {
           const promotionalPrice = price - (price * promotion.percentage) / 100;
           orderDetail.price = promotionalPrice;
           await orderDetail.save();
-          }
         }
+      }
 
       const totalPrice = orderDetail.price * quantity;
       console.log(totalPrice)
@@ -69,7 +69,7 @@ export const addToOrder = async (userId, sizeItemId, quantity) => {
         message: 'Product added to Order successfully',
         OrderDetail: orderDetail,
       };
-  }
+    }
   } catch (error) {
     console.error('Error in addToOrder service:', error);
     return {
@@ -230,70 +230,19 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
     }
     await order.update({ shippingAddress, paymentMethod })
 
-    // Lấy thông tin sản phẩm trong đơn hàng
-    const orderDetails = await db.OrderDetail.findAll({
-      where: { orderId },
-    });
+    // Sử dụng Sequelize để truy xuất thông tin người dùng
+    const user = await db.User.findByPk(order.userId);
 
+    // Lấy email của người dùng
+    const userEmail = user.email;
 
-    // console.log(orderDetails)
-
-    if (!orderDetails || orderDetails.length === 0) {
-      throw new Error('Không có thông tin sản phẩm trong đơn hàng');
-    }
-
-    // Cập nhật số lượng sản phẩm còn lại sau khi xác nhận đơn hàng
-    for (const orderDetail of orderDetails) {
-      const product = await db.SizeItem.findByPk(orderDetail.sizeItemId);
-      console.log(product)
-      const cartitem = await db.CartItem.findOne({ where: { sizeItemId: orderDetail.sizeItemId } })
-
-      const version = await db.Versions.findByPk(product.versionId)
-
-      if (!product) {
-        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.sizeItemId}`);
+    if (order.confirmed) {
+      return {
+        mes: "Đơn hàng đã được xác nhận trước đó"
       }
-
-      // Giảm số lượng sản phẩm còn lại
-      product.quantity -= orderDetail.quantity;
-
-      // console.log("quantity " + product.quantity)
-
-      if (product.quantity < 0) {
-        return {
-          success: true,
-          message: "SP khong du",
-        }
-      }
-
-      // Sử dụng Sequelize để truy xuất thông tin người dùng
-      const user = await db.User.findByPk(order.userId);
-
-      // Lấy email của người dùng
-      const userEmail = user.email;
-
-      if (order.confirmed) {
-        return {
-          mes: "Đơn hàng đã được xác nhận trước đó"
-        }
-      } else {
-        // Gửi email xác nhận
-        emailService.sendConfirmationEmail(userEmail);
-      }
-      await product.save();
-
-      const productId = version.productId
-      const soldproduct = await db.Product.findByPk(productId);
-
-      soldproduct.soldQuantity += orderDetail.quantity;
-      soldproduct.update(soldproduct.soldQuantity);
-      await soldproduct.save();
-
-      if (!cartitem) {
-        console.log("không có cartitem")
-      } else {
-        cartitem.destroy();
-      }
+    } else {
+      // Gửi email xác nhận
+      emailService.sendConfirmationEmail(userEmail);
     }
 
     // Xác nhận đơn hàng
@@ -302,27 +251,6 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
     order.status = 'Processing';
     await order.save();
-
-    const confirmedOrderCount = await db.Order.count({
-      where: { confirmed: true },
-    });
-
-    if (confirmedOrderCount > 10) {
-      const minIdOrder = await db.Order.findOne({
-        order: [['id', 'ASC']],
-        where: { confirmed: true },
-      });
-
-      const orderdetail = await db.OrderDetail.findOne({
-        where: { orderId: minIdOrder.id }
-      })
-
-      orderdetail.destroy();
-
-      await minIdOrder.destroy();
-
-      console.log(`Đã xóa đơn hàng có ID: ${minIdOrder.id}`);
-    }
 
     return order;
   } catch (error) {
@@ -495,7 +423,7 @@ export const addMultipleToOrder = async (userId, items) => {
 
         // Cập nhật soldQuantity của sản phẩm
         await product.update({ soldQuantity: product.soldQuantity + quantity });
-        
+
         return {
           success: true,
           message: "Product added to Order successfully",
