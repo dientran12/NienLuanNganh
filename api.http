@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/cart/addtocart/2/1
+POST http://localhost:3001/api/cart/addtocart/2/3
 Content-Type: application/json
 
 {
@@ -75,5 +75,20 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3001/api/order/getallorder/2
+GET http://localhost:3001/api/order/getallorder/1
 Content-Type: application/json
+
+###
+POST http://localhost:3001/api/order/add-multiple-to-order
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "items": [
+    {"sizeItemId": 1, "quantity": 5},
+    {"sizeItemId": 2, "quantity": 5},
+    {"sizeItemId": 3, "quantity": 5},
+    {"sizeItemId": 4, "quantity": 5},
+    {"sizeItemId": 5, "quantity": 5}
+  ]
+}

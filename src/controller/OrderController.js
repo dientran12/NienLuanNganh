@@ -162,3 +162,35 @@ export const getAllorderDetail = async (req, res) => {
     });
   }
 };
+
+
+export const addMultipleToOrderController = async (req, res) => {
+  try {
+    const { userId, items } = req.body; // Lấy thông tin từ request body
+
+    // Gọi hàm service để thêm sản phẩm vào đơn hàng
+    const result = await services.addMultipleToOrder(userId, items);
+
+    // Kiểm tra kết quả từ hàm service và trả về phản hồi tương ứng
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        orderId: result.orderId,
+        orderDetails: result.orderDetails,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+        errors: result.errors,
+      });
+    }
+  } catch (error) {
+    console.error('Error in addMultipleToOrderController:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
