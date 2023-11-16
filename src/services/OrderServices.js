@@ -381,12 +381,16 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
           message: "Sản phẩm không tồn tại.",
         };
       }
+      const cartitem = await db.CartItem.findOne({where: {sizeItemId: sizeItemId, cartId: userId}});
+        console.log(cartitem)
+        if(cartitem){
+          cartitem.destroy();
+        }
 
       const versionId = sizeItem.versionId;
       const version = await db.Versions.findByPk(versionId);
       const productID = version.productId;
       const product = await db.Product.findByPk(productID);
-      console.log(product)
 
       if (!product) {
         return {

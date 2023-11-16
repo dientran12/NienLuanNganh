@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/cart/addtocart/2/3
+POST http://localhost:3001/api/cart/addtocart/1/3
 Content-Type: application/json
 
 {
@@ -48,7 +48,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/148
+POST http://localhost:3001/api/order/confirmOrder/172
 Content-Type: application/json
 
 {
@@ -83,9 +83,9 @@ POST http://localhost:3001/api/order/add-multiple-to-order
 Content-Type: application/json
 
 {
-  "userId": 1,
+  "userId": 2,
   "items": [
-    {"sizeItemId": 1, "quantity": 5}
+    {"sizeItemId": 3, "quantity": 5}
   ],
   "paymentMethod": "PayPal"
 }
