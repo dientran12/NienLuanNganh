@@ -1,5 +1,7 @@
 import { response } from 'express';
 import db from '../models'
+const { Op, literal } = require('sequelize');
+const currentDate = new Date();
 
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
@@ -151,10 +153,12 @@ export const getAllCartItem = async (userId) => {
     }
 
     // Tìm tất cả các mục trong giỏ hàng của người dùng
-    const cartItems = await db.CartItem.findAll({where:{cartId: cart.id},
+    const cartItems = await db.CartItem.findAll({
+      where: { cartId: cart.id },
       include: [
         {
-          model: db.Cart, as:'cartdata'
+          model: db.Cart,
+          as: 'cartdata',
         },
         {
           model: db.SizeItem,
@@ -162,24 +166,57 @@ export const getAllCartItem = async (userId) => {
           include: [
             {
               model: db.Size,
-              attributes:['sizeName']
+              attributes: ['sizeName'],
             },
             {
               model: db.Versions,
               include: [
                 {
                   model: db.Color,
-                  attributes: ['colorname'], // Include only the colorname field
+                  attributes: ['colorname'],
                 },
                 {
                   model: db.Product,
-                  attributes:['name']
-                }
+                  attributes: ['id', 'name', 'price'],
+                  include: [
+                    {
+                      model: db.Promotions,
+                      attributes: ['id', 'percentage', 'startDate', 'endDate'],
+                      through: {
+                        model: db.ProductPromotions,
+                        attributes: [],
+                      },
+                      required: false,
+                      where: {
+                        [Op.or]: [
+                          {
+                            startDate: { [Op.lte]: currentDate },
+                            endDate: { [Op.gte]: currentDate },
+                          },
+                          {
+                            startDate: { [Op.is]: null },
+                            endDate: { [Op.is]: null },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               ],
             },
           ],
         },
       ],
+    });
+
+    // Tính toán giá mới cho mỗi CartItem
+    cartItems.forEach((cartItem) => {
+      const product = cartItem.productdata.Version.Product;
+      const hasPromotion = product.Promotions && product.Promotions.length > 0;
+      const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
+
+      // Tính toán giá mới theo yêu cầu
+      cartItem.price = (product.price - (product.price * (discountPercentage / 100))) * cartItem.quantity;
     });
 
     return {
@@ -196,3 +233,4 @@ export const getAllCartItem = async (userId) => {
     };
   }
 };
+
