@@ -9,14 +9,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      cartID: {
+      cartId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Carts', 
           key: 'id' 
         },
       },
-      productID: {
+      versionId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Versions',

@@ -4,12 +4,14 @@ import db from '../models'
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
 
-export const addToCartItem = async (userId, productId, quantity) => {
+export const addToCartItem = async (userId, sizeItemId, quantity) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
-    let cart = await db.Cart.findOne({ where: { userID: userId } });
+    let cart = await db.Cart.findOne({ where: { userId: userId } });
 
-    const Versions = await db.Versions.findByPk(productId);
+    const sizeitem = await db.SizeItem.findByPk(sizeItemId);
+    const versionid = sizeitem.versionId;
+    const Versions = await db.Versions.findByPk(versionid);
     const productID = Versions.productId;
 
     const product = await db.Product.findByPk(productID);
@@ -17,12 +19,12 @@ export const addToCartItem = async (userId, productId, quantity) => {
 
     if (!cart) {
       // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
-      cart = await db.Cart.create({ userID: userId });
+      cart = await db.Cart.create({ userId: userId });
     }
 
     // Tìm sản phẩm trong giỏ hàng dựa trên productId
     const cartItem = await db.CartItem.findOne({
-      where: { cartID: cart.id, productID: productId },
+      where: { cartID: cart.id, sizeItemId: sizeItemId },
     });
 
     if (cartItem) {
@@ -35,8 +37,8 @@ export const addToCartItem = async (userId, productId, quantity) => {
     }
     // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
     const newcartitem = await db.CartItem.create({
-      cartID: cart.id,
-      productID: productId,
+      cartId: cart.id,
+      sizeItemId: sizeItemId,
       quantity, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
       price, // Thay thế bằng giá của sản phẩm
     });
@@ -57,14 +59,14 @@ export const addToCartItem = async (userId, productId, quantity) => {
 };
 
 
-export const updatecart = async (userId, productId, data) => {
+export const updatecart = async (userId, sizeItemId, data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let cart = await db.Cart.findOne({ where: { userID: userId } });
+      let cart = await db.Cart.findOne({ where: { userId: userId } });
       const cartItem = await db.CartItem.findOne({
-        where: { cartID: cart.id, productID: productId },
+        where: { cartId: cart.id, sizeItemId: sizeItemId },
       });
-      console.log('product ' + productId + ' dataUpdate in backend ', data)
+      console.log('product ' + sizeItemId + ' dataUpdate in backend ', data)
       if (!cartItem) {
         resolve({
           status: 'OK',
@@ -72,7 +74,14 @@ export const updatecart = async (userId, productId, data) => {
         })
       }
       await cartItem.update(data);
-      console.log(cartItem)
+
+      const sizeitem = await db.SizeItem.findByPk(sizeItemId)
+      const version = await db.Versions.findByPk(sizeitem.versionId)
+      const product = await db.Product.findByPk(version.productId)
+      cartItem.price = cartItem.quantity*product.price;
+
+      cartItem.save();
+      
       resolve({
         status: 'OK',
         message: 'Update product SUCCESSFULLY',
@@ -84,13 +93,13 @@ export const updatecart = async (userId, productId, data) => {
   })
 }
 
-export const deletecart = async (userId, productId) => {
+export const deletecart = async (userId, sizeItemId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let cart = await db.Cart.findOne({ where: { userID: userId } });
+      let cart = await db.Cart.findOne({ where: { userId: userId } });
 
       const cartItem = await db.CartItem.findOne({
-        where: { cartID: cart.id, productID: productId },
+        where: { cartId: cart.id, sizeItemId: sizeItemId },
       });
 
       if (!cartItem) {
@@ -116,7 +125,7 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
   try {
     const cartID = await db.CartItem.findOne({
       where: { id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Versions, as: 'productdata' }]
+      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.SizeItem, as: 'productdata' }]
     })
     resolve({
       err: response ? 0 : 1,
@@ -131,7 +140,7 @@ export const getCartItem = async (id) => new Promise(async (resolve, reject) => 
 export const getAllCartItem = async (userId) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
-    const cart = await db.Cart.findOne({ where: { userID: userId } });
+    const cart = await db.Cart.findOne({ where: { userId: userId } });
 
     if (!cart) {
       return {
@@ -142,9 +151,35 @@ export const getAllCartItem = async (userId) => {
     }
 
     // Tìm tất cả các mục trong giỏ hàng của người dùng
-    const cartItems = await db.CartItem.findAll({
-      where: { cartID: cart.id },
-      include: [{ model: db.Cart, as: 'cartdata' }, { model: db.Versions, as: 'productdata' }]
+    const cartItems = await db.CartItem.findAll({where:{cartId: cart.id},
+      include: [
+        {
+          model: db.Cart, as:'cartdata'
+        },
+        {
+          model: db.SizeItem,
+          as: 'productdata',
+          include: [
+            {
+              model: db.Size,
+              attributes:['sizeName']
+            },
+            {
+              model: db.Versions,
+              include: [
+                {
+                  model: db.Color,
+                  attributes: ['colorname'], // Include only the colorname field
+                },
+                {
+                  model: db.Product,
+                  attributes:['name']
+                }
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     return {

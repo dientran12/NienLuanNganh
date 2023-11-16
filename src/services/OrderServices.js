@@ -2,70 +2,115 @@ import { response } from 'express';
 import db from '../models'
 import * as emailService from './emailService';
 
-export const addToOrder = async (userId, productId, quantity) => {
+
+export const addToOrder = async (userId, sizeItemId, quantity) => {
   try {
-
     const order = await db.Order.create({ userId });
-    const userid = order.userId; // Lấy userId từ đối tượng order
-    const user = await db.User.findByPk(userid); // Sử dụng userId để truy xuất người dùng
-
+    const userid = order.userId;
+    const user = await db.User.findByPk(userid);
     const address = user.address;
-    await db.Order.update({ shippingAddress: address }, {
-      where: { id: order.id },
-    });
+    await db.Order.update({ shippingAddress: address }, { where: { id: order.id } });
 
-
-
-
-    const version = await db.Versions.findByPk(productId);
+    const sizeitem = await db.SizeItem.findByPk(sizeItemId);
+    const versionId = sizeitem.versionId;
+    const version = await db.Versions.findByPk(versionId);
     const productID = version.productId;
     const product = await db.Product.findByPk(productID);
     const price = product.price;
-    const sizeitem = await db.SizeItem.findOne({ where: { versionId: productId } })
     const quantityproduct = sizeitem.quantity;
 
     if (quantity > quantityproduct) {
       return {
         success: true,
-        message: "Khong du sp",
-      }
+        message: "Không đủ sản phẩm trong kho",
+      };
     } else {
       const orderDetail = await db.OrderDetail.create({
         orderId: order.id,
-        productId: productId,
+        sizeItemId: sizeItemId,
         quantity,
         price,
         totalPrice: 0,
       });
 
-      const totalPrice = price * quantity;
+      const promotionProduct = await db.ProductPromotions.findOne({ where: { productId: productID } });
 
-      // Sau đó, cập nhật totalPrice trong OrderDetail
+      if (promotionProduct) {
+        const promotion = await db.Promotions.findByPk(promotionProduct.promotionId);
+
+        // Kiểm tra xem khuyến mãi có hạn không
+        const currentDate = new Date();
+        console.log(currentDate)
+        const startDate = promotion.startDate;
+        console.log(startDate)
+        const endDate = promotion.endDate;
+
+        if ((currentDate < startDate || currentDate > endDate)) {
+          return {
+            success: false,
+            message: 'Khuyến mãi đã hết hạn.',
+          };
+        } else {
+          const promotionalPrice = price - (price * promotion.percentage) / 100;
+          orderDetail.price = promotionalPrice;
+          await orderDetail.save();
+        }
+      }
+
+      const totalPrice = orderDetail.price * quantity;
+      console.log(totalPrice)
       await orderDetail.update({ totalPrice });
 
-      // Tính toán tổng giá trị của tất cả các mục đơn hàng trong đơn hàng
-      const totalAmount = await db.OrderDetail.sum('totalPrice', {
-        where: { orderId: order.id },
-      });
+      const totalAmount = await db.OrderDetail.sum('totalPrice', { where: { orderId: order.id } });
+      await db.Order.update({ totalAmount }, { where: { id: order.id } });
 
-      // Cập nhật trường totalAmount trong đơn hàng
-      await db.Order.update({ totalAmount }, {
-        where: { id: order.id },
-      });
       return {
         success: true,
         message: 'Product added to Order successfully',
-        OrderDetail: orderDetail
+        OrderDetail: orderDetail,
       };
     }
   } catch (error) {
-    console.error('Error in addToOrderDetail service:', error);
+    console.error('Error in addToOrder service:', error);
     return {
       success: false,
       message: 'Internal server error',
     };
   }
 };
+
+
+export const updateorder = async (orderId, sizeItemId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // let order = await db.Order.findByPk(orderId);
+      const orderdetail = await db.OrderDetail.findOne({
+        where: { orderId, sizeItemId: sizeItemId },
+      });
+
+      if (!orderdetail) {
+        resolve({
+          status: 'OK',
+          message: 'Product is not defined',
+        })
+      }
+
+      await orderdetail.update(data);
+
+      orderdetail.totalPrice = orderdetail.quantity * orderdetail.price;
+
+      orderdetail.save();
+
+      resolve({
+        status: 'OK',
+        message: 'Update product SUCCESSFULLY',
+        data: orderdetail
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
 
 // Tạo một service cho việc hủy đơn hàng
 export const cancelOrder = async (orderId) => {
@@ -88,7 +133,8 @@ export const cancelOrder = async (orderId) => {
 
     return {
       success: true,
-      message: 'Order canceled successfully'
+      message: 'Order canceled successfully',
+      order
     };
   } catch (error) {
     console.error('Error in cancelOrder service:', error);
@@ -105,6 +151,14 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
     // Tạo một đơn hàng mới cho người dùng
     const order = await db.Order.create({ userId });
 
+    const userid = order.userId; // Lấy userId từ đối tượng order
+    const user = await db.User.findByPk(userid); // Sử dụng userId để truy xuất người dùng
+
+    const address = user.address;
+    await db.Order.update({ shippingAddress: address }, {
+      where: { id: order.id },
+    });
+
     // Tạo một mảng các promise để chuyển từ giỏ hàng sang đơn hàng
     const promises = cartItemIds.map(async (cartItemId) => {
       const cartItem = await db.CartItem.findByPk(cartItemId);
@@ -120,7 +174,7 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       // Tạo một mục đơn hàng mới từ thông tin mục giỏ hàng
       const orderdetail = await db.OrderDetail.create({
         orderId: order.id,
-        productId: cartItem.productID,
+        sizeItemId: cartItem.sizeItemId,
         quantity: cartItem.quantity,
         price: cartItem.price,
         totalPrice: 0,
@@ -128,6 +182,9 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
 
 
       const totalPrice = cartItem.price * cartItem.quantity;
+
+      // Sau đó, cập nhật totalPrice trong OrderDetail
+      await orderdetail.update({ totalPrice });
 
       // Tính toán tổng giá trị của tất cả các mục đơn hàng trong đơn hàng
       const totalAmount = await db.OrderDetail.sum('totalPrice', {
@@ -138,9 +195,6 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
       await db.Order.update({ totalAmount }, {
         where: { id: order.id },
       });
-
-      // Sau đó, cập nhật totalPrice trong OrderDetail
-      await orderdetail.update({ totalPrice });
 
       return {
         success: true,
@@ -169,73 +223,26 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
       include: [{ model: db.OrderDetail }]
     });
 
-
+    if (!paymentMethod) {
+      return {
+        success: false,
+      }
+    }
     await order.update({ shippingAddress, paymentMethod })
 
-    // Lấy thông tin sản phẩm trong đơn hàng
-    const orderDetails = await db.OrderDetail.findAll({
-      where: { orderId },
-    });
+    // Sử dụng Sequelize để truy xuất thông tin người dùng
+    const user = await db.User.findByPk(order.userId);
 
+    // Lấy email của người dùng
+    const userEmail = user.email;
 
-    // console.log(orderDetails)
-
-    if (!orderDetails || orderDetails.length === 0) {
-      throw new Error('Không có thông tin sản phẩm trong đơn hàng');
-    }
-
-    // Cập nhật số lượng sản phẩm còn lại sau khi xác nhận đơn hàng
-    for (const orderDetail of orderDetails) {
-      const product = await db.SizeItem.findOne({ where: { versionId: orderDetail.productId } });
-
-      const cartitem = await db.CartItem.findOne({ where: { productID: orderDetail.productId } })
-
-      const version = await db.Versions.findByPk(product.versionId)
-
-      if (!product) {
-        throw new Error(`Không tìm thấy sản phẩm với ID ${orderDetail.productId}`);
+    if (order.confirmed) {
+      return {
+        mes: "Đơn hàng đã được xác nhận trước đó"
       }
-
-      // Giảm số lượng sản phẩm còn lại
-      product.quantity -= orderDetail.quantity;
-
-      // console.log("quantity " + product.quantity)
-
-      if (product.quantity < 0) {
-        return {
-          success: true,
-          message: "SP khong du",
-        }
-      }
-
-      // Sử dụng Sequelize để truy xuất thông tin người dùng
-      const user = await db.User.findByPk(order.userId);
-
-      // Lấy email của người dùng
-      const userEmail = user.email;
-
-      if (order.confirmed) {
-        return {
-          mes: "Đơn hàng đã được xác nhận trước đó"
-        }
-      } else {
-        // Gửi email xác nhận
-        emailService.sendConfirmationEmail(userEmail);
-      }
-      await product.save();
-
-      const productId = version.productId
-      const soldproduct = await db.Product.findByPk(productId);
-
-      soldproduct.soldQuantity += orderDetail.quantity;
-      soldproduct.update(soldproduct.soldQuantity);
-      await soldproduct.save();
-
-      if (!cartitem) {
-        console.log("không có cartitem")
-      } else {
-        cartitem.destroy();
-      }
+    } else {
+      // Gửi email xác nhận
+      emailService.sendConfirmationEmail(userEmail);
     }
 
     // Xác nhận đơn hàng
@@ -244,27 +251,6 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
 
     order.status = 'Processing';
     await order.save();
-
-    const confirmedOrderCount = await db.Order.count({
-      where: { confirmed: true },
-    });
-
-    if (confirmedOrderCount > 10) {
-      const minIdOrder = await db.Order.findOne({
-        order: [['id', 'ASC']],
-        where: { confirmed: true },
-      });
-
-      const orderdetail = await db.OrderDetail.findOne({
-        where: { orderId: minIdOrder.id }
-      })
-
-      orderdetail.destroy();
-
-      await minIdOrder.destroy();
-
-      console.log(`Đã xóa đơn hàng có ID: ${minIdOrder.id}`);
-    }
 
     return order;
   } catch (error) {
@@ -302,5 +288,193 @@ export const calculateTotalForMonth = async (month, year) => {
   } catch (error) {
     console.error('Lỗi khi tính tổng giá trị đơn hàng trong tháng:', error);
     return null;
+  }
+};
+
+export const getAllorderDetail = async (userId) => {
+  try {
+    // Bước 1: Tìm tất cả các đơn hàng của người dùng dựa trên userId
+    const orders = await db.Order.findAll({ where: { userId: userId } });
+
+    if (!orders || orders.length === 0) {
+      return {
+        success: true,
+        message: 'Order is empty',
+        orderdetail: [],
+      };
+    }
+
+    // Bước 2 và 3: Tìm tất cả các mục trong đơn hàng chi tiết của mỗi đơn hàng của người dùng
+    const orderdetail = [];
+    for (const order of orders) {
+      const orderItems = await db.OrderDetail.findAll({
+        where: { orderId: order.id },
+        include: [
+          {
+            model: db.Order, as: 'orderdata',
+          },
+          {
+            model: db.SizeItem,
+            as: 'productdata',
+            include: [
+              {
+                model: db.Size,
+                attributes: ['sizeName'],
+              },
+              {
+                model: db.Versions,
+                include: [
+                  {
+                    model: db.Color,
+                    attributes: ['colorname'],
+                  },
+                  {
+                    model: db.Product,
+                    attributes: ['name'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      orderdetail.push(...orderItems);
+    }
+
+
+    return {
+      success: true,
+      message: 'OrderDetail retrieved successfully',
+      orderdetail: orderdetail,
+    };
+  } catch (error) {
+    console.error('Error in OrderDetail service:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      orderdetail: [],
+    };
+  }
+};
+
+
+// services/OrderServices.js
+export const addMultipleToOrder = async (userId, items) => {
+  try {
+    const order = await db.Order.create({ userId });
+
+    const promises = items.map(async (item) => {
+      const { sizeItemId, quantity } = item;
+
+      const sizeItem = await db.SizeItem.findByPk(sizeItemId);
+
+      // Kiểm tra xem sizeItem có tồn tại không
+      if (!sizeItem) {
+        return {
+          success: false,
+          message: "Sản phẩm không tồn tại.",
+        };
+      }
+
+      const versionId = sizeItem.versionId;
+      const version = await db.Versions.findByPk(versionId);
+      const productID = version.productId;
+      const product = await db.Product.findByPk(productID);
+
+      if (!product) {
+        return {
+          success: false,
+          message: "Sản phẩm không tồn tại.",
+        };
+      }
+      
+      const price = product.price;
+      const quantityproduct = sizeItem.quantity;
+
+      if (quantity > quantityproduct) {
+        return {
+          success: false,
+          message: "Không đủ sản phẩm trong kho",
+        };
+      } else {
+        const orderDetail = await db.OrderDetail.create({
+          orderId: order.id,
+          sizeItemId: sizeItemId,
+          quantity,
+          price,
+          totalPrice: 0,
+        });
+
+        const promotionProduct = await db.ProductPromotions.findOne({
+          where: { productId: productID },
+        });
+
+        if (promotionProduct) {
+          const promotion = await db.Promotions.findByPk(
+            promotionProduct.promotionId
+          );
+
+          const currentDate = new Date();
+          const startDate = promotion.startDate;
+          const endDate = promotion.endDate;
+
+          if (currentDate < startDate || currentDate > endDate) {
+            return {
+              success: false,
+              message: "Khuyến mãi đã hết hạn.",
+            };
+          } else {
+            const promotionalPrice =
+              price - (price * promotion.percentage) / 100;
+            orderDetail.price = promotionalPrice;
+            await orderDetail.save();
+          }
+        }
+
+        const totalPrice = orderDetail.price * quantity;
+        await orderDetail.update({ totalPrice });
+
+        // Cập nhật số lượng của sizeItem
+        await sizeItem.update({ quantity: quantityproduct - quantity });
+
+        // Cập nhật soldQuantity của sản phẩm
+        await product.update({ soldQuantity: product.soldQuantity + quantity });
+
+        return {
+          success: true,
+          message: "Product added to Order successfully",
+          orderDetail: orderDetail,
+        };
+      }
+    });
+
+    // Đợi tất cả các promises hoàn tất
+    const results = await Promise.all(promises);
+
+    // Kiểm tra kết quả và xử lý theo nhu cầu của bạn
+    const successResults = results.filter((result) => result.success);
+    const errorResults = results.filter((result) => !result.success);
+
+    if (errorResults.length > 0) {
+      return {
+        success: false,
+        message: "Có lỗi xảy ra khi thêm sản phẩm vào đơn hàng",
+        errors: errorResults,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Products added to Order successfully",
+      orderId: order.id,
+      orderDetails: successResults.map((result) => result.orderDetail),
+    };
+  } catch (error) {
+    console.error("Error in addMultipleToOrder service:", error);
+    return {
+      success: false,
+      message: "Internal server error",
+    };
   }
 };
