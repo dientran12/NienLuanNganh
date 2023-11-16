@@ -85,11 +85,7 @@ Content-Type: application/json
 {
   "userId": 1,
   "items": [
-    {"sizeItemId": 1, "quantity": 5},
-    {"sizeItemId": 2, "quantity": 5},
-    {"sizeItemId": 3, "quantity": 5},
-    {"sizeItemId": 4, "quantity": 5},
-    {"sizeItemId": 5, "quantity": 5},
-    {"sizeItemId": 6, "quantity": 5}
-  ]
+    {"sizeItemId": 1, "quantity": 5}
+  ],
+  "paymentMethod": "PayPal"
 }

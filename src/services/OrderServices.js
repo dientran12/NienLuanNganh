@@ -360,9 +360,14 @@ export const getAllorderDetail = async (userId) => {
 
 
 // services/OrderServices.js
-export const addMultipleToOrder = async (userId, items) => {
+export const addMultipleToOrder = async (userId, items,shippingAddress, paymentMethod) => {
   try {
     const order = await db.Order.create({ userId });
+
+    const userid = order.userId;
+    const user = await db.User.findByPk(userid);
+    const address = user.address;
+    await db.Order.update({ shippingAddress: address }, { where: { id: order.id } });
 
     const promises = items.map(async (item) => {
       const { sizeItemId, quantity } = item;
@@ -381,6 +386,7 @@ export const addMultipleToOrder = async (userId, items) => {
       const version = await db.Versions.findByPk(versionId);
       const productID = version.productId;
       const product = await db.Product.findByPk(productID);
+      console.log(product)
 
       if (!product) {
         return {
@@ -451,6 +457,32 @@ export const addMultipleToOrder = async (userId, items) => {
 
     // Đợi tất cả các promises hoàn tất
     const results = await Promise.all(promises);
+    
+    if (!paymentMethod) {
+      return {
+        success: false,
+      }
+    }
+    await order.update({ shippingAddress, paymentMethod })
+
+    // Lấy email của người dùng
+    const userEmail = user.email;
+
+    if (order.confirmed) {
+      return {
+        mes: "Đơn hàng đã được xác nhận trước đó"
+      }
+    } else {
+      // Gửi email xác nhận
+      emailService.sendConfirmationEmail(userEmail);
+    }
+
+    // Xác nhận đơn hàng
+    order.confirmed = true;
+    await order.save();
+
+    order.status = 'Processing';
+    await order.save();
 
     // Kiểm tra kết quả và xử lý theo nhu cầu của bạn
     const successResults = results.filter((result) => result.success);

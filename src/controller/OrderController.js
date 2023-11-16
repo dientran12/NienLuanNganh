@@ -166,10 +166,10 @@ export const getAllorderDetail = async (req, res) => {
 
 export const addMultipleToOrderController = async (req, res) => {
   try {
-    const { userId, items } = req.body; // Lấy thông tin từ request body
+    const { userId, items, shippingAddress, paymentMethod } = req.body; // Lấy thông tin từ request body
 
     // Gọi hàm service để thêm sản phẩm vào đơn hàng
-    const result = await services.addMultipleToOrder(userId, items);
+    const result = await services.addMultipleToOrder(userId, items, shippingAddress, paymentMethod );
 
     // Kiểm tra kết quả từ hàm service và trả về phản hồi tương ứng
     if (result.success) {
