@@ -463,14 +463,15 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
     const results = await Promise.all(promises);
     
     if (!paymentMethod) {
-      return {
-        success: false,
-      }
+      const paymentMethod = 'PayPal';
+      order.paymentMethod = paymentMethod;
+      order.update(paymentMethod)
     }
     await order.update({ shippingAddress, paymentMethod })
 
     // Lấy email của người dùng
     const userEmail = user.email;
+    console.log(userEmail)
 
     if (order.confirmed) {
       return {
