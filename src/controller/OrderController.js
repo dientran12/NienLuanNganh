@@ -1,62 +1,62 @@
 import * as services from '../services/OrderServices.js'
 
 
-export const addtoOrder= async (req, res) => {
-  try {
+// export const addtoOrder= async (req, res) => {
+//   try {
     
-    const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const sizeItemId = req.body.sizeItemId;
-    const quantity = req.body.quantity;
+//     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
+//     const sizeItemId = req.body.sizeItemId;
+//     const quantity = req.body.quantity;
 
-    if (!sizeItemId) {
-      return res.status(400).json({
-        err: 1,
-        mes: 'Missing payload',
-      });
-    }
+//     if (!sizeItemId) {
+//       return res.status(400).json({
+//         err: 1,
+//         mes: 'Missing payload',
+//       });
+//     }
 
-    const response = await services.addToOrder(userId, sizeItemId, quantity);
+//     const response = await services.addToOrder(userId, sizeItemId, quantity);
 
-    if (response.success) {
-      return res.status(201).json({
-        status: 'OK',
-        message: response.message,
-        OrderDetail: response.OrderDetail,
-      });
-    } else {
-      return res.status(404).json({
-        err: -1,
-        message: response.message,
-      });
-    }
-  } catch (error) {
-    console.error('Error in addtoOrder controller:', error);
-    return res.status(500).json({
-      err: -1,
-      message: 'Internal server error',
-    });
-  }
-};
+//     if (response.success) {
+//       return res.status(201).json({
+//         status: 'OK',
+//         message: response.message,
+//         OrderDetail: response.OrderDetail,
+//       });
+//     } else {
+//       return res.status(404).json({
+//         err: -1,
+//         message: response.message,
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error in addtoOrder controller:', error);
+//     return res.status(500).json({
+//       err: -1,
+//       message: 'Internal server error',
+//     });
+//   }
+// };
 
-export const updateorder = async (req, res) => {
-  try {
-      const sizeItemId = req.params.sizeItemId
-      const orderId = req.params.orderId
-      const data = req.body
-      if (!sizeItemId) {
-          return res.status(200).json({
-              status: "error",
-              message: "The Id is required"
-          })
-      }
-      const response = await services.updateorder(orderId, sizeItemId, data)
-      return res.status(200).json(response)
-  } catch (e) {
-      return res.status(404).json({
-          message: e
-      })
-  }
-}
+// export const updateorder = async (req, res) => {
+//   try {
+//       const sizeItemId = req.params.sizeItemId
+//       const orderId = req.params.orderId
+//       const data = req.body
+//       if (!sizeItemId) {
+//           return res.status(200).json({
+//               status: "error",
+//               message: "The Id is required"
+//           })
+//       }
+//       const response = await services.updateorder(orderId, sizeItemId, data)
+//       return res.status(200).json(response)
+//   } catch (e) {
+//       return res.status(404).json({
+//           message: e
+//       })
+//   }
+// }
 
 
 export const cancelOrderController = async (req, res) => {
@@ -76,35 +76,12 @@ export const cancelOrderController = async (req, res) => {
 };
 
 
-export const moveFromCartToNewOrderController = async (req, res) => {
-  const { userId, cartItemIds } = req.body;
-
-  try {
-    const results = await services.moveFromCartToNewOrder(userId, cartItemIds);
-
-    const successResults = results.filter((result) => result.success);
-    const errorResults = results.filter((result) => !result.success);
-
-    if (successResults.length === results.length) {
-      return res.status(201).json({ 
-        results,
-      });
-    } else {
-      return res.status(400).json({ errors: errorResults.map((result) => result.message) });
-    }
-  } catch (error) {
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-
 export const confirmOrder = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const {shippingAddress, paymentMethod} = req.body;
-    const order = await services.confirmOrder(orderId, shippingAddress, paymentMethod);
+    const order = await services.confirmOrder(orderId);
 
-    if (!order || !paymentMethod) {
+    if (!order) {
       return res.status(400).json({
         success: false,
         message: 'Không thể xác nhận đơn hàng do thiếu thông tin liên hệ',

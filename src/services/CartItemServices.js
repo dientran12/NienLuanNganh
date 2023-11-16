@@ -6,18 +6,10 @@ const currentDate = new Date();
 // Trong service (CartItemServices.js)
 // import { Cart, CartItem } from '../models'; // Import các model cần thiết
 
-export const addToCartItem = async (userId, sizeItemId, quantity) => {
+export const addToCartItem = async (userId, sizeItemId) => {
   try {
     // Tìm giỏ hàng của người dùng dựa trên userId
     let cart = await db.Cart.findOne({ where: { userId: userId } });
-
-    const sizeitem = await db.SizeItem.findByPk(sizeItemId);
-    const versionid = sizeitem.versionId;
-    const Versions = await db.Versions.findByPk(versionid);
-    const productID = Versions.productId;
-
-    const product = await db.Product.findByPk(productID);
-    const price = product.price;
 
     if (!cart) {
       // Nếu không có giỏ hàng cho userId, tạo giỏ hàng mới
@@ -41,8 +33,7 @@ export const addToCartItem = async (userId, sizeItemId, quantity) => {
     const newcartitem = await db.CartItem.create({
       cartId: cart.id,
       sizeItemId: sizeItemId,
-      quantity, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
-      price, // Thay thế bằng giá của sản phẩm
+      quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
     });
 
     return {
@@ -76,18 +67,12 @@ export const updatecart = async (userId, sizeItemId, data) => {
         })
       }
       await cartItem.update(data);
-
-      const sizeitem = await db.SizeItem.findByPk(sizeItemId)
-      const version = await db.Versions.findByPk(sizeitem.versionId)
-      const product = await db.Product.findByPk(version.productId)
-      cartItem.price = cartItem.quantity*product.price;
-
       cartItem.save();
-      
+
       resolve({
         status: 'OK',
         message: 'Update product SUCCESSFULLY',
-        data: cartItem
+        data: cartItem 
       })
     } catch (e) {
       reject(e)
