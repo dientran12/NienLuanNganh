@@ -390,6 +390,25 @@ const productController = {
     }
   },
 
+  getAll: async (req, res) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1; // Chuyển đổi giá trị của page thành số nguyên, mặc định là 1 nếu không có giá trị
+        const pageSize = parseInt(req.query.pageSize, 10) || 10; // Chuyển đổi giá trị của pageSize thành số nguyên, mặc định là 10 nếu không có giá trị
+        // Retrieve search name from request query parameter (if provided)
+        const searchName = req.query.name || '';
+
+        // Call the service function to get products
+        const products = await productService.getAll(searchName, page, pageSize);
+
+        // Return the products as a JSON response
+        return res.json({ success: true, products });
+    } catch (error) {
+        // Handle errors and return an error response
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+}
+
 };
 
 module.exports = productController;

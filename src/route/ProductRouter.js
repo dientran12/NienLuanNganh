@@ -60,6 +60,9 @@ router.get('/get-all-no-promotion', productController.getAllProductsNoPromotion)
 // Lấy tất cả sản phẩm còn trong thời gian khuyến mãi cho customer
 router.get('/get-all-for-customer-in-promotion', productController.getAllProductsInPromotionCustomer);
 
+// Lấy tất cả sản phẩm
+router.get('/get-all', productController.getAll);
+
 module.exports = router;
 
 // // Lấy số lượng sản phẩm theo id 
