@@ -5,17 +5,17 @@ export const addtoOrder= async (req, res) => {
   try {
     
     const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const productId = req.body.productId;
+    const sizeItemId = req.body.sizeItemId;
     const quantity = req.body.quantity;
 
-    if (!productId) {
+    if (!sizeItemId) {
       return res.status(400).json({
         err: 1,
         mes: 'Missing payload',
       });
     }
 
-    const response = await services.addToOrder(userId, productId, quantity);
+    const response = await services.addToOrder(userId, sizeItemId, quantity);
 
     if (response.success) {
       return res.status(201).json({
@@ -37,6 +37,26 @@ export const addtoOrder= async (req, res) => {
     });
   }
 };
+
+export const updateorder = async (req, res) => {
+  try {
+      const sizeItemId = req.params.sizeItemId
+      const orderId = req.params.orderId
+      const data = req.body
+      if (!sizeItemId) {
+          return res.status(200).json({
+              status: "error",
+              message: "The Id is required"
+          })
+      }
+      const response = await services.updateorder(orderId, sizeItemId, data)
+      return res.status(200).json(response)
+  } catch (e) {
+      return res.status(404).json({
+          message: e
+      })
+  }
+}
 
 
 export const cancelOrderController = async (req, res) => {
@@ -84,7 +104,7 @@ export const confirmOrder = async (req, res) => {
     const {shippingAddress, paymentMethod} = req.body;
     const order = await services.confirmOrder(orderId, shippingAddress, paymentMethod);
 
-    if (!order) {
+    if (!order || !paymentMethod) {
       return res.status(400).json({
         success: false,
         message: 'Không thể xác nhận đơn hàng do thiếu thông tin liên hệ',
@@ -105,6 +125,7 @@ export const confirmOrder = async (req, res) => {
   }
 };
 
+
 export const getTotalForMonth = async (req, res) => {
   const { month, year } = req.body;
   const total = await services.calculateTotalForMonth(month, year);
@@ -113,5 +134,63 @@ export const getTotalForMonth = async (req, res) => {
     res.json({ total });
   } else {
     res.status(500).json({ error: 'Lỗi khi tính tổng giá trị đơn hàng trong tháng.' });
+  }
+};
+
+export const getAllorderDetail = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const result = await services.getAllorderDetail(userId);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        orderdetail: result.orderdetail,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.message,
+      });
+    }
+  } catch (error) {
+    console.error('Error :', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+
+export const addMultipleToOrderController = async (req, res) => {
+  try {
+    const { userId, items } = req.body; // Lấy thông tin từ request body
+
+    // Gọi hàm service để thêm sản phẩm vào đơn hàng
+    const result = await services.addMultipleToOrder(userId, items);
+
+    // Kiểm tra kết quả từ hàm service và trả về phản hồi tương ứng
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        orderId: result.orderId,
+        orderDetails: result.orderDetails,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+        errors: result.errors,
+      });
+    }
+  } catch (error) {
+    console.error('Error in addMultipleToOrderController:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
   }
 };

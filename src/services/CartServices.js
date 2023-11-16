@@ -10,7 +10,7 @@ export const getCart = async (id) => new Promise(async (resolve, reject) => {
         resolve({
             err: response ? 0:1,
             mes: response ? '':'',
-            "cartdata":cartID
+            cartdata:cartID
         })
     } catch (e) {
         reject(e)

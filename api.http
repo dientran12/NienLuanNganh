@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/cart/addtocart/1/6
+POST http://localhost:3001/api/cart/addtocart/2/3
 Content-Type: application/json
 
 {
@@ -6,11 +6,11 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3001/api/cart/deletecart/1/5
+DELETE http://localhost:3001/api/cart/deletecart/1/4
 Content-Type: application/json
 
 ###
-POST http://localhost:3001/api/cart/updatecart/1/2
+POST http://localhost:3001/api/cart/updatecart/1/4
 Content-Type: application/json
 
 {
@@ -21,22 +21,22 @@ Content-Type: application/json
 GET http://localhost:3001/api/cart/getcart/1
 
 ###
-GET http://localhost:3001/api/cart/getcartitem/38
+GET http://localhost:3001/api/cart/getcartitem/4
 
 ###
 GET http://localhost:3001/api/cart/getalldata/1
 
 ###
-POST http://localhost:3001/api/order/addProduct/1
+POST http://localhost:3001/api/order/addProduct/2
 Content-Type: application/json
 
 {
-  "productId": "6",
-  "quantity": "6"
+  "sizeItemId": "2",
+  "quantity": "3"
 }
 
 ###
-DELETE http://localhost:3000/api/order/cancel/1
+DELETE http://localhost:3001/api/order/cancel/3
 
 ###
 POST http://localhost:3001/api/order/moveMultipleFromCartToOrder
@@ -44,16 +44,17 @@ Content-Type: application/json
 
 {
   "userId": "1",
-  "cartItemIds": [75,76]
+  "cartItemIds": [9,11]
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/104
+POST http://localhost:3001/api/order/confirmOrder/148
 Content-Type: application/json
 
 {
-  "shippingAddress": "hau giang", 
+  "shippingAddress": "hau giang",
   "paymentMethod": "PayPal"
+  
 }
 
 ###
@@ -63,4 +64,32 @@ Content-Type: application/json
 {
   "month": "11",
   "year": "2023"
+}
+
+###
+POST http://localhost:3001/api/order/updateorder/10/4
+Content-Type: application/json
+
+{
+  "quantity": "2"
+}
+
+###
+GET http://localhost:3001/api/order/getallorder/1
+Content-Type: application/json
+
+###
+POST http://localhost:3001/api/order/add-multiple-to-order
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "items": [
+    {"sizeItemId": 1, "quantity": 5},
+    {"sizeItemId": 2, "quantity": 5},
+    {"sizeItemId": 3, "quantity": 5},
+    {"sizeItemId": 4, "quantity": 5},
+    {"sizeItemId": 5, "quantity": 5},
+    {"sizeItemId": 6, "quantity": 5}
+  ]
 }
