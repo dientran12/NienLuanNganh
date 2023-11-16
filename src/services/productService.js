@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const Sequelize = require('sequelize');
 const db = require('../models/index');
 const productPromotionService = require('../services/productPromotionService');
@@ -1925,6 +1925,103 @@ const productService = {
       return { success: false, message: 'Internal Server Error' };
     }
   },
+
+  getAll: async (searchName, page, pageSize) => {
+    try {
+        const currentDate = new Date();
+        const offset = (page - 1) * pageSize;
+
+        const products = await Product.findAndCountAll({
+            where: {
+                name: {
+                    [Op.like]: `%${searchName}%`,
+                },
+                [Op.and]: literal('"Versions.id" IS NOT NULL'),
+            },
+            include: [
+                {
+                    model: Version,
+                    attributes: ['id', 'productId', 'colorId', 'image'],
+                    limit: 1,
+                    order: [['createdAt', 'ASC']],
+                    separate: true,
+                },
+                {
+                    model: Promotion,
+                    attributes: ['id', 'name', 'percentage', 'startDate', 'endDate'],
+                    through: {
+                        model: ProductPromotions,
+                        attributes: [],
+                    },
+                    required: false,
+                    where: {
+                        [Op.or]: [
+                            {
+                                startDate: { [Op.lte]: currentDate },
+                                endDate: { [Op.gte]: currentDate },
+                            },
+                            {
+                                startDate: { [Op.is]: null },
+                                endDate: { [Op.is]: null },
+                            },
+                        ],
+                    },
+                },
+                {
+                    model: Review,
+                },
+            ],
+            limit: pageSize,
+            offset: offset,
+        });
+
+        const productsWithDiscountedPrice = products.rows
+            .filter((product) => product.Versions && product.Versions.length > 0)
+            .map((product) => {
+                const hasPromotion = product.Promotions && product.Promotions.length > 0;
+                const discountPercentage = hasPromotion ? product.Promotions[0].percentage : null;
+                const discountedPrice = hasPromotion
+                    ? product.price - (product.price * (discountPercentage / 100))
+                    : null;
+
+                const firstVersionImage = product.Versions[0]?.image ?? null;
+
+                const averageRating =
+                    product.Reviews && product.Reviews.length > 0
+                        ? parseFloat(product.Reviews.reduce((sum, review) => sum + review.rating, 0) / product.Reviews.length)
+                        : null;
+
+                return {
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    origin: product.origin,
+                    brand: product.brand,
+                    type: product.type,
+                    gender: product.gender,
+                    price: product.price,
+                    image: firstVersionImage,
+                    Versions: product.Versions,
+                    Rating: averageRating,
+                    hasPromotion: hasPromotion ? discountPercentage : null,
+                    discountedPrice,
+                };
+            });
+            
+        return {
+            total: products.count, // Use count for the total number of products
+            totalPages: Math.ceil(products.count / pageSize),
+            currentPage: page,
+            pageSize: pageSize,
+            products: productsWithDiscountedPrice,
+        };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Internal Server Error' };
+    }
+  },
+
+
     
 };
   
