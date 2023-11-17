@@ -97,7 +97,7 @@ export const getAllCartItemController = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: result.message,
-        cartItems: result.cartItems,
+        cartItemsWithDiscount: result.cartItemsWithDiscount,
       });
     } else {
       return res.status(500).json({

@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "userId": 1,
-  "sizeItemId": 4
+  "sizeItemId": 3
 }
 
 ###
@@ -84,3 +84,12 @@ Content-Type: application/json
   ],
   "shippingAddress": "hau giang"
 }
+
+
+###
+GET http://localhost:3001/api/product/get-all-for-customer
+
+
+
+###
+GET http://localhost:3001/api/version/get-all
