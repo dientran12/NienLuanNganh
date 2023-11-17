@@ -249,7 +249,7 @@ export const confirmOrder = async (orderId) => {
       // Xác nhận đơn hàng
       order.confirmed = true;
       await order.save();
-      
+
       // Gửi email xác nhận
       emailService.sendConfirmationEmail(userEmail);
     }
@@ -449,7 +449,7 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
           console.log(startDate, endDate, currentDateMoment)
 
           if (currentDateMoment < startDate || currentDateMoment > endDate) {
-
+            
           } else {
             const promotionalPrice =
               price - (price * promotion.percentage) / 100;
