@@ -23,16 +23,8 @@ module.exports = (sequelize) => {
       totalAmount: {
         type: DataTypes.DECIMAL(10, 2),
       },
-      status: {
-        type: DataTypes.ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'),
-        defaultValue: 'Pending',
-      },
       paymentMethod: {
         type: DataTypes.ENUM('Credit Card', 'PayPal', 'Cash on Delivery', 'Bank Transfer'),
-      },
-      confirmed: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false, // Mặc định là chưa được xác nhận
       },
     },
     {
