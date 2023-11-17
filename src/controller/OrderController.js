@@ -78,16 +78,27 @@ export const cancelOrderController = async (req, res) => {
 
 export const confirmOrder = async (req, res) => {
   try {
-    const orderId = req.params.orderId;
-    const order = await services.confirmOrder(orderId);
 
-    if (!order) {
+    const orderId=req.params.orderId
+    const order = await services.confirmOrder(orderId);
+  
+    if (order && order.mes) {
       return res.status(400).json({
         success: false,
-        message: 'Không thể xác nhận đơn hàng do thiếu thông tin liên hệ',
+        message: order.mes,
       });
     }
-
+  
+    const userEmail = order.User.email;
+    const emailResult = await services.sendConfirmationEmail(userEmail);
+  
+    if (!emailResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi khi gửi email: ' + emailResult.message,
+      });
+    }
+  
     return res.status(200).json({
       success: true,
       message: 'Đơn hàng đã được xác nhận thành công',
@@ -100,6 +111,7 @@ export const confirmOrder = async (req, res) => {
       message: 'Lỗi máy chủ nội bộ',
     });
   }
+  
 };
 
 

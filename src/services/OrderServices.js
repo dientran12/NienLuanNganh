@@ -245,14 +245,13 @@ export const confirmOrder = async (orderId) => {
         mes: "Đơn hàng đã được xác nhận trước đó"
       }
     } else {
-
-      // Xác nhận đơn hàng
-      order.confirmed = true;
-      await order.save();
-
       // Gửi email xác nhận
       emailService.sendConfirmationEmail(userEmail);
     }
+
+     // Xác nhận đơn hàng
+     order.confirmed = true;
+     await order.save();
 
     order.status = 'Processing';
     await order.save();
@@ -471,6 +470,36 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
 
         // Cập nhật soldQuantity của sản phẩm
         await product.update({ soldQuantity: product.soldQuantity + quantity });
+
+        // Sử dụng Sequelize để truy xuất thông tin người dùng
+        const user = await db.User.findByPk(order.userId);
+
+        // Lấy email của người dùng
+        const userEmail = user.email;
+
+        if (order.confirmed) {
+          return {
+            mes: "Đơn hàng đã được xác nhận trước đó"
+          }
+        } else {
+          try {
+            // Gửi email xác nhận
+            const emailResult = await emailService.sendConfirmationEmail(userEmail);
+  
+            if (!emailResult.success) {
+              // Nếu gửi email thất bại, bạn có thể xử lý tùy ý ở đây, ví dụ như ghi log
+              console.error('Lỗi khi gửi email xác nhận:', emailResult.message);
+            
+              // Có thể thêm return để dừng quá trình tiếp theo nếu gửi email thất bại
+              return {
+                success: false,
+                message: 'Lỗi khi gửi email xác nhận: ' + emailResult.message,
+              };
+            }
+          } catch (emailError) {
+            console.error('Lỗi khi thực hiện gửi email xác nhận:', emailError);
+          }
+        }
 
         return {
           success: true,

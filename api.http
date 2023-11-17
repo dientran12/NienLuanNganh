@@ -49,7 +49,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/api/order/confirmOrder/245
+POST http://localhost:3001/api/order/confirmOrder/255
 Content-Type: application/json
 
 ###
@@ -78,7 +78,7 @@ POST http://localhost:3001/api/order/add-multiple-to-order
 Content-Type: application/json
 
 {
-  "userId": 1,
+  "userId": 2,
   "items": [
     {"sizeItemId": 3, "quantity": 1}
   ],
