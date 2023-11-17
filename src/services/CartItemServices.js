@@ -201,20 +201,29 @@ export const getAllCartItem = async (userId) => {
       ],
     });
 
-    // Tính toán giá mới cho mỗi CartItem
-    cartItems.forEach((cartItem) => {
+    // Tính toán giá mới và thông tin khuyến mãi cho mỗi CartItem
+    const cartItemsWithDiscount = cartItems.map((cartItem) => {
       const product = cartItem.productdata.Version.Product;
       const hasPromotion = product.Promotions && product.Promotions.length > 0;
       const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
 
       // Tính toán giá mới theo yêu cầu
-      cartItem.discount = (product.price - (product.price * (discountPercentage / 100))) * cartItem.quantity;
+      const discountedPrice = hasPromotion
+        ? product.price - (product.price * (discountPercentage / 100))
+        : null;
+
+      // Gán thông tin khuyến mãi và giảm giá vào cartItem
+      return {
+        ...cartItem.get({ plain: true }),
+        discountPercentage: hasPromotion ? discountPercentage : null,
+        discountedPrice: discountedPrice,
+      };
     });
 
     return {
       success: true,
       message: 'Cart items retrieved successfully',
-      cartItems: cartItems,
+      cartItemsWithDiscount: cartItemsWithDiscount,
     };
   } catch (error) {
     console.error('Error in getAllCartItem service:', error);
@@ -225,4 +234,5 @@ export const getAllCartItem = async (userId) => {
     };
   }
 };
+
 
