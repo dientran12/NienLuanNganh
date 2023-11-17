@@ -29,10 +29,17 @@ export const addToCartItem = async (userId, sizeItemId) => {
         cartItem,
       }
     }
+    const sizeitem =await db.SizeItem.findByPk(sizeItemId)
+    const versionId=sizeitem.versionId
+    const version= await db.Versions.findByPk(versionId)
+    const productId=version.productId
+    const product =await db.Product.findByPk(productId)
+    const discount = product.price
     // Nếu sản phẩm chưa tồn tại trong giỏ hàng, tạo mới
     const newcartitem = await db.CartItem.create({
       cartId: cart.id,
       sizeItemId: sizeItemId,
+      discount,
       quantity: 1, // Đặt quantity thành 1 khi thêm sản phẩm mới vào giỏ hàng
     });
 
@@ -201,7 +208,7 @@ export const getAllCartItem = async (userId) => {
       const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
 
       // Tính toán giá mới theo yêu cầu
-      cartItem.price = (product.price - (product.price * (discountPercentage / 100))) * cartItem.quantity;
+      cartItem.discount = (product.price - (product.price * (discountPercentage / 100))) * cartItem.quantity;
     });
 
     return {
