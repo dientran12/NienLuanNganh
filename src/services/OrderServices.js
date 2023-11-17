@@ -1,6 +1,7 @@
 import { response } from 'express';
 import db from '../models'
 import * as emailService from './emailService';
+const moment = require('moment');
 
 
 export const addToOrder = async (userId, sizeItemId, quantity) => {
@@ -216,19 +217,22 @@ export const moveFromCartToNewOrder = async (userId, cartItemIds) => {
   }
 };
 
-export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
+
+export const confirmOrder = async (orderId) => {
   try {
     const order = await db.Order.findOne({
       where: { id: orderId },
       include: [{ model: db.OrderDetail }]
     });
 
-    if (!paymentMethod) {
+    const orderdetail = await db.OrderDetail.findOne({ where: { orderId: orderId } })
+    console.log(orderdetail)
+
+    if (!orderdetail) {
       return {
-        success: false,
+        mes: "đơn hàng không có sản phẩm"
       }
     }
-    await order.update({ shippingAddress, paymentMethod })
 
     // Sử dụng Sequelize để truy xuất thông tin người dùng
     const user = await db.User.findByPk(order.userId);
@@ -241,13 +245,14 @@ export const confirmOrder = async (orderId, shippingAddress, paymentMethod) => {
         mes: "Đơn hàng đã được xác nhận trước đó"
       }
     } else {
+
+      // Xác nhận đơn hàng
+      order.confirmed = true;
+      await order.save();
+
       // Gửi email xác nhận
       emailService.sendConfirmationEmail(userEmail);
     }
-
-    // Xác nhận đơn hàng
-    order.confirmed = true;
-    await order.save();
 
     order.status = 'Processing';
     await order.save();
@@ -330,7 +335,7 @@ export const getAllorderDetail = async (userId) => {
                   },
                   {
                     model: db.Product,
-                    attributes: ['name'],
+                    attributes: ['name', 'price'],
                   },
                 ],
               },
@@ -360,14 +365,25 @@ export const getAllorderDetail = async (userId) => {
 
 
 // services/OrderServices.js
-export const addMultipleToOrder = async (userId, items,shippingAddress, paymentMethod) => {
+export const addMultipleToOrder = async (userId, items, shippingAddress, paymentMethod) => {
   try {
     const order = await db.Order.create({ userId });
 
     const userid = order.userId;
     const user = await db.User.findByPk(userid);
     const address = user.address;
-    await db.Order.update({ shippingAddress: address }, { where: { id: order.id } });
+
+    const finalShippingAddress = shippingAddress || address;
+
+    // Cập nhật shippingAddress trong bảng Order
+    await db.Order.update({ shippingAddress: finalShippingAddress }, { where: { id: order.id } });
+
+    if (!finalShippingAddress) {
+      order.destroy();
+      return {
+        message: 'Không có địa chỉ giao hàng',
+      };
+    }
 
     const promises = items.map(async (item) => {
       const { sizeItemId, quantity } = item;
@@ -381,11 +397,11 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
           message: "Sản phẩm không tồn tại.",
         };
       }
-      const cartitem = await db.CartItem.findOne({where: {sizeItemId: sizeItemId, cartId: userId}});
-        console.log(cartitem)
-        if(cartitem){
-          cartitem.destroy();
-        }
+      const cartitem = await db.CartItem.findOne({ where: { sizeItemId: sizeItemId, cartId: userId } });
+      console.log(cartitem)
+      if (cartitem) {
+        cartitem.destroy();
+      }
 
       const versionId = sizeItem.versionId;
       const version = await db.Versions.findByPk(versionId);
@@ -398,7 +414,7 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
           message: "Sản phẩm không tồn tại.",
         };
       }
-      
+
       const price = product.price;
       const quantityproduct = sizeItem.quantity;
 
@@ -424,16 +440,16 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
           const promotion = await db.Promotions.findByPk(
             promotionProduct.promotionId
           );
-
           const currentDate = new Date();
-          const startDate = promotion.startDate;
-          const endDate = promotion.endDate;
 
-          if (currentDate < startDate || currentDate > endDate) {
-            return {
-              success: false,
-              message: "Khuyến mãi đã hết hạn.",
-            };
+          const startDate = moment(promotion.startDate, 'YYYY/MM/DD');
+          const endDate = moment(promotion.endDate, 'YYYY/MM/DD');
+          const currentDateMoment = moment(currentDate, 'YYYY/MM/DD');
+
+          console.log(startDate, endDate, currentDateMoment)
+
+          if (currentDateMoment < startDate || currentDateMoment > endDate) {
+            
           } else {
             const promotionalPrice =
               price - (price * promotion.percentage) / 100;
@@ -442,8 +458,13 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
           }
         }
 
+        console.log(orderDetail.price)
         const totalPrice = orderDetail.price * quantity;
         await orderDetail.update({ totalPrice });
+
+        const totalAmount = await db.OrderDetail.sum('totalPrice', { where: { orderId: order.id } });
+        await db.Order.update({ totalAmount }, { where: { id: order.id } });
+
 
         // Cập nhật số lượng của sizeItem
         await sizeItem.update({ quantity: quantityproduct - quantity });
@@ -461,32 +482,6 @@ export const addMultipleToOrder = async (userId, items,shippingAddress, paymentM
 
     // Đợi tất cả các promises hoàn tất
     const results = await Promise.all(promises);
-    
-    if (!paymentMethod) {
-      return {
-        success: false,
-      }
-    }
-    await order.update({ shippingAddress, paymentMethod })
-
-    // Lấy email của người dùng
-    const userEmail = user.email;
-
-    if (order.confirmed) {
-      return {
-        mes: "Đơn hàng đã được xác nhận trước đó"
-      }
-    } else {
-      // Gửi email xác nhận
-      emailService.sendConfirmationEmail(userEmail);
-    }
-
-    // Xác nhận đơn hàng
-    order.confirmed = true;
-    await order.save();
-
-    order.status = 'Processing';
-    await order.save();
 
     // Kiểm tra kết quả và xử lý theo nhu cầu của bạn
     const successResults = results.filter((result) => result.success);

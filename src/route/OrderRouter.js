@@ -10,17 +10,17 @@ import {getAllorderDetail} from '../controller/OrderController'
 const { addMultipleToOrderController } = require('../controller/OrderController');
 const router = express.Router();
 
-//thêm sản phẩm vào đơn hàng bằng sizeiemid
-router.post('/addProduct/:userId', addtoOrder);
+// //thêm sản phẩm vào đơn hàng bằng sizeiemid
+// router.post('/addProduct/:userId', addtoOrder);
 
-// chỉnh sửa đơn hàng
-router.post('/updateorder/:orderId/:sizeItemId', updateorder)
+// // chỉnh sửa đơn hàng
+// router.post('/updateorder/:orderId/:sizeItemId', updateorder)
 
 //hủy đơn hàng (xóa đơn hàng)
 router.delete('/cancel/:orderId', cancelOrderController);
 
-//thêm sản phẩm từ giỏ hàng bằng cartiemid
-router.post('/moveMultipleFromCartToOrder', moveFromCartToNewOrderController);
+// //thêm sản phẩm từ giỏ hàng bằng cartiemid
+// router.post('/moveMultipleFromCartToOrder', moveFromCartToNewOrderController);
 
 //xác nhận đơn hàng và gửi mail xác nhận, cập nhật trạng thái, số lượng sản phẩm còn lại và cập nhật số sản phẩm đã bán
 router.post('/confirmOrder/:orderId', confirmOrder);

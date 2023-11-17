@@ -34,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 1,
     },
-    price: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'CartItem',

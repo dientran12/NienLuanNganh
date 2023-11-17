@@ -3,9 +3,7 @@ import * as services from '../services/CartItemServices.js'
 export const addtocartitem = async (req, res) => {
   try {
     
-    const userId = req.params.userId; // Điền userId của người dùng từ session hoặc tham số đường dẫn
-    const sizeItemId = req.params.sizeItemId;
-    const quantity = req.body.quantity;
+    const {userId, sizeItemId} = req.body; // Điền userId của người dùng từ session hoặc tham số đường dẫn
 
     if (!sizeItemId) {
       return res.status(400).json({
@@ -14,7 +12,7 @@ export const addtocartitem = async (req, res) => {
       });
     }
 
-    const response = await services.addToCartItem(userId, sizeItemId, quantity);
+    const response = await services.addToCartItem(userId, sizeItemId);
 
     if (response.success) {
       return res.status(201).json({

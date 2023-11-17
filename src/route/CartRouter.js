@@ -5,7 +5,7 @@ import express from 'express'
 const router = express.Router();
 
 // chức năng thêm sản phẩm vào giỏ hàng bằng sizeitemid
-router.post('/addtocart/:userId/:sizeItemId', CartItemControllers.addtocartitem)
+router.post('/addtocart', CartItemControllers.addtocartitem)
 
 // chỉnh sửa giỏ hàng
 router.post('/updatecart/:userId/:sizeItemId', CartItemControllers.updatecart)
