@@ -145,7 +145,7 @@ export const getAllCartItem = async (userId) => {
     }
 
     // Tìm tất cả các mục trong giỏ hàng của người dùng
-    const cartItems = await db.CartItem.findAll({
+    const cartItem = await db.CartItem.findAll({
       where: { cartId: cart.id },
       include: [
         {
@@ -202,7 +202,7 @@ export const getAllCartItem = async (userId) => {
     });
 
     // Tính toán giá mới và thông tin khuyến mãi cho mỗi CartItem
-    const cartItemsWithDiscount = cartItems.map((cartItem) => {
+    const cartItems = cartItem.map((cartItem) => {
       const product = cartItem.productdata.Version.Product;
       const hasPromotion = product.Promotions && product.Promotions.length > 0;
       const discountPercentage = hasPromotion ? product.Promotions[0].percentage : 0;
@@ -223,7 +223,7 @@ export const getAllCartItem = async (userId) => {
     return {
       success: true,
       message: 'Cart items retrieved successfully',
-      cartItemsWithDiscount: cartItemsWithDiscount,
+      cartItems: cartItems,
     };
   } catch (error) {
     console.error('Error in getAllCartItem service:', error);
