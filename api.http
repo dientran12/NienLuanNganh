@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "userId": 1,
-  "sizeItemId": 1
+  "sizeItemId": 4
 }
 
 ###
@@ -80,7 +80,6 @@ Content-Type: application/json
 {
   "userId": 1,
   "items": [
-    {"sizeItemId": 1, "quantity": 1},
     {"sizeItemId": 3, "quantity": 1}
   ],
   "shippingAddress": "hau giang"
