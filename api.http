@@ -78,9 +78,9 @@ POST http://localhost:3001/api/order/add-multiple-to-order
 Content-Type: application/json
 
 {
-  "userId": 2,
+  "userId": 1,
   "items": [
-    {"sizeItemId": 3, "quantity": 1}
+    {"sizeItemId": 3, "quantity": 5}
   ],
   "shippingAddress": "hau giang"
 }

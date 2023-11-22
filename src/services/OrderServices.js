@@ -414,7 +414,6 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
         };
       }
 
-      const price = product.price;
       const quantityproduct = sizeItem.quantity;
 
       if (quantity > quantityproduct) {
@@ -427,7 +426,6 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
           orderId: order.id,
           sizeItemId: sizeItemId,
           quantity,
-          price,
           totalPrice: 0,
         });
 
@@ -448,21 +446,24 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
           console.log(startDate, endDate, currentDateMoment)
 
           if (currentDateMoment < startDate || currentDateMoment > endDate) {
+            const price = product.price;
+            console.log(price)
+            const totalPrice = price * quantity;
+            await orderDetail.update({ totalPrice });
+  
+            const totalAmount = await db.OrderDetail.sum('totalPrice', { where: { orderId: order.id } });
+            await db.Order.update({ totalAmount }, { where: { id: order.id } });
             
           } else {
-            const promotionalPrice =
-              price - (price * promotion.percentage) / 100;
-            orderDetail.price = promotionalPrice;
-            await orderDetail.save();
+            const price = product.price - (product.price * promotion.percentage) / 100;
+            console.log(price)
+            const totalPrice = price * quantity;
+            await orderDetail.update({ totalPrice });
+  
+            const totalAmount = await db.OrderDetail.sum('totalPrice', { where: { orderId: order.id } });
+            await db.Order.update({ totalAmount }, { where: { id: order.id } });
           }
         }
-
-        console.log(orderDetail.price)
-        const totalPrice = orderDetail.price * quantity;
-        await orderDetail.update({ totalPrice });
-
-        const totalAmount = await db.OrderDetail.sum('totalPrice', { where: { orderId: order.id } });
-        await db.Order.update({ totalAmount }, { where: { id: order.id } });
 
 
         // Cập nhật số lượng của sizeItem
@@ -477,11 +478,6 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
         // Lấy email của người dùng
         const userEmail = user.email;
 
-        if (order.confirmed) {
-          return {
-            mes: "Đơn hàng đã được xác nhận trước đó"
-          }
-        } else {
           try {
             // Gửi email xác nhận
             const emailResult = await emailService.sendConfirmationEmail(userEmail);
@@ -499,7 +495,6 @@ export const addMultipleToOrder = async (userId, items, shippingAddress, payment
           } catch (emailError) {
             console.error('Lỗi khi thực hiện gửi email xác nhận:', emailError);
           }
-        }
 
         return {
           success: true,
